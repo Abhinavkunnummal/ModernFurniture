@@ -1,0 +1,144 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<main class="main-wrap">
+    <header class="main-header navbar">
+        <!-- Header content -->
+    </header>
+
+    <section class="content-main">
+        <h1 class="mb-4 text-center">Product Dashboard</h1>
+        <a href="/admin/addProduct"><button class="btn btn-primary" style="margin-left: 800px; margin-top: -10px; margin-bottom: 20px">Add Product</button></a>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped bordered-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th class="highlight-heading">Name</th>
+                        <th class="highlight-heading">Description</th>
+                        <th class="highlight-heading">Price</th>
+                        <th class="highlight-heading">Category</th>
+                        <th class="highlight-heading">Quantity</th>
+                        <th class="highlight-heading">Images</th>
+                        <th class="highlight-heading">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (products && products.length) { %>
+                        <% products.forEach((product) => { %>
+                            <tr>
+                                <td><%= product.name %></td>
+                                <td><%= product.description %></td>
+                                <td>$<%= product.price.toFixed(2) %></td>
+                                <td><%= product.category?.name || 'N/A' %></td>
+                                <td><%= product.stock %></td>
+                                <td>
+                                    <% if (product.image && product.image.length > 0) { %>
+                                        <img class="product-image .img-thumbnail" src="/productimage/<%= product.image[0] %>" alt="Product Image" style="width: 70px; height: 70px;" />
+                                    <% } else { %>
+                                        No Image
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-primary">Edit</a>
+                                    <% if (!product.is_Listed) { %>
+                                        <button class="btn btn-danger block-btn" data-product-id="<%= product._id %>">Block</button>
+                                    <% } else { %>
+                                        <button class="btn btn-success unblock-btn" data-product-id="<%= product._id %>">Unblock</button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="8">No products available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+   
+    <%- include('../admin_layouts/footer.ejs') %>
+</main>
+
+<div id="imagePopup" class="image-popup">
+    <div class="popup-content">
+        <span class="close-popup" onclick="closePopup()">&times;</span>
+        <img id="popupImage" />
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+
+document.querySelectorAll('.block-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        Swal.fire({
+            title: 'Confirmation',
+            text: 'Are you sure you want to block this product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, block it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+        
+                window.location.href = `/admin/blockproduct?id=${productId}`;
+            }
+        });
+    });
+});
+
+
+document.querySelectorAll('.unblock-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        Swal.fire({
+            title: 'Confirmation',
+            text: 'Are you sure you want to unblock this product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, unblock it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/blockproduct?id=${productId}`;
+            }
+        });
+    });
+});
+
+
+    // JavaScript for popups
+    function openPopup(imageSrc) {
+        document.getElementById("popupImage").src = imageSrc;
+        document.getElementById("imagePopup").style.display = "flex";
+    }
+
+    function closePopup() {
+        document.getElementById("imagePopup").style.display = "none";
+    }
+</script>
+
+<style>
+    .bordered-table {
+        border: 1px solid #dee2e6;
+    }
+    
+    .highlight-heading {
+        font-size: 17px;
+        background-color: #343a40; /* Dark color for heading background */
+        color: rgb(73, 11, 11); /* Light color for heading text */
+    }
+
+    /* Border for columns */
+    .bordered-table th,
+    .bordered-table td {
+        border: 1px solid #dee2e6;
+    }
+</style>
+

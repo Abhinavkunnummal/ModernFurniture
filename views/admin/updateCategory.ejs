@@ -1,0 +1,94 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+<main class="main-wrap">
+    <header class="main-header navbar">
+        <!-- Header content -->
+    </header>
+
+    <section class="content-main">
+        <form action="/admin/categoryitems/<%= categoryData._id %>"  class="container" id="updateCategoryForm">
+            <h1 class="text-center">Update Category</h1>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <% if(typeof message !=='undefined') {%>
+                        <p class="text-danger"><%= message %></p>
+                    <% } %>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Category Name</label>
+                        <input type="text" name="name" value="<%= categoryData.name %>" id="name" class="form-control" style="border: 1px solid #ced4da;" required>
+                        <p id="nameError" class="text-danger"></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea name="description"  id="description" class="form-control" rows="5" style="border: 1px solid #ced4da;"  required><%= categoryData.description %></textarea>
+                        <p id="descriptionError" class="text-danger"></p>
+                    </div>
+                    <input type="hidden" name="id" value="<%= categoryData._id %>">
+                    <!-- Change button type to button -->
+                    <button type="button" onclick="validateForm()" class="btn btn-primary btn-block">Update Category</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- Footer inclusion -->
+</main>
+<%- include('../admin_layouts/footer.ejs') %>
+<script>
+    function validateForm() {
+        var name = document.getElementById("name").value.trim();
+        var description = document.getElementById("description").value.trim();
+        var nameError = document.getElementById("nameError");
+        var descriptionError = document.getElementById("descriptionError");
+
+        nameError.innerHTML = "";
+        descriptionError.innerHTML = "";
+
+        if (name === "") {
+            nameError.innerHTML = "Category Name must be filled out";
+            return false;
+        }
+
+        if (description === "") {
+            descriptionError.innerHTML = "Description must be filled out";
+            return false;
+        }
+
+        submitForm();
+    }
+
+    async function submitForm() {
+        event.preventDefault();
+        console.log('keri')
+        const form = document.getElementById("updateCategoryForm");
+        const formData = new FormData(form);
+        const name=document.getElementById('name').value;
+        const description=document.getElementById('description').value
+        const id = formData.get("id");
+        console.log(id,form)
+        const formdata={
+            id:id,
+            name:name,
+            description:description
+        }
+        try {
+            const response = await fetch('/admin/categoryDetails', {
+                method: "POST",
+                headers:{
+                    'Content-type':'application/json'
+                },
+                body: JSON.stringify(formdata)
+            });
+
+            if (response.ok) {
+                console.log("Category updated successfully");
+                window.location.href='/admin/categoryDetails'
+            } else {
+                console.error("Failed to update category");
+            }
+        } catch (error) {
+            console.error("Error updating category:", error);
+        }
+    }
+</script>

@@ -1,0 +1,160 @@
+<!-- HTML Template - categoryDashboard.ejs -->
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<main class="main-wrap">
+    <header class="main-header navbar">
+        <!-- Header content -->
+    </header>
+
+    <section class="content-main">
+        <h1 class="mb-4 text-center">Category Dashboard</h1>
+        <div class="text-center mb-4">
+            <a href="/admin/addCategory" class="btn btn-primary">Add Category</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped bordered-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <!-- <th class="highlight-heading">Images</th> -->
+
+                        <th class="highlight-heading">Name</th>
+                        <th class="highlight-heading">Description</th>
+                        <!-- <th class="highlight-heading">Status</th> -->
+                        <th class="highlight-heading">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (categories && categories.length) { %>
+                        <% categories.forEach((category) => { %>
+                            <tr>
+                                
+                                <td><%= category.name %></td>
+                                <td><%= category.description %></td>
+                               
+                                <td>
+                                    <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-primary">Edit</a>
+                                    <% if (!category.is_Listed) { %>
+                                        <button class="btn btn-danger block-category-btn" data-category-id="<%= category._id %>">Block</button>
+                                    <% } else { %>
+                                        <button class="btn btn-success unblock-category-btn" data-category-id="<%= category._id %>">Unblock</button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4">No categories available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- content-main end// -->
+    <%- include('../admin_layouts/footer.ejs') %>
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    document.querySelectorAll('.block-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-category-id');
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'Are you sure you want to block this category?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, block it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    fetch(`/admin/blockCategory?id=${categoryId}`)
+                        .then(response => {
+                            if (response.ok) {
+                              
+                                window.location.reload();
+                            } else {
+                               
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Failed to block the category.',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'An error occurred while processing your request.',
+                                icon: 'error'
+                            });
+                        });
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.unblock-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const categoryId = this.getAttribute('data-category-id');
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'Are you sure you want to unblock this category?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, unblock it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/unblockCategory?id=${categoryId}`)
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                               
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Failed to unblock the category.',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'An error occurred while processing your request.',
+                                icon: 'error'
+                            });
+                        });
+                }
+            });
+        });
+    });
+</script>
+
+
+<style>
+    .bordered-table {
+        border: 1px solid #dee2e6;
+    }
+    
+    .highlight-heading {
+        font-size: 17px;
+        background-color: #343a40; /* Dark color for heading background */
+        color: rgb(73, 11, 11); /* Light color for heading text */
+    }
+
+    
+    .bordered-table th,
+    .bordered-table td {
+        border: 1px solid #dee2e6;
+    }
+</style>

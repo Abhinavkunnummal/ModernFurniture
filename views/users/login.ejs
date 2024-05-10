@@ -1,0 +1,77 @@
+<%- include('../form_layouts/header.ejs') %>
+
+<section class="ftco-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+        <h2 class="heading-section">USER LOGIN</h2>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-10">
+        <div class="wrap d-md-flex">
+          <div class="img" style="background-image: url(form_assets/images/logo.jpg)"></div>
+          <div class="login-wrap p-4 p-md-5">
+            <div class="d-flex">
+              <div class="w-100">
+                <h3 class="mb-4">Sign In</h3>
+                <% if (typeof message != 'undefined') { %>
+                	<p class="text-danger"><%= message %></p>
+                <% } %>
+              </div>
+              <div class="w-100">
+                <!-- <p class="social-media d-flex justify-content-end">
+										<a href="#" class="social-icon d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a>
+										<a href="#" class="social-icon d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a>
+									</p> -->
+              </div>
+            </div>
+            <form action="/loginUser" method="post" class="signin-form">
+              <div class="form-group mb-2">
+                <label class="label" for="name">Email</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Email"
+                  name="email"
+                  required
+                />
+              </div>
+              <div class="form-group mb-2">
+                <label class="label" for="password">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <button
+                  type="submit"
+                  class="form-control btn btn-primary rounded submit px-3 btn"
+                >
+                  Sign In
+                </button>
+              </div>
+              <div class="form-group d-md-flex">
+                <div class="w-50 text-left">
+                  <a href="/google" class="btn btn-outline-primary google ">Login with Google</a>
+                </div>
+                <div class="w-50 text-md-right">
+                  <a href="/forgetPassword">Forgot Password</a>
+                </div>
+              </div>
+            </form>
+            <p class="text-center">
+              Not a member? <a x` href="/renderSignUp">Sign Up</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../form_layouts/footer.ejs') %>

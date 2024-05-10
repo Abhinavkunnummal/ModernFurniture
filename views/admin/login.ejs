@@ -1,0 +1,72 @@
+<%- include('../form_layouts/header.ejs') %>
+
+<section class="ftco-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+        <h2 class="heading-section">ADMIN LOGIN</h2>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-10">
+        <div class="wrap d-md-flex">
+          <div class="img" style="background-image: url(form_assets/images/logo1.jpg)"></div>
+          <div class="login-wrap p-4 p-md-5">
+            <div class="d-flex">
+              <div class="w-100">
+                <% if (typeof message != 'undefined') { %>
+                  <p class="text-danger"><%= message %></p>
+                <% } %>
+               
+              </div>
+            </div>
+            <form method="post" class="signin-form">
+              <div class="form-group mb-2">
+                <label class="label" for="name">Email</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Email"
+                  name="email"
+                  required
+                />
+              </div>
+              <div class="form-group mb-2">
+                <label class="label" for="password">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <button
+                  type="submit"
+                  class="form-control btn btn-primary rounded submit px-3 btn"
+                >
+                  Log In
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../form_layouts/footer.ejs') %>
+
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  Swal.fire({
+    title:"Do you want to save the changes?",
+    showDenyButton:true,
+    showCancelButton:true,
+    denyButtonText:'Dont save',
+  })
+</script> -->

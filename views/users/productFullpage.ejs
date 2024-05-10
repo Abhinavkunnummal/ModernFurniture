@@ -1,0 +1,53 @@
+<%- include('../layouts/header.ejs') %>
+<%- include('../layouts/navbar.ejs') %> 
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="xzoom-container">
+                <img src="/productimage/<%= products.image[0] %>" class="xzoom" xoriginal="/productimage/<%= products.image[0] %>">
+                <div class="xzoom-thumbs">
+                    <a href="/productimage/<%= products.image[0] %>">
+                        <img class="xzoom-gallery" src="/productimage/<%= products.image[0] %>" xpreview="/productimage/<%= products.image[0] %>">
+                    </a>
+                    <a href="/productimage/<%= products.image[1] %>">
+                        <img class="xzoom-gallery" src="/productimage/<%= products.image[1] %>">
+                    </a>
+                    <a href="/productimage/<%= products.image[2] %>">
+                        <img class="xzoom-gallery" src="/productimage/<%= products.image[2] %>" >
+                    </a>
+                    <a href="/productimage/<%= products.image[3] %>">
+                        <img class="xzoom-gallery" src="/productimage/<%= products.image[3] %>" >
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="description">
+                <h1><%= products.name %></h1>
+                <p>
+                   <%= products.description %>
+                </p>
+                <span>
+                    $150
+                </span>
+                <div>
+                    <button class="btn btn-primary">Buy Now</button>
+                    <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success">Add To Cart</a>
+
+                    <!-- <button class="btn btn-success">Add To Cart</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="/productDetails/js/jquery.js"></script>
+<script src="/productDetails/js/zoom.js"></script>
+<script src="/productDetails/js/script.js"></script>
+
+<%- include('../layouts/footer.ejs') %>

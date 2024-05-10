@@ -1,0 +1,114 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<main class="main-wrap">
+    <header class="main-header navbar">
+        <!-- Header content -->
+    </header>
+
+    <section class="content-main">
+        <form id="categoryForm" action="/admin/categoryitem" method="post" >
+            <h1>Welcome to Category Page</h1>
+            <div>
+                <h3>Edit Product</h3>
+                <% if(typeof message !=='undefined') {%>
+                    <p style="color:red;"><%= message %></p>
+                <% } %>
+                <div>
+                    <label for="name">Category Name</label>
+                    <input type="text" name="name" id="name" required>
+                    <p id="nameError" style="color: red; display: none;">Please enter a valid category name (first letter capitalized).</p>
+                </div>
+                <!-- <div>
+                    <label for="name">Category Image</label>
+                    <input type="file" name="categoryImg" id="categoryImg" required onchange="previewImg()">
+                    <img  id="preview" style="display: none; width: 100PX; height: 150px; object-fit: cover;">
+                    
+                </div> -->
+                <div>
+                    <label for="description">Description</label><br>
+                    <textarea name="description" id="description" cols="30" rows="10" required></textarea>
+                    <p id="descriptionError" style="color: red; display: none;">Please enter a valid description.</p>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Category</button>
+                </div>
+            </div>
+        </form>
+    </section>
+  
+
+    <!-- content-main end// -->
+    <%- include('../admin_layouts/footer.ejs') %>
+</main>
+
+<script>
+
+    function previewImg(){
+        let input=document.getElementById('categoryImg')
+        let preview=document.getElementById('preview')
+        if(input.files&&input.files[0]){
+            const reader=new FileReader()
+            reader.onload=function(fun){
+                preview.src=fun.target.result
+                preview.style.display='block'
+            }
+            reader.readAsDataURL(input.files[0])
+        }else{
+            preview.src=""
+            preview.style.display='none'
+        }
+    }
+
+
+ 
+document.getElementById("categoryForm").addEventListener("submit", async function(event) {
+   
+    if (!await validateForm()) {
+        event.preventDefault();
+    }
+});
+
+async function validateForm() {
+    var name = document.getElementById("name").value.trim();
+    var description = document.getElementById("description").value.trim();
+    var isValid = true;
+
+ 
+    if (name === "") {
+        document.getElementById("nameError").innerText = "Category name is required.";
+        document.getElementById("nameError").style.display = "block";
+        isValid = false;
+    } else {
+      
+        const response = await fetch(`/admin/checkCategory?name=${name}`);
+        const data = await response.json();
+
+        if (data.exists) {
+            document.getElementById("nameError").innerText = "Category name already exists.";
+            document.getElementById("nameError").style.display = "block";
+            isValid = false;
+        } else {
+            document.getElementById("nameError").style.display = "none";
+        }
+    }
+
+    
+    if (description === "") {
+        document.getElementById("descriptionError").innerText = "Description is required.";
+        document.getElementById("descriptionError").style.display = "block";
+        isValid = false;
+    } else {
+        document.getElementById("descriptionError").style.display = "none";
+    }
+
+    return isValid;
+}
+
+
+
+    
+    function isFirstLetterCapitalized(str) {
+        return str.charAt(0) === str.charAt(0).toUpperCase();
+    }
+</script>

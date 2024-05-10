@@ -1,0 +1,57 @@
+<nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" aria-label="Furni navigation bar">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">MODERN FURNITURE<span></span></a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsFurni">
+            <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shop">Shop</a>
+                </li>
+
+                <% if (locals.user) { %>
+                    <li class="nav-item">
+                        <a href="/userProfile" title="My account">
+                            <div class="icon">
+                                <i class="far fa-user" style="color: lightgray;"></i> <!-- Regular user icon -->
+                            </div>
+                            <p id="userProfile"><%= user.name%></p> <!-- Add an id to the paragraph for displaying the username -->
+                        </a>
+                    </li>
+
+                <li class="nav-item">
+                    <a href="/logout" title="Logout">
+                        <div class="icon">
+                            <i class="fas fa-sign-out-alt" style="color: lightgray;"></i> <!-- Logout icon -->
+                        </div>
+                        <p>Logout</p>
+                    </a>
+                </li>
+                <% }
+                 else { %>
+                    <li class="nav-item">
+                        <a href="/login" title="My account">
+                            <div class="icon">
+                                <i class="fas fa-user" style="color: lightgray;"></i> <!-- Account icon -->
+                            </div>
+                            <p>Login</p>
+                        </a>
+                    </li>
+                <% } %>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">
+                        <img src="/assets/images/cart.svg" >
+    
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,179 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<main class="main-wrap">
+    <header class="main-header navbar">
+        Header content 
+    </header>
+
+    <section class="content-main">
+        <form id="editProductForm" class="forms-sample" enctype="multipart/form-data">
+            <h1 class="mb-4">Welcome to Edit Product</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" class="form-control border" name="name" value="<%= productsData.name %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Product Description</label>
+                        <textarea class="form-control border" name="description" rows="5" required><%= productsData.description %></textarea>
+                    </div>
+                  
+                    <div id="image-preview-container" class="mt-3">
+                        <% if (productsData.image && productsData.image.length > 0) { %>
+                            <% productsData.image.forEach((image, index) => { %>
+                                <div class="image-preview-item">
+                                    <img src="/productimage/<%= image %>" alt="Preview Image" class="preview-image" style="width: 100px; height: auto; margin-right: 5px;">
+                                    <button type="button" class="btn btn-primary change-image-btn" data-index="<%= index %>">Change Image</button>
+                                    <button type="button" class="btn btn-danger remove-image-btn" data-index="<%= index %>" data-path="/productimage/<%= image %>">Remove Image</button>
+
+                                    
+                                    <input type="hidden" name="existing_images[]" value="<%= image %>">
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="number" class="form-control border" name="price" value="<%= productsData.price %>" min="1" required>
+                        <input type="hidden" name="id" value="<%= productsData._id %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control border" name="category" id="category" required>
+                            <% categorydata.forEach((category) => { %>
+                                <option value="<%= category._id %>" <%= productsData.category == category._id ? 'selected' : '' %>><%= category.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Stock</label>
+                        <input type="number" class="form-control border" name="stock" value="<%= productsData.stock %>" min="1" required>
+                    </div>
+                </div>
+            </div>
+      
+            <div class="form-group mt-3">
+                <label for="productimages">Upload Product Images</label>
+                <input type="file" class="form-control" id="productimages" name="images" accept="image/*" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-3">Submit Changes</button>
+        </form>
+    </section>
+</main>
+
+<%- include('../admin_layouts/footer.ejs') %>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script>
+
+  
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const maxImageCount = 4;
+      const previewContainer = document.getElementById("image-preview-container");
+  
+      document.getElementById("productimages").addEventListener("change", function (e) {
+        const selectedFiles = e.target.files;
+        if (selectedFiles.length > maxImageCount) {
+          showAlert(`Maximum ${maxImageCount} images allowed.`);
+          e.target.value = "";
+        } else {
+          updateImagePreviews(selectedFiles);
+        }
+      });
+  
+      function updateImagePreviews(files) {
+        for (let i = 0; i < files.length; i++) {
+          const reader = new FileReader();
+          const previewImage = document.createElement("img");
+          previewImage.className = "preview-image";
+          reader.onload = (function (img) {
+            return function (e) {
+              img.src = e.target.result;
+            };
+          })(previewImage);
+          reader.readAsDataURL(files[i]);
+  
+          previewContainer.appendChild(previewImage);
+        }
+      }
+  
+      previewContainer.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-image-btn')) {
+          const imageItem = e.target.parentElement;
+          const existingImagesInput = imageItem.querySelector('input[name="existing_images[]"]');
+          if (existingImagesInput) {
+            existingImagesInput.remove();
+          }
+          imageItem.remove();
+        }
+      });
+  
+      previewContainer.addEventListener('click', function (e) {
+  if (e.target && e.target.classList.contains('remove-image-btn')) {
+    const imageItem = e.target.parentElement;
+    const existingImagesInput = imageItem.querySelector('input[name="existing_images[]"]');
+    const imagePath = e.target.dataset.path; 
+    if (existingImagesInput) {
+      existingImagesInput.remove();
+    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+     
+        imageItem.remove();
+        showAlert('success', 'Image deleted successfully.');
+      }
+    });
+  }
+});
+
+
+      document.getElementById("editProductForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+  
+        const formData = new FormData(this);
+  
+        try {
+          const response = await fetch('/admin/editProduct', {
+            method: 'POST',
+            body: formData
+          });
+  
+          const data = await response.json();
+  
+          if (data.success) {
+            showAlert('success', data.message);
+            window.location.href = '/admin/Productlist'
+          } else {
+            showAlert('error', data.message || 'Error updating product');
+          }
+        } catch (error) {
+          console.error('Error updating product:', error);
+          showAlert('error', 'Error updating product');
+        }
+      });
+  
+      function showAlert(type, message) {
+        Swal.fire({
+          icon: type,
+          title: message,
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }
+    });
+  </script>
