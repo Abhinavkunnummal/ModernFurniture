@@ -53,5 +53,7 @@ adminRoute.get('/blockproduct', isLogin, adminController.blockProduct);
 // Image Deleting Route
 adminRoute.post('/admin/deleteImage/:productId/:imageIndex', adminController.deleteImage);
 
+adminRoute.get('/orderDetails',adminController.renderOrders)
+
 module.exports = adminRoute;
 

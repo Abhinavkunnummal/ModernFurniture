@@ -105,7 +105,7 @@ userRoute.get('/checkoutAddAddress',userController.loadCheckoutAddAddress)
 // userRoute.post('/checkoutAddress',cartController.postCheckoutAddress)
 
 //***************************************************ORDER DETAILS*****************************************************************/
-userRoute.get('/orders',userController.renderOrders)
+userRoute.get('/orders',cartController.renderOrders)
 
 
 

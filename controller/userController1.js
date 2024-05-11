@@ -637,14 +637,7 @@ const loadCheckoutAddAddress=async(req,res)=>{
   }
 }
 
-//***************************************************ORDER DETAILS***************************************************************/
-const renderOrders=async(req,res)=>{
-  try{
-    res.render('order')
-  }catch(error){
-    console.log(error.message);
-  }
-}
+
 
 
 
@@ -680,5 +673,5 @@ module.exports = {
   forgetPassword,
   checkoutAddress,
   loadCheckoutAddAddress,
-  renderOrders,
+  
 };

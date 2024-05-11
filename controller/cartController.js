@@ -73,58 +73,6 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-
-// const updateCartItem = async (req, res) => {
-//   try {
-//     console.log(`dgfhdahfljdshfjklhdskjlfhjkdsh`);
-//     const userId = req.session.userId;
-//     const { productId, quantityChange } = req.body;
-
-//     const cartItems = await CartItem.find({ userId }).populate("product.productId");
-
-//     if (!cartItems || cartItems.length === 0) {
-//       return res.status(404).json({ message: "No cart items found for the user" });
-//     }
-
-//     const cartItemToUpdate = cartItems.find(
-//       (item) => item.product[0].productId.toString() === productId
-//     );
-
-//     if (!cartItemToUpdate) {
-//       return res.status(404).json({ message: "Cart item not found" });
-//     }
-
-//     const product = cartItemToUpdate.product[0];
-//     const newQuantity = product.quantity + parseInt(quantityChange);
-
-//     if (newQuantity < 1) {
-//       return res.status(400).json({ message: "Quantity cannot be less than 1" });
-//     }
-
-// const newPrice = product.price*newQuantity
-
-// await CartItem.findOneAndUpdate(
-//       {
-//         _id: cartItemToUpdate._id,
-//         "product.productId": product.productId,
-//       },
-//       {
-//         $inc: { "product.$.quantity": quantityChange },
-//         $set:{"product.$.totalPrice":newPrice}
-//       },
-    
-//       { new: true }
-//     )
-
-//     const updatedCartItems = await CartItem.find({ userId }).populate("product.productId");
-
-//     res.status(200).json({ message: "Cart items updated successfully", cartItems: updatedCartItems });
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
 const updateCartItem = async (req, res) => {
   try {
     const userId = req.session.user_id;
@@ -185,19 +133,12 @@ const renderPlaceOrder = async (req, res) => {
   try {
     const { selectedAddress, paymentMethod } = req.body;
     const userId = req.session.user_id;
-
-    // Check if user is logged in
     if (!userId) {
       return res.redirect('/login');
     }
+    const availableAddress = await Address.findOne({ userId });
 
-    // Fetch available addresses for the user
-    const availableAddress = await Address.findOne({ userId: userId });
-
-    // Fetch cart items for the user
-    const cartItems = await CartItem.find({ userId: userId }).populate('product.productId');
-
-    // If no selected address or payment method, redirect back to checkout with error message
+    const cartItems = await CartItem.find({ userId }).populate('product.productId');
     if (!selectedAddress) {
       req.flash('errmsg', 'Please choose a delivery address');
       return res.redirect('/checkout');
@@ -205,14 +146,18 @@ const renderPlaceOrder = async (req, res) => {
       req.flash('errmsg', 'Please choose a payment option');
       return res.redirect('/checkout');
     }
-
-    // Calculate order amount
     let orderAmount = 0;
     cartItems.forEach((item) => {
       orderAmount += item.product[0].totalPrice;
     });
 
-    // Create a new order with the fetched data
+    const currentDate = new Date(); // Get the current date
+const year = currentDate.getFullYear(); // Get the current year
+const month = currentDate.getMonth() + 1; // Get the current month (Month is zero-based, so add 1)
+
+// Format the shipping date as year-month (e.g., "2024-05")
+const shippingDate = `${year}-${month.toString().padStart(2, '0')}`;
+
     const newOrder = new Order({
       userId: userId,
       cartId: cartItems.map((item) => item._id),
@@ -223,25 +168,33 @@ const renderPlaceOrder = async (req, res) => {
       })),
       orderAmount: orderAmount,
       deliveryAddress: selectedAddress,
+      shippingDate: shippingDate, // Assign formatted shipping date
       orderStatus: 'pending',
       paymentMethod: paymentMethod,
       paymentStatus: false
     });
 
-    // Save the new order to the database
     await newOrder.save();
+    await CartItem.deleteMany({ userId });
 
-    // Clear the cart after placing the order
-    await CartItem.deleteMany({ userId: userId });
-
-    // Render the thank you page
-    res.render('thankyou');
+    res.render('thankyou'); // Redirecting to the thank you page
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server Error');
   }
 };
 
+//***************************************************ORDER DETAILS***************************************************************/
+const renderOrders = async (req, res) => {
+  try {
+    const userId = req.session.user_id;
+    const orders = await Order.find({ userId: userId }).populate('orderedItem.productId');
+
+    res.render('orders', {user:userId,userId: userId, orders: orders });
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 
 
 
@@ -258,6 +211,7 @@ module.exports={
     checkoutPage,
     renderPlaceOrder,
     // placeOrder,
+    renderOrders,
 
 }
 

@@ -395,6 +395,16 @@ const blockProduct = async (req, res) => {
   }
 };
 
+const renderOrders=async(req,res)=>{
+  try{
+    
+    res.render('orderDetails')
+  }catch(error){
+    console.log(error.message)
+  }
+}
+
+
 module.exports = {
   renderLogin,
   verifyLogin,
@@ -417,4 +427,5 @@ module.exports = {
   editproductsLoad,
   updateProduct,
   blockProduct,
+  renderOrders,
 };
