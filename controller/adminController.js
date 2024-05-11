@@ -4,6 +4,7 @@ const Product = require("../model/product");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
 const sharp = require("sharp"); //CROPPER JS
+const Order=require('../model/order')
 
 const renderLogin = async (req, res) => {
   try {
@@ -397,8 +398,8 @@ const blockProduct = async (req, res) => {
 
 const renderOrders=async(req,res)=>{
   try{
-    
-    res.render('orderDetails')
+    const orderData=await Order.find().populate('orderedItem.productId').populate('userId')
+    res.render('orderDetails',{orderData})
   }catch(error){
     console.log(error.message)
   }
