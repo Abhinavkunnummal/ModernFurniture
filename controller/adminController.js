@@ -398,8 +398,8 @@ const blockProduct = async (req, res) => {
 
 const renderOrders=async(req,res)=>{
   try{
-    const orderData=await Order.find().populate('orderedItem.productId').populate('userId')
-    res.render('orderDetails',{orderData})
+    const order=await Order.find().populate('orderedItem.productId').populate('userId')
+    res.render('orderDetails',{order})
   }catch(error){
     console.log(error.message)
   }

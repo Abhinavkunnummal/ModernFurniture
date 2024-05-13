@@ -441,84 +441,55 @@
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y">
                 <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
-                <h2>Your Orders</h2>
-                <% if (orders && orders.length > 0) { %>
-                    <% orders.forEach((order, index) => { %>
-                        <div class="order-box">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th colspan="4">Order <%= index + 1 %> Details</th>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Order ID:</strong></td>
-                                        <td><span style="color: #333;"><%= order._id %></span></td>
-                                        <td><strong>Ordered Date:</strong></td>
-                                        <td><span style="color: #333;"><%= order.createdAt.toLocaleString() %></span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Shipping Date:</strong></td>
-                                        <td><span style="color: #333;"><%= order.shippingDate %></span></td>
-                                        <td><strong>Delivery Date:</strong></td>
-                                        <td><span style="color: #333;"><%= order.deliveryDate %></span></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th colspan="6">Ordered Items:</th>
-                                    </tr>
-                                    <tr>
-                                        <th>Product ID</th>
-                                        <th>Product Name</th>
-                                        <th>Quantity</th>
-                                        <th>Order Status</th>
-                                        <th>Price</th>
-                                        <th><strong>Total Amount</strong></th>
-                                    </tr>
-                                    <% order.orderedItem.forEach(item => { %>
-                                        <tr>
-                                            <td><span style="color: #333;"><%= item.productId.name %></span></td>
-                                            <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %> " style="max-width: 50px; max-height: 50px;" /></td>
-                                            <td><span style="color: #333;"><%= item.quantity %></span></td>
-                                            <td><span style="color: #333;"><%= order.orderStatus %></span></td>
-                                            <td><span style="color: #333;"><%= item.totalProductAmount %></span></td>
-                                            <td><span style="color: #333;"><%= order.orderAmount %></span></td>
-                                         
-                                        </tr>
-                                        
-                                    <% }) %>
-                                <a href="/orderDetails?id=<%= order._id %>" class="btn btn-warning">Show Full Details</a>
-                                
-                                </tbody>
-                            </table>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <p>No orders found for this user.</p>
-                <% } %>
-                
-                
-                <style>
-                    /* CSS for styling order boxes */
-                    .order-box {
-                        border: 1px solid #181111; /* Border style */
-                        border-radius: 8px; /* Rounded corners */
-                        padding: 20px; /* Padding inside the box */
-                        margin-bottom: 20px; /* Margin between boxes */
-                        background-color: #d19bcb; /* Background color */
-                    }
-                
-                    /* CSS for darker font color */
-                    .order-box td {
-                        color: #333; /* Darker font color */
-                    }
-                </style>
-                
-                
-                
+                <div class="order-details">
+                    <div class="order-details">
+                        <% if (orders ) { %>
+                           <%= console.log('afasfsf'); %>
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <h3>Order Details</h3>
+                                    <p><strong>Order ID:</strong> <%= orders._id %></p>
+                                    <p><strong>Ordered Date:</strong> <%= orders.createdAt? orders.createdAt.toLocaleString() : 'N/A' %></p>
+                                    <p><strong>Shipping Date:</strong> <%= orders.shippingDate %></p>
+                                    <p><strong>Delivery Date:</strong> <%= orders.deliveryDate %></p>
+                                </div>
+                                <div class="ordered-items">
+                                    <h4>Ordered Items:</h4>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product ID</th>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Order Status</th>
+                                                <th>Price</th>
+                                                <th>Total Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (orders.orderedItem && orders.orderedItem.length > 0) { %>
+                                                <% orders.orderedItem.forEach(item => { %>
+                                                    <tr>
+                                                        <td><%= item.productId.name %></td>
+                                                        <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %> " style="max-width: 50px; max-height: 50px;" /></td>
+                                                        <td><%= item.quantity %></td>
+                                                        <td><%= item.orderStatus %></td>
+                                                        <td><%= item.totalProductAmount %></td>
+                                                        <td><%= item.orderAmount %></td>
+                                                    </tr>
+                                                <% }) %>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <p>No orders found.</p>
+                        <% } %>
+                    </div>
+                </div>
             </div>
-        </div>
-        
+          </div>       
         
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

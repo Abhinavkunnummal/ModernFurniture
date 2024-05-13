@@ -196,6 +196,23 @@ const renderOrders = async (req, res) => {
   }
 }
 
+const renderFullDetails = async (req, res) => {
+  try {
+    // console.log(req.params);
+    const userId = req.session.user_id;
+    const orderId = req.query.id;
+    console.log(orderId);
+    const orders = await Order.findOne({ userId: userId,_id:orderId }).populate('orderedItem.productId');
+    console.log(orders);
+    res.render('orderFullDetails', { user: userId, orders: orders });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+
 
 
 
@@ -212,6 +229,7 @@ module.exports={
     renderPlaceOrder,
     // placeOrder,
     renderOrders,
+    renderFullDetails,
 
 }
 

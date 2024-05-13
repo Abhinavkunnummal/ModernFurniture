@@ -106,7 +106,8 @@ userRoute.get('/checkoutAddAddress',userController.loadCheckoutAddAddress)
 
 //***************************************************ORDER DETAILS*****************************************************************/
 userRoute.get('/orders',cartController.renderOrders)
+userRoute.get('/orderDetails',cartController.renderFullDetails)
 
-
+  
 
 module.exports = userRoute;
