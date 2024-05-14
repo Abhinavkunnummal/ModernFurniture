@@ -14,9 +14,9 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <!-- <th>Name</th> -->
                         <th>OrderId</th>
                         <th>Ordered Items</th>
+                        <th>Price</th>
                         <th>Total Amount</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -26,21 +26,49 @@
                     <% orderData.forEach((order, index) => { %>
                         <tr>
                             <td><%= index + 1 %></td>
-                            <!-- <td><%= order.userId.name %></td> -->
                             <td><%= order._id %></td>
                             <td>
                                 <% order.orderedItem.forEach((item) => { %>
                                     <div class="order-box">
-                                        <img src="/productimage/<%= item.productId.image[0] %>" style="width: 75px; height: 75px;">
+                                        <img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="width: 75px; height: 75px;">
                                         <div><%= item.productId.name %> - <%= item.quantity %></div>
                                     </div>
                                 <% }) %>
                             </td>
-                            <td><%= order.orderAmount %></td>
-                            <td><%= order.orderStatus %></td>
                             <td>
-                                <!-- Add action buttons or links if needed -->
+                                <% order.orderedItem.forEach((item) => { %>
+                                    <div class="order-box">
+                                        <div><%= item.totalProductAmount %> </div>
+                                    </div>
+                                <% }) %>
                             </td>
+                            <td><%= order.orderAmount %></td>
+                            <td>
+                                 <form id="orderStatus" action="/admin/updateOrderStatus" method="post">                                                                     
+                                <% order.orderedItem.forEach((item) => { %>
+                                    <div class="order-box p-0" >
+                                        <p class="mb-1"><strong>Select Status:</strong></p>
+                                        <input type="hidden" name="orderId" id="orderId" >
+                                        <select class="form-select" id="modalOrderStatus">
+                                            <option value="pending">Pending</option>
+                                            <option value="processing">Processing</option>
+                                            <option value="shipped">Shipped</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                <% }) %>
+                            </form>     
+                            </td>
+                            
+                            <td>
+                                <% order.orderedItem.forEach((item) => { %>
+                                    <div class="order-box m-0">
+                                        <div><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">Update Status</button></div>
+                                    </div>
+                                <% }) %>
+                            </td>
+                            
                         </tr>
                         <!-- Add a spacer row between orders -->
                         <tr class="spacer-row">
@@ -51,6 +79,62 @@
             </table>
         </div>
     </section>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+    
+       .content-main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+    
+       .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+    
+       .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+    
+       .table th,.table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    
+       .order-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+    
+       .order-box img {
+            margin-right: 10px;
+        }
+    
+       .spacer-row {
+            height: 20px;
+            background-color: #eee;
+        }
+    
+        @media (max-width: 768px) {
+           .table-responsive {
+                overflow-x: scroll;
+            }
+        }
+    </style>
+    
 
     <%- include('../admin_layouts/footer.ejs') %>
 </main>

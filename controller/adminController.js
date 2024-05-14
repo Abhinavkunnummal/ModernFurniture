@@ -395,13 +395,21 @@ const blockProduct = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
+//************************************************** ORDER DETAILS ****************************************************************/
 const renderOrders=async(req,res)=>{
   try{
-    const order=await Order.find().populate('orderedItem.productId').populate('userId')
-    res.render('orderDetails',{order})
+    const orderData=await Order.find().populate('orderedItem.productId').populate('userId')
+    res.render('orderDetails',{orderData})
   }catch(error){
     console.log(error.message)
+  }
+}
+
+const renderSingleView=async(req,res)=>{
+  try{
+    res.render('singleOrder')
+  }catch(error){
+    console.log(error.message);
   }
 }
 
@@ -429,4 +437,5 @@ module.exports = {
   updateProduct,
   blockProduct,
   renderOrders,
+  renderSingleView,
 };
