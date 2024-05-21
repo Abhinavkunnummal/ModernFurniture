@@ -435,6 +435,62 @@
 		<!-- End Footer Section -->	
 
 
+		<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<div id="myForm">
+  <!-- Your form elements here -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('payButton').addEventListener('click', function () {
+    var amount = 5000; // Example amount in paise
+    razorpay(amount);
+  });
+});
+
+function razorpay(amount) {
+  fetch('/razor', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount })
+  })
+ .then(response => response.json())
+ .then(data => {
+    if (data.success) {
+      let options = {
+        "key": data.keyId,
+        "amount": data.amount,
+        "currency": "INR",
+        "name": "Your Company Name",
+        "order_id": data.orderId,
+        "handler": function (response) {
+          // Handle successful payment
+          console.log('Payment Successful:', response.razorpay_payment_id);
+        },
+        "prefill": {
+          "name": data.name,
+          "email": data.email,
+          "contact": "9999999999"
+        },
+        "notes": {
+          "address": "Razorpay Corporate Office"
+        },
+        "theme": {
+          "color": "#F37254"
+        }
+      };
+      var rzp1 = new Razorpay(options);
+      rzp1.open();
+    } else {
+      // Handle failure
+      console.log('Payment Failed');
+    }
+  })
+ .catch(error => console.error('Error:', error));
+}
+</script>
+
+
 <%- include('../layouts/footer.ejs') %>
 
   

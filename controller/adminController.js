@@ -413,6 +413,57 @@ const renderSingleView=async(req,res)=>{
   }
 }
 
+const updateStatus = async (req, res) => {
+  try {
+    const { status, orderId } = req.body;
+console.log(status);
+    // Validate input
+    if (!status ||!orderId) {
+        return res.status(400).json({ success: false, message: 'Missing status or orderId' });
+    }
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Update the order status
+    order.orderStatus = status;
+
+    // Update the product status within the order
+    for (let i = 0; i < order.orderedItem.length; i++) {
+        let productStatus = 'pending'; // Default status
+        switch (status) {
+            case 'shipped':
+                productStatus = 'shipped';
+                break;
+            case 'delivered':
+                productStatus = 'delivered';
+                break;
+            case 'cancelled':
+                productStatus = 'cancelled';
+                break;
+            case 'returned':
+                productStatus = 'returned';
+                break;
+            default:
+                break;
+        }
+        
+        order.orderedItem[i].productStatus = productStatus;
+    }
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({ success: true, message: 'Order status updated successfully.' });
+  } catch (error) {
+    console.error('Error in updating order status:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 
 module.exports = {
   renderLogin,
@@ -438,4 +489,5 @@ module.exports = {
   blockProduct,
   renderOrders,
   renderSingleView,
+  updateStatus,
 };

@@ -31,8 +31,11 @@
                    <%= products.description %>
                 </p>
                 <span>
-                    $150
+                    ₹<%= products.price %>
                 </span>
+                <p>
+                   Stock left : <%= products.stock %>
+                </p>
                 <div>
                     <button class="btn btn-primary">Buy Now</button>
                     <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success">Add To Cart</a>

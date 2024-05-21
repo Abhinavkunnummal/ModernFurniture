@@ -14,11 +14,6 @@ const categorySchema = mongoose.Schema({
      type: Boolean,
       default: false
     },
-  // categoryImg:{
-  //   type:String,
-  //   required:true
-  // }
-  
 },{Timestamp:true});
 
 module.exports = mongoose.model("Category", categorySchema);

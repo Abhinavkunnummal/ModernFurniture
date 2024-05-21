@@ -55,6 +55,8 @@ adminRoute.post('/admin/deleteImage/:productId/:imageIndex', adminController.del
 
 adminRoute.get('/orderDetails',adminController.renderOrders)
 adminRoute.get('/viewsingle',adminController.renderSingleView)
+adminRoute.post('/updatestatus',adminController.updateStatus)
+
 
 module.exports = adminRoute;
 

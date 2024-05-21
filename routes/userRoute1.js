@@ -47,6 +47,8 @@ userRoute.get("/productFull", userController.loadFullPage);
 
 userRoute.post('/resendOtp',userController.resendOtp)
 
+
+
 //Google authentication
 
 userRoute.get("/home",(req,res)=> {
@@ -108,6 +110,16 @@ userRoute.get('/checkoutAddAddress',userController.loadCheckoutAddAddress)
 userRoute.get('/orders',cartController.renderOrders)
 userRoute.get('/orderDetails',cartController.renderFullDetails)
 
-  
+userRoute.post('/razor',cartController.razorpayPayment)
+
+userRoute.get('/wishlist', cartController.renderWishlist);
+
+// Add to wishlist
+userRoute.post('/wishlist/add/:productId', cartController.addToWishList);
+
+// Remove from wishlist
+userRoute.post('/wishlist/remove', cartController.removeFromWishList);
+
+
 
 module.exports = userRoute;

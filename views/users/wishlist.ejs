@@ -1,0 +1,125 @@
+<!-- wishlist.ejs -->
+<%- include('../layouts/header.ejs') %>
+<%- include('../layouts/navbar.ejs') %>
+
+<div class="hero" style="padding: 20px 0;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="intro-excerpt">
+          <h1 style="font-size: 24px;">Wishlist</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="untree_co-section before-footer-section">
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-md-12">
+        <div class="site-blocks-table">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="product-thumbnail">Image</th>
+                <th class="product-name">Product</th>
+                <th class="product-price">Price</th>
+                <th class="product-remove">Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (wishlistItems && wishlistItems.length > 0) { %>
+                <% wishlistItems.forEach(product => { %>
+                  <tr data-productId="<%= product.productId %>">
+                    <td class="product-thumbnail">
+                      <% if (product.productId.image && product.productId.image[0]) { %>
+                        <img src="/productimage/<%= product.productId.image[0] %>" alt="Product Image" class="img-fluid">
+                      <% } else { %>
+                        <img src="/placeholder.jpg" alt="Product Image Not Available" class="img-fluid">
+                      <% } %>
+                    </td>
+                    <td class="product-name">
+                      <h2 class="h5 text-black"><%= product.productId.name %></h2>
+                      <!-- Display product name -->
+                    </td>
+                    <td class="product-price">
+                      <% if (product.productId && product.productId.price !== undefined && product.productId.price !== null) { %>
+                        ₹<%= product.productId.price.toFixed(2) %>
+                        <!-- Display product price -->
+                      <% } else { %>
+                        Price Not Available
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="#" class="remove-wishlist-btn btn btn-black btn-sm" data-product-id="<%= product.productId._id %>">X</a>
+                    </td>
+                  </tr>
+                <% }) %>
+                
+              <% } else { %>
+                <tr>
+                  <td colspan="4">No Products in the wishlist</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <a href="/shop" class="btn btn-outline-black btn-sm btn-block">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/footer.ejs') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const removeWishlistBtns = document.querySelectorAll('.remove-wishlist-btn');
+    
+    removeWishlistBtns.forEach(button => {
+      button.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default anchor behavior (navigation)
+        
+        const productId = this.getAttribute('data-product-id'); // Retrieve product ID
+        
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, remove it!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            console.log('asjdfajsh',productId);
+            fetch(`/wishlist/remove`, {
+              method: 'POST',
+              headers:{'Content-Type': 'application/json'},
+              body:JSON.stringify({productId})
+            })
+            .then(response => response.json())
+            .then(data =>{
+              if(data.success){
+                window.location.reload()
+              }
+            })
+            .catch(error => {
+              console.error(error);
+              // Handle error if removal fails
+              Swal.fire("Error", error.message, "error");
+            });
+          }
+        });
+      });
+    });
+  });
+</script>

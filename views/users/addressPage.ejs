@@ -460,7 +460,7 @@
                             <label class="form-check-label" for="address_<%= addr._id %>">
                               <h5><%= addr.address %>, <%= addr.city %>, <%= addr.state %>, <%= addr.zipcode %>
                                 <a href="/addressEdit?id=<%= addr._id %>" class="btn btn-primary">edit</a>
-                                <a href="/addressDelete?id=<%= addr._id %>" class="btn btn-danger">Delete</a>
+                                <a href="javascript:void(0);" class="btn btn-danger" onclick="confirmDelete('<%= addr._id %>')">Delete</a>
                               </h5>
                             </label>
                           </div>
@@ -513,6 +513,31 @@
 
     </script> -->
 
+      <!-- Include SweetAlert CSS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+      <!-- Include SweetAlert JS -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      function confirmDelete(addressId){
+        Swal.fire({
+          title:'Are you sure?',
+          text:'You wont be able to revert this!',
+          icon:'warning',
+          showCancelButton:true,
+          confirmButtonColor:'#3085d6',
+          cancelButtonColor:'#d33',
+          confirmButtonText:'Yes, delete it!'
+        }).then((result)=>{
+          if(result.isConfirmed){
+            window.location.href='/addressDelete?id='+addressId;
+          }
+        })
+      }
+    </script>
+
+
+    
     
   
 

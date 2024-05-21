@@ -443,7 +443,7 @@
                 <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
                 <h2>Your Orders</h2>
                 <% if (orders && orders.length > 0) { %>
-                    <% orders.forEach((order, index) => { %>
+                    <% orders.reverse().forEach((order, index) => { %>
                         <div class="order-box">
                             <table class="table">
                                 <thead>
@@ -489,8 +489,14 @@
                                     <% }) %>
                                 <a href="/orderDetails?id=<%= order._id %>" class="btn btn-warning">Show Full Details</a>
                                 
+                                <!-- <a href="/cancelOrders" class="btn btn-danger">Cancel Orders</a> -->
+                                
                                 </tbody>
                             </table>
+                            <div class="order-actions">
+                     
+                              <a href="/cancelOrders?id=<%= order._id %>" class="btn btn-danger">Cancel Orders</a>
+                          </div>
                         </div>
                     <% }) %>
                 <% } else { %>
@@ -512,6 +518,14 @@
                     .order-box td {
                         color: #333; /* Darker font color */
                     }
+
+                       /* CSS for order actions */
+            .order-actions {
+                display: flex;
+                justify-content: flex-end; /* Align buttons to the right */
+                margin-top: 20px; /* Margin at the top of the button container */
+            }
+
                 </style>
                 
                 

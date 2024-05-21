@@ -8,8 +8,151 @@ const Address=require('../model/address')
 const Product = require("../model/product");
 
 const { ObjectId } = require("mongodb");
+const Category = require('../model/category');
 
 dotenv.config();
+
+//*****************************************************NodeMailer******************************************************************/
+const userController = {
+  renderOtp: async (req, res) => {
+      try {
+          res.render('otp');
+      } catch (error) {
+          console.error(error.message);
+      }
+  },
+
+  verifyOtp: async (req, res) => {
+      try {
+          const { otp } = req.body;
+          const tempUser = req.session.tempUser;
+          const storedOtp = tempUser.otp;
+
+          if (otp!== storedOtp) {
+              req.flash("error", "Invalid OTP");
+              return res.redirect("/otp");
+          }
+
+          const userId = tempUser.userId;
+          const user = await User.findById(userId);
+
+          if (!user) {
+              req.flash("error", "User not found");
+              return res.redirect("/otp");
+          }
+
+          const updatedUser = await User.findByIdAndUpdate(userId, { $set: { is_verified: true } }, { new: true });
+          delete req.session.tempUser.otp;
+
+          req.flash("success", "Email verified successfully Login to enjoy shopping");
+          res.redirect("/login");
+      } catch (error) {
+          console.error(error.message);
+          res.status(500).send({ error: "Internal server error" });
+      }
+  },
+
+  resendOtp: async (req, res) => {
+      try {
+          const tempUser = req.session.tempUser;
+
+          if (!tempUser ||!tempUser.userId ||!tempUser.email) {
+              req.flash("error", "User session data missing");
+              return res.redirect("/otp");
+          }
+
+          const userId = tempUser.userId;
+          const user = await User.findById(userId);
+
+          if (!user) {
+              req.flash("error", "User not found");
+              return res.redirect("/otp");
+          }
+
+          const newOtp = generateOTP(); // Assuming generateOTP is a function you've defined elsewhere
+          await sendVerifyMail(user.name, tempUser.email, user._id, newOtp);
+
+          req.session.tempUser.otp = newOtp;
+          const otpDoc = new Otp({
+              user_id: user._id,
+              otp: newOtp,
+          });
+          await otpDoc.save();
+
+          req.flash("success", "New OTP has been sent to your email");
+          res.redirect("/otp");
+      } catch (error) {
+          console.error(error.message);
+          res.status(500).send({ error: "Internal server error" });
+      }
+  },
+
+  verifyResetOtp: async (req, res) => {
+      try {
+          const { otp } = req.body;
+          const tempReset = req.session.tempReset;
+          const storedOtp = tempReset.otp;
+
+          if (otp!== storedOtp) {
+              req.flash("error", "Invalid OTP");
+              return res.redirect("/resetotp");
+          }
+
+          const userId = tempReset.userId;
+          const user = await User.findById(userId);
+
+          if (!user) {
+              req.flash("error", "User not found");
+              return res.redirect("/resetotp");
+          } else {
+              res.redirect('/changePassword');
+          }
+      } catch (error) {
+          console.error(error.message);
+          res.status(500).send({ error: "Internal server error" });
+      }
+  },
+
+  sendOtp: async (req, res) => {
+      try {
+          const email = req.session.resetMail;
+          const userData = await User.findOne({ email: email });
+
+          if (!userData) {
+              console.log('User not found for the provided email');
+              return;
+          }
+
+          const name = userData.name;
+          const otp = generateOTP(); // Assuming generateOTP is a function you've defined elsewhere
+          await sendPassResetMail(name, email, otp);
+
+          const resetOtp = new Otp({
+              user_id: userData._id,
+              otp
+          });
+          req.session.tempReset = {
+              userId: userData._id,
+              email: userData.email,
+              otp: otp
+          };
+          await resetOtp.save();
+          res.redirect('/resetotp');
+      } catch (error) {
+          console.error(error.message);
+          res.status(500).send({ error: "Internal server error" });
+      }
+  },
+
+  loadResetotp: async (req, res) => {
+      try {
+          res.render('resetotp');
+      } catch (error) {
+          console.error(error.message);
+      }
+  }
+};
+//******************************************************************************************************************************** */
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -113,9 +256,7 @@ const verifyOTPAndSaveUser = async (req, res) => {
         );
         await UserOTPVerification.findOneAndDelete({ email: req.body.email });
 
-        const newOTP = generateOTP();
-        req.session.otp = newOTP;
-
+        req.session.destroy(); // Clear the session to remove the timer
         return res.render("login", {
           message: "Email verified successfully , Login to continue",
         });
@@ -125,19 +266,34 @@ const verifyOTPAndSaveUser = async (req, res) => {
         return res.render("otp", {
           message: "Invalid OTP. Please try again.",
           email: req.body.email,
+          timer: req.session.timer // Preserve the timer value
         });
       }
     } else {
       console.log("OTP expired or has not been generated.");
       return res.render("otp", {
-        message:
-          "OTP expired or has not been generated. Please request a new OTP.",
+        message: "OTP expired or has not been generated. Please request a new OTP.",
         email: req.body.email,
+        timer: req.session.timer // Preserve the timer value
       });
     }
   } catch (error) {
     console.error("Error verifying OTP and saving user:", error);
     res.status(500).send("Internal Server Error");
+  }
+};
+
+const resendOtp = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const newOTP = generateOTP();
+    req.session.otp = newOTP;
+    req.session.timer = 60; // Reset timer to 60 seconds
+    await sendOtpToEmail(email, newOTP); // Your function to send OTP to the user's email
+    res.json({ message: 'OTP resent successfully' });
+  } catch (error) {
+    console.error('Error resending OTP:', error);
+    res.status(500).send('Internal Server Error');
   }
 };
 
@@ -218,7 +374,8 @@ const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
     const products = await Product.find({ is_Listed: false });
-    res.render("shop", { products, user: userData });
+    const categorys=await Category.find({is_Listed:false});
+    res.render("shop", { products, user: userData ,categorys});
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
@@ -230,6 +387,7 @@ const loadFullPage = async (req, res) => {
     const userData = await User.findById(req.session.user_id);
     const id = req.query.id;
     const products = await Product.findOne({ _id: id });
+    console.log(products)
     res.render("productFullpage", { products, user: userData });
   } catch (error) {
     console.error("Error loading full page:", error);
@@ -247,19 +405,19 @@ const logoutUser = async (req, res) => {
   }
 };
 
-const resendOtp = async (req, res) => {
-  try {
-    const email = req.body.email;
-    const otp = generateOTP();
-    req.session.otp = otp;
-    await saveOTP(email, otp);
-    await sendOTPVerifyMail(email, otp);
-    res.json({ message: "OTP resent successfully" });
-  } catch (error) {
-    console.error("Error resending OTP:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+// const resendOtp = async (req, res) => {
+//   try {
+//     const email = req.body.email;
+//     const otp = generateOTP();
+//     req.session.otp = otp;
+//     await saveOTP(email, otp);
+//     await sendOTPVerifyMail(email, otp);
+//     res.json({ message: "OTP resent successfully" });
+//   } catch (error) {
+//     console.error("Error resending OTP:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
 
 //User profile -9th
 
@@ -455,20 +613,23 @@ const editedAddressPost = async (req, res) => {
 const sortProducts = async (req, res) => {
   try {
       const sortingCriteria = req.query.sort;
-      let sortedProducts;
-
+      let sortedProducts; // Declare sortedProducts here
       
       switch (sortingCriteria) {
+          case 'nameAZ':
+              sortedProducts = await Product.find().collation({locale:'en'}).sort({name:1}); // Use sortedProducts instead of sortProducts
+              break;
+          case 'nameZA':
+              sortedProducts = await Product.find().collation({locale:'en'}).sort({name:-1}); // Use sortedProducts instead of sortProducts
+              break;
           case 'priceLowToHigh':
-              sortedProducts = await Product.find().sort({ price: 1 });
+              sortedProducts = await Product.find().sort({ price: 1 }); // Use sortedProducts instead of sortProducts
               break;
           case 'priceHighToLow':
-              sortedProducts = await Product.find().sort({ price: -1 });
+              sortedProducts = await Product.find().sort({ price: -1 }); // Use sortedProducts instead of sortProducts
               break;
-            
-          
           default:
-              sortedProducts = await Product.find(); 
+              sortedProducts = await Product.find(); // Use sortedProducts instead of sortProducts
       }
 
       res.json({ products: sortedProducts });
@@ -477,6 +638,7 @@ const sortProducts = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // ***********************************************************FORGET PASSWORD******************************************************\\
 
