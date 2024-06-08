@@ -1,0 +1,129 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>  
+
+<!-- Include html2pdf and xlsx CDNs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+
+<h1>Modern Furniture Sales Report</h1>
+
+<div class="d-flex justify-content-end pe-4 pt-2" >
+    <div class="dropdown">
+        <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown"
+            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Sales Report
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="salesReportDropdown">
+            <li><a class="dropdown-item" href="/admin/salesDaily"><i
+                        class="fas fa-calendar-day me-2"></i>Daily</a>
+            </li>
+            <li><a class="dropdown-item" href="/admin/salesWeekly"><i
+                        class="fas fa-calendar-week me-2"></i>Weekly</a>
+            </li>
+            <li><a class="dropdown-item" href="/admin/salesMonthly"><i
+                        class="fas fa-calendar-alt me-2"></i>Monthly</a></li>
+            <li><a class="dropdown-item" href="/admin/salesYearly"><i
+                        class="fas fa-calendar me-2"></i>Yearly</a></li>
+        </ul>
+    </div>
+</div>
+<div class="card-body"style="margin-left: 300px;">
+    <div class="table-responsive">  
+        <table id="myTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th>TIme Line</th>
+                    <th>Total Orders</th>
+                    <th>Total Revenue</th>
+                  
+                    <th>Total Coupon Discount</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <% report.forEach((order, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= order._id %></td>
+                        <td><%= order.totalOrders %></td>
+                        <td>₹<%= order.totalAmount.toFixed(2) %></td>
+                      
+                        <td><%= totalCouponAmount %></td>
+                      
+                    </tr>
+                <% }); %>
+                <tr> 
+                    <td colspan="2"><strong>Total:</strong></td> 
+                    <td><%= totalOrders %></td> 
+                    <td>₹<%= totalAmount.toFixed(2) - totalCouponAmount %></td> 
+                </tr>
+            </tbody>   
+        </table>
+    </div>
+</div>
+
+<div class="text-center mb-4">
+    
+    <button id="download-pdf" class="btn btn-success mr-2" aria-controls="myTable">
+        Download as PDF
+    </button>
+    <a id="download-excel" class="btn btn-success" aria-controls="myTable">
+        Download as Excel
+    </a>
+</div>
+<br><br><br>
+<style>
+    /* CSS for table borders */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+<%- include('../admin_layouts/footer.ejs') %>
+<script>
+   
+    function downloadExcel() {
+       
+        const table = document.getElementById('myTable');
+        
+        
+        const wb = XLSX.utils.table_to_book(table);
+
+      
+        XLSX.writeFile(wb, 'sales_report.xlsx');
+    }
+
+   
+    document.getElementById('download-excel').addEventListener('click', function() {
+        downloadExcel();
+    });
+
+    
+    document.getElementById('download-pdf').addEventListener('click', function() {
+       
+        const element = document.getElementById('myTable');
+
+        
+        const opt = {
+            margin: 0.5,
+            filename: 'sales_report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+       
+        html2pdf().from(element).set(opt).save();
+    });
+</script>

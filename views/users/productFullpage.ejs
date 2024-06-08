@@ -1,12 +1,14 @@
 <%- include('../layouts/header.ejs') %>
 <%- include('../layouts/navbar.ejs') %> 
 
-
 <div class="container">
     <div class="row">
         <div class="col-md-6">
             <div class="xzoom-container">
-                <img src="/productimage/<%= products.image[0] %>" class="xzoom" xoriginal="/productimage/<%= products.image[0] %>">
+                <img src="/productimage/<%= products.image[0] %>" class="xzoom" xoriginal="/productimage/<%= products.image[0] %>">    
+                <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= products._id %>">
+                    <i class="fas fa-heart"></i>
+                </button>
                 <div class="xzoom-thumbs">
                     <a href="/productimage/<%= products.image[0] %>">
                         <img class="xzoom-gallery" src="/productimage/<%= products.image[0] %>" xpreview="/productimage/<%= products.image[0] %>">
@@ -20,7 +22,6 @@
                     <a href="/productimage/<%= products.image[3] %>">
                         <img class="xzoom-gallery" src="/productimage/<%= products.image[3] %>" >
                     </a>
-                    
                 </div>
             </div>
         </div>
@@ -36,21 +37,66 @@
                 <p>
                    Stock left : <%= products.stock %>
                 </p>
-                <div>
+                <div>       
+                  <% if (products.stock > 0) { %>
                     <button class="btn btn-primary">Buy Now</button>
-                    <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success">Add To Cart</a>
+                      <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success">Add To Cart</a>
+                  <% } else { %>
+                      <button class="btn btn-secondary" disabled>Out of Stock</button>
+                  <% } %>
 
-                    <!-- <button class="btn btn-success">Add To Cart</button> -->
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/productDetails/js/jquery.js"></script>
 <script src="/productDetails/js/zoom.js"></script>
 <script src="/productDetails/js/script.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const wishlistIcon = document.querySelector('.wishlist-icon');
+
+    wishlistIcon.addEventListener('click', function(event) {
+      event.preventDefault(); // Prevent default button behavior
+
+      const productId = this.getAttribute('data-product-id'); // Retrieve product ID
+
+      fetch(`/wishlist/add/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        if (response.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Added to Wishlist',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Could not add to wishlist. Try again later.',
+          });
+        }
+      }).catch(error => {
+        console.error('Error adding to wishlist:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Could not add to wishlist. Try again later.',
+        });
+      });
+    });
+  });
+</script>
 
 <%- include('../layouts/footer.ejs') %>

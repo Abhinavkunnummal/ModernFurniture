@@ -2,6 +2,7 @@
 <%- include('../layouts/header.ejs') %>
 <%- include('../layouts/navbar.ejs') %>
 
+
 <div class="hero" style="padding: 20px 0;">
   <div class="container">
     <div class="row justify-content-center">
@@ -26,6 +27,7 @@
                 <th class="product-name">Product</th>
                 <th class="product-price">Price</th>
                 <th class="product-remove">Remove</th>
+                <th class="product-action">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -54,6 +56,9 @@
                     <td>
                       <a href="#" class="remove-wishlist-btn btn btn-black btn-sm" data-product-id="<%= product.productId._id %>">X</a>
                     </td>
+                    <td>
+                      <a href="/addToCart?productId=<%= product.productId._id %>" class="btn btn-success">Add To Cart</a>
+                    </td>
                   </tr>
                 <% }) %>
                 
@@ -77,7 +82,8 @@
 </div>
 
 <%- include('../layouts/footer.ejs') %>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>

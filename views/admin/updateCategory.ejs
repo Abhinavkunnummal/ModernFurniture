@@ -25,7 +25,6 @@
                         <p id="descriptionError" class="text-danger"></p>
                     </div>
                     <input type="hidden" name="id" value="<%= categoryData._id %>">
-                    <!-- Change button type to button -->
                     <button type="button" onclick="validateForm()" class="btn btn-primary btn-block">Update Category</button>
                 </div>
             </div>
@@ -60,32 +59,35 @@
 
     async function submitForm() {
         event.preventDefault();
-        console.log('keri')
         const form = document.getElementById("updateCategoryForm");
         const formData = new FormData(form);
-        const name=document.getElementById('name').value;
-        const description=document.getElementById('description').value
+        const name = document.getElementById('name').value;
+        const description = document.getElementById('description').value;
         const id = formData.get("id");
-        console.log(id,form)
-        const formdata={
-            id:id,
-            name:name,
-            description:description
-        }
+        const formdata = {
+            id: id,
+            name: name,
+            description: description
+        };
         try {
             const response = await fetch('/admin/categoryDetails', {
                 method: "POST",
-                headers:{
-                    'Content-type':'application/json'
+                headers: {
+                    'Content-type': 'application/json'
                 },
                 body: JSON.stringify(formdata)
             });
 
             if (response.ok) {
                 console.log("Category updated successfully");
-                window.location.href='/admin/categoryDetails'
+                window.location.href = '/admin/categoryDetails';
             } else {
-                console.error("Failed to update category");
+                const result = await response.json();
+                if (response.status === 400) {
+                    document.getElementById("nameError").innerHTML = result.message;
+                } else {
+                    console.error("Failed to update category");
+                }
             }
         } catch (error) {
             console.error("Error updating category:", error);

@@ -9,7 +9,7 @@
     </div>
     <nav>
         <ul class="menu-aside">
-            <li class="menu-item ">
+            <li class="menu-item active">
                 <a class="menu-link " href="/admin">
                     <i class="icon material-icons md-home"></i>
                     <span class="text">Dashboard</span>
@@ -40,9 +40,24 @@
                 <a class="menu-link" href="/admin/orderDetails"> <i class="icon material-icons md-stars"></i> <span class="text">Orders</span> </a>
             </li>
             <li class="menu-item">
-                <a class="menu-link" disabled href="#">
+                <a class="menu-link" disabled href="/admin/coupon">
                     <i class="icon material-icons md-pie_chart"></i>
-                    <span class="text">Statistics</span>
+                    <span class="text">Coupons</span>
+                </a>
+            </li>
+
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/offer">
+                    <i class="icon material-icons md-local_offer"></i>
+
+                    <span class="text">Offers</span>
+                </a>
+
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" disabled  href="/admin/salesreport">
+                    <i class="icon material-icons md-pie_chart"></i>
+                    <span class="text">Sales  Report</span>
                 </a>
             </li>
         </ul>
@@ -69,13 +84,3 @@
         <br />
     </nav>
 </aside>
-
-<script>
-    const menuLinks=document.querySelectorAll('.menu-link')
-    menuLinks.forEach(menuLink=>{
-    menuLink.addEventListener('click',()=>{
-        document.querySelector('.active')?.classList.remove('active')
-    menuLink.classList.add('active')
-})
-    })
-</script>

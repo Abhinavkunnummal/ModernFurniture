@@ -56,7 +56,31 @@ adminRoute.post('/admin/deleteImage/:productId/:imageIndex', adminController.del
 adminRoute.get('/orderDetails',adminController.renderOrders)
 adminRoute.get('/viewsingle',adminController.renderSingleView)
 adminRoute.post('/updatestatus',adminController.updateStatus)
+adminRoute.post('/approveReturn',adminController.approveReturn)
+adminRoute.post('/rejectReturn',adminController.rejectReturn)
 
+
+adminRoute.get('/coupon',adminController.renderCoupon)
+adminRoute.get('/addCoupon',adminController.addCoupon)
+adminRoute.post('/addCoupon',adminController.submitAddCoupon)
+adminRoute.get('/editcoupon',adminController.renderEditCoupon)
+adminRoute.post('/deletecoupon',adminController.deleteCoupon)
+
+
+adminRoute.get('/offer',adminController.renderOffer)
+adminRoute.get('/addOffer',adminController.loadAddOffer)
+adminRoute.post('/addoffer',adminController.addOffer)
+adminRoute.get('/editOffer',adminController.loadEditOffer)
+adminRoute.post('/editOffer',adminController.editOffer)
+adminRoute.post('/deleteoffer',adminController.deleteOffer)
+
+
+adminRoute.get('/salesreport',adminController.loadSalesReport)
+adminRoute.get('/salesDaily',adminController.dailySalesReport)
+adminRoute.get('/salesWeekly',adminController.generateWeeklyReport)
+adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
+adminRoute.get('/salesYearly',adminController.generateYearlyReport)
+adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
 
 module.exports = adminRoute;
 

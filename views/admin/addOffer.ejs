@@ -1,0 +1,111 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+
+
+<% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+    <div class="alert alert-danger" role="alert">
+        <%= errorMessage %>
+    </div>
+<% } %>
+<div class="container" style="margin-left: 300px; margin-top: 50px;">   
+    <h1>Add Offer !!!</h1>
+    <form action="addoffer" method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" class="form-control" name="offerName" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount</label>
+                    <input type="number" class="form-control" name="discount" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" name="startDate">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" name="endDate">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="offerType" class="form-label">Offer Type</label>
+                    <select class="form-select" name="offerType" id="offerType" required>
+                        <option value="Category">Category</option>
+                        <option value="Product">Product</option>
+                        <option value="Referral">Referral</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3" id="productSelect">
+                    <label for="productId" class="form-label">Product</label>
+                    <select class="form-select" name="productId">
+                        <% products.forEach((item) => { %>
+                            <option value="<%=item._id%>" ><%= item.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="mb-3" id="categorySelect" style="display:none;">
+                    <label for="categoryId" class="form-label">Category</label>
+                    <select class="form-select" name="categoryId">
+                        <% categories.forEach((item) => { %>
+                            <option  value="<%=item._id%>" ><%= item.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Offer</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const offerTypeSelect = document.getElementById('offerType');
+        const productSelect = document.getElementById('productSelect');
+        const categorySelect = document.getElementById('categorySelect');
+        
+        // Function to show/hide product or category select based on offer type
+        function toggleSelects() {
+            const selectedOfferType = offerTypeSelect.value;
+            if (selectedOfferType === 'Product') {
+                productSelect.style.display = 'block';
+                categorySelect.style.display = 'none';
+            } else if (selectedOfferType === 'Category') {
+                productSelect.style.display = 'none';
+                categorySelect.style.display = 'block';
+            } else {
+                productSelect.style.display = 'none';
+                categorySelect.style.display = 'none';
+            }
+        }
+
+        // Initial call to toggleSelects
+        toggleSelects();
+
+        // Event listener for offerType select change
+        offerTypeSelect.addEventListener('change', toggleSelects);
+    });
+</script>
+
+<br><br><br>
+<%- include('../admin_layouts/footer.ejs') %>
+
+
+
+
+

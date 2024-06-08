@@ -1,0 +1,166 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+    <h1>All Offers</h1>
+
+    <section class="content-main " style="margin-left:310px ;">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Offers</h2>
+                <p>Here are the offers.</p>
+            </div>
+            <div>
+                <a type="button" class="btn btn-primary" href="/admin/addOffer">Add Offer</a>
+            </div>
+        </div>
+    
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <% if (offers.length > 0) { %>
+                                    <thead>
+                                        <tr>
+                                              <th>S no</th>
+                                            <th>Offer Name</th>
+                                            <th>Discount</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Offer Type</th>
+                                            <th>Edit</th>
+                                            <th>Remove</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% offers.forEach((offer, i) => { %>
+                                            <tr>
+                                                <td><%= i + 1 %></td>
+                                                <td><%= offer.offerName %></td>
+                                                <td><%= offer.discount %></td>
+                                                <td><%= offer.startDate ? offer.startDate.toDateString() : 'N/A' %></td>
+                                                <td><%= offer.endDate ? offer.endDate.toDateString() : 'N/A' %></td>
+                                                <td><%=offer.offerType%></td>
+                                                <td>
+                                                     <a href="/admin/editOffer?id=<%= offer._id %>"
+                                                        class="badge rounded-pill  btn btn-success">Edit</a>
+                                                </td>
+                                                <td> <a href="" id="deletebtn" value="<%= offer._id %>"
+                                                    class="btn btn-danger btn-sm deletebtn badge rounded-pill text-decoration-none ms-2">Delete</a>
+                                                     <input type="hidden"  id="offerId" name="" value=" <%=offer._id%>">
+                                                    </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="8" class="text-center">No offers to display</td>
+                                    </tr>
+                                <% } %>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- .col// -->
+                </div>
+                <!-- .row // -->
+            </div>
+            <!-- card body .// -->
+        </div>
+        <!-- card .// -->
+    </section>
+    <% if (offers.length > 0) { %>
+        <div class="pagination-area mt-30 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                    <li class="page-item"><a class="page-link" href="#">02</a></li>
+                    <li class="page-item"><a class="page-link" href="#">03</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <% } %>
+
+
+        <%- include('../admin_layouts/footer.ejs') %>
+
+
+<!-- Add this script tag to include Axios from the CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons = document.querySelectorAll('.deletebtn');
+
+    deleteButtons.forEach(deleteButton => {
+        deleteButton.addEventListener('click', function (event) {
+            event.preventDefault(); 
+
+            const offerId = this.getAttribute('value');
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios.post('/admin/deleteoffer', { offerId })
+                        .then(res => {
+                            if (res.data.success) {
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: "The Offer has been deleted.",
+                                    icon: "success"
+                                }).then(() => {
+                                    window.location.href = '/admin/offer';
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Error!",
+                                    text: "Something went wrong.",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.log('error in delete offer', err);
+                            Swal.fire({
+                                title: "Error!",
+                                text: "Something went wrong.",
+                                icon: "error"
+                            });
+                        });
+                }
+            });
+        });
+    });
+
+    const productRows = document.querySelectorAll('.product-row');
+    const categoryRows = document.querySelectorAll('.category-row');
+
+    productRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const productId = row.getAttribute('data-product-id');
+            window.location.href = `/admin/editOffer?id=${productId}`;
+        });
+    });
+
+    categoryRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const categoryId = row.getAttribute('data-category-id');
+            window.location.href = `/admin/editOffer?id=${categoryId}`;
+        });
+    });
+});
+
+
+</script>

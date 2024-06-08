@@ -1,5 +1,4 @@
 <%- include('../layouts/header.ejs') %>
-
 <%- include('../layouts/navbar.ejs') %>
 
 <!-- Sorting Options -->
@@ -26,15 +25,13 @@
            <!-- Category Filter -->
            <select class="form-select" id="categoryFilter">
                <option value="">All Categories</option>
-
-			   <% categorys.forEach(element => { %>
-				<option value="clothing"><%= element.name %></option>
-			   <% }) %>
+               <% categorys.forEach(element => { %>
+               <option value="<%= element.name %>"><%= element.name %></option>
+               <% }) %>
            </select>
         </div>
     </div>
 </div>
-
 
 <!-- Product Listing -->
 <div class="untree_co-section product-section before-footer-section">
@@ -45,12 +42,23 @@
             <div class="col-12 col-md-4 col-lg-4 mb-5">
                 <a class="product-item" href='/productFull?id=<%= product._id %>'>
                     <img src="/productimage/<%= product.image[0] %>" class="img-fluid product-thumbnail">
+                    <% if (product.isNew) { %>
+                    <span class="badge bg-success">New</span>
+                    <% } %>
+                    <% if (product.stock === 0) { %>
+                    <span class="badge bg-danger">Out of Stock</span>
+                    <% } %>
                     <h3 class="product-title"><%= product.name %></h3>
                     <strong class="product-price"><%= product.price %></strong>
                     <!-- Wishlist Icon - Initially Hidden -->
                     <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= product._id %>">
                         <i class="fas fa-heart"></i>
                     </button>
+                    <% if (product.stock > 0) { %>
+                    <a href="/addToCart?productId=<%= product._id %>" class="btn btn-success">Add To Cart</a>
+                    <% } else { %>
+                    <button class="btn btn-secondary" disabled>Out of Stock</button>
+                    <% } %>
                     <span class="icon-cross">
                         <img src="assets/images/cross.svg" class="img-fluid">
                     </span>
@@ -63,11 +71,13 @@
 </div>
 
 <%- include('../layouts/footer.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.getElementById('sortingOptions').addEventListener('change', function () {
     var sortingCriteria = this.value;
-    fetch(`/sortProducts?sort=${sortingCriteria}`)
+    var category = document.getElementById('categoryFilter').value;
+    fetch(`/sortProducts?sort=${sortingCriteria}&category=${category}`)
        .then(response => response.json())
        .then(data => {
             renderProducts(data.products);
@@ -84,12 +94,18 @@ function renderProducts(products) {
             <div class="col-12 col-md-4 col-lg-4 mb-5">
                 <a class="product-item" href='/productFull?id=${product._id}'>
                     <img src="/productimage/${product.image[0]}" class="img-fluid product-thumbnail">
+                    ${product.isNew ? '<span class="badge bg-success">New</span>' : ''}
+                    ${product.stock === 0 ? '<span class="badge bg-danger">Out of Stock</span>' : ''}
                     <h3 class="product-title">${product.name}</h3>
                     <strong class="product-price">${product.price}</strong>
                     <!-- Wishlist Icon - Initially Hidden -->
                     <button class="btn btn-outline-danger wishlist-icon" data-product-id="${product._id}">
                         <i class="fas fa-heart"></i>
                     </button>
+                    ${product.stock > 0 
+                        ? `<a href="/addToCart?productId=${product._id}" class="btn btn-success">Add To Cart</a>`
+                        : '<button class="btn btn-secondary" disabled>Out of Stock</button>'
+                    }
                     <span class="icon-cross">
                         <img src="assets/images/cross.svg" class="img-fluid">
                     </span>
@@ -100,10 +116,10 @@ function renderProducts(products) {
     });
 
     // Re-attach event listeners for wishlist icons after re-rendering
-    attachWishlistEventListeners();
+    attachEventListeners();
 }
 
-function attachWishlistEventListeners() {
+function attachEventListeners() {
     const wishlistIcons = document.querySelectorAll('.wishlist-icon');
     wishlistIcons.forEach(icon => {
         icon.addEventListener('click', function() {
@@ -113,22 +129,31 @@ function attachWishlistEventListeners() {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Added to Wishlist',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Could not add to wishlist. Try again later.',
-                    });
-                }
-            }).catch(error => console.error('Error adding to wishlist:', error));
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      Swal.fire({
+                          icon: 'success',
+                          title: 'Added to Wishlist',
+                          showConfirmButton: false,
+                          timer: 1500
+                      });
+                  } else {
+                      Swal.fire({
+                          icon: 'error',
+                          title: 'Error',
+                          text: data.message || 'Could not add to wishlist. Try again later.',
+                      });
+                  }
+              })
+              .catch(error => {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'Could not add to wishlist. Try again later.',
+                  });
+                  console.error('Error adding to wishlist:', error);
+              });
         });
 
         // Show wishlist icon on hover
@@ -144,11 +169,16 @@ function attachWishlistEventListeners() {
 }
 
 // Initial attachment of event listeners
-attachWishlistEventListeners();
+attachEventListeners();
 
-document.getElementById('categoryFilter').addEventListener('change', function() {
-    var category = this.value;
-    // Implement fetching filtered products based on category
+document.getElementById('categoryFilter').addEventListener('change', function () {
+  var category = this.value;
+  var sortingCriteria = document.getElementById('sortingOptions').value;
+  fetch(`/sortProducts?sort=${sortingCriteria}&category=${category}`)
+   .then(response => response.json())
+   .then(data => {
+      renderProducts(data.products);
+    })
+   .catch(error => console.error('Error fetching and sorting products:', error));
 });
-
 </script>

@@ -1,0 +1,70 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<div class="container" style="margin-left: 250px;">
+  <h1 style="margin-left: 70px;">Add Coupon</h1>
+
+  <main>
+    <div class="row">
+      <form id="addCouponForm" action="/admin/addcoupon" method="POST" style="margin-left: 70px;">
+        <div class="mb-3">
+          <label for="couponCode" class="form-label">Coupon Code</label>
+          <input type="text" id="couponCode" class="form-control" name="couponCode" required 
+                 style="width: 500px; background-color: #f0f0f0;">
+          <div class="invalid-feedback">Please enter a valid coupon code.</div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col-md-6">
+            <label for="discountAmount" class="form-label">Discount Amount (₹)</label>
+            <input type="number" id="discountAmount" class="form-control" name="discountAmount" required 
+                   style="width: 500px; background-color: #f0f0f0;">
+          </div>
+          <div class="mb-3 col-md-6">
+            <label for="minimumAmount" class="form-label">Minimum Amount (₹)</label>
+            <input type="number" id="minimumAmount" class="form-control" name="minimumAmount" required 
+                   style="width: 500px; background-color: #f0f0f0;">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="3" required 
+                    style="width: 500px; background-color: #f0f0f0;"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="expiryDate" class="form-label">Expiry Date</label>
+          <input type="date" class="form-control" name="expiryDate" required 
+                 style="width: 500px; background-color: #f0f0f0;">
+          <% if(typeof errorMessage !== 'undefined') { %>
+            <p style="color: red;"><%= errorMessage %></p>
+          <% } %>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Coupon</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<%- include('../admin_layouts/footer.ejs') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  document.getElementById('addCouponForm').addEventListener('submit', function(event) {
+    const discountAmount = parseFloat(document.getElementById('discountAmount').value);
+    const minimumAmount = parseFloat(document.getElementById('minimumAmount').value);
+
+    if (discountAmount > minimumAmount) {
+      event.preventDefault();
+      Swal.fire({
+        title: "Invalid Input",
+        text: "Discount amount cannot be more than the minimum amount.",
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "OK"
+      });
+    }
+  });
+</script>

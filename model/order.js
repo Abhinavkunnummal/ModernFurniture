@@ -1,72 +1,64 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose');
 
-
-const orderSchema= new mongoose.Schema({
-    userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        required:true
+const orderSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    cartId:{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'Cart_Items',
-        required:true
+    cartId: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Cart_Items',
+        required: true
     },
-    orderedItem:[{
-        productId:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'Product',
-            required:true
+    orderedItem: [{
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
         },
-        quantity:{
-            type:Number,
-            required:true
+        quantity: {
+            type: Number,
+            required: true
         },
-        totalProductAmount:{
-            type:Number,
-            required:true
+        totalProductAmount: {
+            type: Number,
+            required: true
         },
-        
+        orderStatus: {
+            type: String,
+            required: true,
+            default: "pending"
+        }
     }],
     orderAmount: {
         type: Number,
-        required: true, 
-
+        required: true
     },
-    deliveryAddress: {  
+    deliveryAddress: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Address",
-        required: true,
+        ref: "Address",
+        required: true
     },
-    orderStatus: {
-        type: String,
-        required: true,
-        default:"pending"
+    deliveryDate: {
+        type: Date
     },
-    deliveryDate:{
-        type:Date
-    },
-    shippingDate:{
-        type:Date
+    shippingDate: {
+        type: Date
     },
     paymentMethod: {
         type: String,
-        required: true,
-   
+        required: true
     },
     coupon: {
-        type: Number
+        type: String
     },
-    paymentStatus:{
-        type:Boolean,
-        default:false
+    paymentStatus: {
+        type: Boolean,
+        default: false
     }
-    
-},
+}, {
+    timestamps: true
+});
 
-{
-    timestamps:true
-
-})
-
-module.exports=mongoose.model('Order',orderSchema)
+module.exports = mongoose.model('Order', orderSchema);

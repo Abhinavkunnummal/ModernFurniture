@@ -78,7 +78,7 @@ userRoute.get('/addressEdit',userController.renderEditAddress)
 userRoute.get('/addressDelete',userController.deleteAddress)
 userRoute.post('/addressEdited',userController.editedAddressPost)
 userRoute.post('/checkoutPostAddress',userController.checkoutAddress)
-
+userRoute.post('/apply-coupon', cartController.applyCoupon);
 //Cart
 
 userRoute.get('/cart',cartController.renderCart)
@@ -90,6 +90,10 @@ userRoute.get('/addToCart',cartController.addToCart)
 userRoute.get('/checkout',cartController.checkoutPage)
 // userRoute.post('/placeOrder',cartController.placeOrder)
 userRoute.post('/checkoutAddress',cartController.renderPlaceOrder)
+userRoute.post('/verify-payment',cartController.verifyPayment)
+userRoute.get('/coupon',userController.renderCouponPage)
+userRoute.post('/returnOrder',cartController.returnOrder)
+
 
 
 userRoute.post('/removeCart',cartController.removeFromCart)
@@ -104,13 +108,17 @@ userRoute.post('/forgetPassword',userController.passwordChange)
 userRoute.post('/changedPass',userController.changedPass)
 userRoute.post('/forget',userController.forgetPassword)
 userRoute.get('/checkoutAddAddress',userController.loadCheckoutAddAddress)
+userRoute.get('/thankyou',cartController.renderThankyou)
 // userRoute.post('/checkoutAddress',cartController.postCheckoutAddress)
 
 //***************************************************ORDER DETAILS*****************************************************************/
 userRoute.get('/orders',cartController.renderOrders)
+// userRoute.get('/createOrder',cartController.rend)
+
 userRoute.get('/orderDetails',cartController.renderFullDetails)
 
-userRoute.post('/razor',cartController.razorpayPayment)
+userRoute.get('/cancelOrders',cartController.cancelOrder)
+
 
 userRoute.get('/wishlist', cartController.renderWishlist);
 
@@ -119,6 +127,15 @@ userRoute.post('/wishlist/add/:productId', cartController.addToWishList);
 
 // Remove from wishlist
 userRoute.post('/wishlist/remove', cartController.removeFromWishList);
+
+userRoute.get('/wallet',cartController.renderWallet)
+userRoute.post('/addfunds',cartController.addFunds)
+userRoute.post('/fundVerification',cartController.fundVerification)
+userRoute.post('/addwallet',cartController.addToWallet)
+userRoute.post('/placeorderwallet',cartController.placeOrderWallet)
+
+// userRoute.get('/downloadInvoice',cartController.downloadInvoice)
+userRoute.get('/invoice',cartController.loadInvoice)
 
 
 

@@ -4,7 +4,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <style>
 	/* Custom CSS */
 .form-check-input1 {
@@ -18,6 +18,31 @@
 }
 
 </style>	
+<style>
+	.icon-cash {
+		color: #28a745; /* Green */
+	}
+	.icon-razorpay {
+		color: #007bff; /* Blue */
+	}
+	.icon-wallet {
+		color: #ffc107; /* Yellow */
+	}
+	.form-check-label {
+		display: flex;
+		align-items: center;
+	}
+	.form-check-label i {
+		margin-right: 10px;
+	}
+	.summary {
+		text-align: right;
+		margin-top: 20px;
+	}
+	.summary h5 {
+		margin-bottom: 10px;
+	}
+</style>
 
 		<!-- Start Hero Section -->
 		<div class="hero" style="padding: 20px 0;">
@@ -49,7 +74,7 @@
 						</div>
 					<%  }  %>
 		            <div class="form-group">
-						<form id="formAddressDetails" method="post"  action="/checkoutAddress">
+						<form id="formAddressDetails"   >
 							<div class="card-header">
 							  <h5 class="card-title mb-0"><h3>Address Details</h3></h5>
 							  <div class="d-flex  flex-column">
@@ -58,7 +83,7 @@
 									<div class="form-check">
 									  <input class="form-check-input" type="radio" name="selectedAddress" value="<%= addr._id %>" id="address_<%= addr._id %>">
 									  <label class="form-check-label" for="address_<%= addr._id %>">
-										console.log(<%= addr._id %>)
+										
 										<h5><%= addr.address %>, <%= addr.city %>, <%= addr.state %>, <%= addr.zipcode %></h5>  
 									  </label>
 									</div>
@@ -70,188 +95,28 @@
 							  </div>
 							</div>
 							<!-- Address Form -->
-							
-						
-		              <label for="c_country" class="text-black">Country <span class="text-danger">*</span></label>
-		              <select id="c_country" class="form-control">
-		                <option value="1">Select a country</option>    
-		                <option value="2">bangladesh</option>    
-		                <option value="3">Algeria</option>    
-		                <option value="4">Afghanistan</option>    
-		                <option value="5">Ghana</option>    
-		                <option value="6">Albania</option>    
-		                <option value="7">Bahrain</option>    
-		                <option value="8">Colombia</option>    
-		                <option value="9">Dominican Republic</option>    
-		              </select>
-		            </div>
-		            <div class="form-group row">
-		              <div class="col-md-6">
-		                <label for="c_fname" class="text-black">First Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_fname" name="c_fname">
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_lname" class="text-black">Last Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_lname" name="c_lname">
-		              </div>
-		            </div>
-
-		            <div class="form-group row">
-		              <div class="col-md-12">
-		                <label for="c_companyname" class="text-black">Company Name </label>
-		                <input type="text" class="form-control" id="c_companyname" name="c_companyname">
-		              </div>
-		            </div>
-
-		            <div class="form-group row">
-		              <div class="col-md-12">
-		                <label for="c_address" class="text-black">Address <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_address" name="c_address" placeholder="Street address">
-		              </div>
-		            </div>
-
-		            <div class="form-group mt-3">
-		              <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
-		            </div>
-
-		            <div class="form-group row">
-		              <div class="col-md-6">
-		                <label for="c_state_country" class="text-black">State / Country <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_state_country" name="c_state_country">
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_postal_zip" name="c_postal_zip">
-		              </div>
-		            </div>
-
-		            <div class="form-group row mb-5">
-		              <div class="col-md-6">
-		                <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_email_address" name="c_email_address">
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number">
-		              </div>
-		            </div>
-
-		            <div class="form-group">
-		              <label for="c_create_account" class="text-black" data-bs-toggle="collapse" href="#create_an_account" role="button" aria-expanded="false" aria-controls="create_an_account"><input type="checkbox" value="1" id="c_create_account"> Create an account?</label>
-		              <div class="collapse" id="create_an_account">
-		                <div class="py-2 mb-4">
-		                  <p class="mb-3">Create an account by entering the information below. If you are a returning customer please login at the top of the page.</p>
-		                  <div class="form-group">
-		                    <label for="c_account_password" class="text-black">Account Password</label>
-		                    <input type="email" class="form-control" id="c_account_password" name="c_account_password" placeholder="">
-		                  </div>
-		                </div>
-		              </div>
-		            </div>
-
-
-		            <div class="form-group">
-		              <label for="c_ship_different_address" class="text-black" data-bs-toggle="collapse" href="#ship_different_address" role="button" aria-expanded="false" aria-controls="ship_different_address"><input type="checkbox" value="1" id="c_ship_different_address"> Ship To A Different Address?</label>
-		              <div class="collapse" id="ship_different_address">
-		                <div class="py-2">
-
-		                  <div class="form-group">
-		                    <label for="c_diff_country" class="text-black">Country <span class="text-danger">*</span></label>
-		                    <select id="c_diff_country" class="form-control">
-		                      <option value="1">Select a country</option>    
-		                      <option value="2">bangladesh</option>    
-		                      <option value="3">Algeria</option>    
-		                      <option value="4">Afghanistan</option>    
-		                      <option value="5">Ghana</option>    
-		                      <option value="6">Albania</option>    
-		                      <option value="7">Bahrain</option>    
-		                      <option value="8">Colombia</option>    
-		                      <option value="9">Dominican Republic</option>    
-		                    </select>
-		                  </div>
-
-
-		                  <div class="form-group row">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_fname" class="text-black">First Name <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_fname" name="c_diff_fname">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_lname" class="text-black">Last Name <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_lname" name="c_diff_lname">
-		                    </div>
-		                  </div>
-
-		                  <div class="form-group row">
-		                    <div class="col-md-12">
-		                      <label for="c_diff_companyname" class="text-black">Company Name </label>
-		                      <input type="text" class="form-control" id="c_diff_companyname" name="c_diff_companyname">
-		                    </div>
-		                  </div>
-
-		                  <div class="form-group row  mb-3">
-		                    <div class="col-md-12">
-		                      <label for="c_diff_address" class="text-black">Address <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_address" name="c_diff_address" placeholder="Street address">
-		                    </div>
-		                  </div>
-
-		                  <div class="form-group">
-		                    <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
-		                  </div>
-
-		                  <div class="form-group row">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_state_country" class="text-black">State / Country <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_state_country" name="c_diff_state_country">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_postal_zip" name="c_diff_postal_zip">
-		                    </div>
-		                  </div>
-
-		                  <div class="form-group row mb-5">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_email_address" name="c_diff_email_address">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_phone" name="c_diff_phone" placeholder="Phone Number">
-		                    </div>
-		                  </div>
-
-		                </div>
-
-		              </div>
-		            </div>
-
-		            <div class="form-group">
-		              <label for="c_order_notes" class="text-black">Order Notes</label>
-		              <textarea name="c_order_notes" id="c_order_notes" cols="30" rows="5" class="form-control" placeholder="Write your notes here..."></textarea>
 		            </div>
 
 		          </div>
 		        </div>
 		        <div class="col-md-6">
 
-		          <div class="row mb-5">
-		            <div class="col-md-12">
-		              <h2 class="h3 mb-3 text-black">Coupon Code</h2>
-		              <div class="p-3 p-lg-5 border bg-white">
-
-		                <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
-		                <div class="input-group w-75 couponcode-wrap">
-		                  <input type="text" class="form-control me-2" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
-		                  <div class="input-group-append">
-		                    <button class="btn btn-black btn-sm" type="button" id="button-addon2">Apply</button>
-		                  </div>
-		                </div>
-
-		              </div>
-		            </div>
-		          </div>
+					<div class="row mb-5">
+						<div class="col-md-12">
+							<h2 class="h3 mb-3 text-black">Coupon Code</h2>
+							<div class="p-3 p-lg-5 border bg-white rounded shadow-sm">
+								<div class="mb-3">
+									<label for="c_code" class="form-label">Enter your coupon code if you have one</label>
+									<div class="input-group">
+										<input type="text" class="form-control" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code">
+										<button class="btn btn-outline-dark" type="button" id="applyCouponButton">Apply</button>
+										<button class="btn btn-outline-dark" type="button" id="removeCouponButton">Remove</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
 
 		          <div class="row mb-5">
 		            <div class="col-md-12">
@@ -260,63 +125,66 @@
 						<table class="table site-block-order-table mb-5">
 							<thead>
 								<tr>
-								
+									<th>Image</th>
 									<th>Product</th>
+									<th>Quantity</th>
 									<th>Total</th>
 								</tr>
 							</thead>
 							<tbody>
-
-								
 								<% cartItems.forEach(cart => { %>
-									
 									<tr>
-						
-										<td><%= cart.product[0].productId.name %> <strong class="mx-2">x<%= cart.product[0].quantity %></strong> <%= cart.quantity %></td>
+										<td> <img src="/productimage/<%= cart.product[0].productId.image[0] %>" alt="Product Image" class="img-fluid" style="height: 70px; width: 65px;"></td>
+										<td><%= cart.product[0].productId.name %> </td>
+										<td><strong class="mx-2">x<%= cart.product[0].quantity %></strong> <%= cart.quantity %></td>
 										<td>₹<%= (cart.product[0] && cart.product[0].totalPrice ? cart.product[0].totalPrice.toFixed(2) : '0.00') %></td>
 									</tr>
 								<% }); %>
 								<tr>
-									<td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-									<td class="text-black">₹<%= cartItems.reduce((acc, item) => acc + (item.product[0].price * item.product[0].quantity),0 ).toFixed(2)  %></td>
+									<td colspan="3" class="text-right text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+									<td class="text-black">₹<%= cartItems.reduce((acc, item) => acc + (item.product[0].price * item.product[0].quantity), 0).toFixed(2) %></td>
 								</tr>
 								<tr>
-									<td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-									<td class="text-black font-weight-bold"><strong>₹<%= cartItems.reduce((acc, item) => acc + (item.product[0].price * item.product[0].quantity),0 ).toFixed(2)  %></strong></td>
+									<td colspan="3" class="text-right text-black font-weight-bold"><strong>Discount</strong></td>
+									<td class="text-black discount-amount">₹0.00</td>
 								</tr>
+								<tr>
+									<td colspan="3" class="text-right text-black font-weight-bold"><strong>Order Total</strong></td>
+									<td id="orderTotalValue" class="text-black order-total">₹<%= cartItems.reduce((acc, item) => acc + (item.product[0].price * item.product[0].quantity), 0).toFixed(2) %></td>
+								</tr>
+								
 							</tbody>
 						</table>
 						
-						<div class="container">
-					
-								<div class="form-check">
-								  <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="cashOnDelivery">
-								  <label class="form-check-label" for="cashOnDelivery">
-									<strong>Cash On Delivery</strong>
-								  </label>
-								</div>
-								<div class="form-check">
-								  <input class="form-check-input" type="radio" name="paymentMethod" id="razorPay" value="razorPay">
-								  <label class="form-check-label" for="razorPay">
-									<strong>Razor Pay</strong>
-								  </label>
-								</div>
-								<div class="form-check">
-								  <input class="form-check-input" type="radio" name="paymentMethod" id="directBankTransfer" value="directBankTransfer">
-								  <label class="form-check-label" for="directBankTransfer">
-									<strong>Direct Bank Transfer</strong>
-								  </label>
-								</div>
-								<!-- <button type="submit" class="btn btn-primary mt-3">Submit</button> -->
-							  
-							  
-						  </div>
+						<h2 class="text-center mb-4">Payment Methods</h2>
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="cashOnDelivery">
+							<label class="form-check-label" for="cashOnDelivery">
+								<i class="fas fa-money-bill-wave icon-cash"></i> <strong>Cash On Delivery</strong>
+							</label>
+						</div>
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="radio" name="paymentMethod" id="razorPay" value="razorPay">
+							<label class="form-check-label" for="razorPay">
+								<i class="fas fa-credit-card icon-razorpay"></i> <strong>Razor Pay</strong>
+							</label>
+						</div>
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="radio" name="paymentMethod" id="Wallet" value="Wallet">
+							<label class="form-check-label" for="Wallet">
+								<i class="fas fa-wallet icon-wallet"></i> <strong>Wallet</strong>
+							</label>
+
+
+							
+						</div>
+					</div>
 						  <br>
 						  
 
 
 		                <div class="form-group">
-		                  <button class="btn btn-warning btn-lg py-3 btn-block" onclick="window.location='/checkoutAddress'">Place Order</button>
+		                  <button class="btn btn-warning btn-lg py-3 btn-block"  id="placeOrderButton">Place Order</button>
 		                </div>
 
 		              </div>
@@ -427,70 +295,187 @@
 							</ul>
 						</div>
 
-					</div>
+					</div>						
 				</div>
 
 			</div>
 		</footer>
 		<!-- End Footer Section -->	
-
-
+		<%- include('../layouts/footer.ejs') %>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 		<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<div id="myForm">
-  <!-- Your form elements here -->
-</div>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script>
+	document.addEventListener("DOMContentLoaded", async function () {
+    const placeOrderButton = document.getElementById("placeOrderButton");
+    const applyCouponButton = document.getElementById("applyCouponButton");
+    const removeCouponButton = document.getElementById("removeCouponButton");
+    const couponCodeInput = document.getElementById("c_code");
+	const orderTotalElement = document.getElementById("orderTotalValue"); 
+	const s = document.getElementById("orderTotalValue").value
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('payButton').addEventListener('click', function () {
-    var amount = 5000; // Example amount in paise
-    razorpay(amount);
-  });
-});
+    let appliedCoupon = null;
+	console.log(s+"Hallo");
+    let originalTotal = parseFloat(orderTotalElement.textContent.replace('₹', '')); // Parse the order total value
+	console.log('originalTotal', originalTotal);
+    let currentTotal = originalTotal;
 
-function razorpay(amount) {
-  fetch('/razor', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount })
-  })
- .then(response => response.json())
- .then(data => {
-    if (data.success) {
-      let options = {
-        "key": data.keyId,
-        "amount": data.amount,
-        "currency": "INR",
-        "name": "Your Company Name",
-        "order_id": data.orderId,
-        "handler": function (response) {
-          // Handle successful payment
-          console.log('Payment Successful:', response.razorpay_payment_id);
-        },
-        "prefill": {
-          "name": data.name,
-          "email": data.email,
-          "contact": "9999999999"
-        },
-        "notes": {
-          "address": "Razorpay Corporate Office"
-        },
-        "theme": {
-          "color": "#F37254"
+    applyCouponButton.addEventListener("click", async function () {
+        const couponCode = couponCodeInput.value;
+        if (!couponCode) {
+            Swal.fire("Error", "Please enter a coupon code.", "error");
+            return;
         }
-      };
-      var rzp1 = new Razorpay(options);
-      rzp1.open();
-    } else {
-      // Handle failure
-      console.log('Payment Failed');
+
+        try {
+            const response = await fetch('/apply-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ couponCode, originalTotal }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to apply coupon');
+            }
+
+            const couponData = await response.json();
+            console.log('Coupon Data:', couponData); // Debugging line
+
+            if (couponData.success) {
+                appliedCoupon = couponCode;
+                currentTotal = couponData.newTotal;
+                updateOrderTotal(currentTotal);
+                displayDiscountAmount(couponData.discountAmount);
+                Swal.fire("Success", "Coupon applied successfully!", "success");
+            } else {
+                Swal.fire("Error", couponData.message || 'Invalid coupon code.', "error");
+            }
+        } catch (error) {
+            console.error('Error applying coupon:', error);
+            Swal.fire("Error", "Error applying coupon. Please try again.", "error");
+        }
+    });
+
+    removeCouponButton.addEventListener("click", function () {
+        if (appliedCoupon) {
+            appliedCoupon = null;
+            couponCodeInput.value = '';
+            currentTotal = originalTotal;
+            updateOrderTotal(currentTotal);
+            displayDiscountAmount(0); // Clear discount amount
+            Swal.fire("Success", "Coupon removed successfully!", "success");
+        } else {
+            Swal.fire("Error", "No coupon applied.", "error");
+        }
+    });
+
+    placeOrderButton.addEventListener("click", async function (event) {
+        event.preventDefault();
+
+        try {
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            const response = await fetch('/checkoutAddress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selectedAddress,
+                    paymentMethod,
+                    couponCode: appliedCoupon,
+                    finalTotal: currentTotal // Added finalTotal to the request body
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch response from server');
+            }
+
+            const orderData = await response.json();
+
+            if (paymentMethod === 'razorPay') {
+                const options = {
+                    key: 'rzp_test_xRxsOz9knBNBUy',
+                    amount: currentTotal * 100, // Updated to use the final total amount
+                    currency: orderData.currency,
+                    name: 'MODERN FURNITURE',
+                    description: 'Purchase Description',
+                    order_id: orderData.orderId,
+                    handler: async function (response) {
+                        try {
+                            const verifyResponse = await fetch('/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    razorpayPaymentId: response.razorpay_payment_id,
+                                    razorpayOrderId: response.razorpay_order_id,
+                                    razorpaySignature: response.razorpay_signature,
+                                    selectedAddress,
+                                    paymentMethod
+                                }),
+                            });
+
+                            if (!verifyResponse.ok) {
+                                throw new Error('Payment verification failed');
+                            }
+
+                            const verifyData = await verifyResponse.json();
+                            if (verifyData.success) {
+                                window.location.href = '/thankyou';
+                            } else {
+                                Swal.fire("Error", "Payment verification failed", "error");
+                            }
+                        } catch (error) {
+                            console.error('Error verifying payment:', error);
+                            Swal.fire("Error", "Error verifying payment. Please try again.", "error");
+                        }
+                    },
+                    prefill: {
+                        name: 'ABHINAV.K',
+                        email: 'abhinavkkunnummal@gmail.com',
+                        contact: '9778519430'
+                    },
+                    theme: {
+                        color: '#3399cc'
+                    }
+                };
+
+                const rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    console.error('Payment failed:', response.error.code, response.error.description);
+                    Swal.fire("Error", "Payment failed. Please try again.", "error");
+                });
+                rzp1.open();
+            } else {
+                if (orderData.success) {
+                    window.location.href = '/thankyou';
+                } else {
+                    Swal.fire("Error", "Error placing order. Please try again.", "error");
+                }
+            }
+
+        } catch (error) {
+            console.error('Error placing order:', error);
+            Swal.fire("Error", "Insufficient Balance. You do not have enough balance in your wallet.", "error");
+        }
+    });
+
+    function updateOrderTotal(newTotal) {
+        const orderTotalElement = document.querySelector('.order-total');
+        orderTotalElement.textContent = `₹${newTotal.toFixed(2)}`;
     }
-  })
- .catch(error => console.error('Error:', error));
-}
+
+    function displayDiscountAmount(discountAmount) {
+        const discountAmountElement = document.querySelector('.discount-amount');
+        discountAmountElement.textContent = `₹${discountAmount.toFixed(2)}`;
+    }
+});
 </script>
 
-
-<%- include('../layouts/footer.ejs') %>
-
-  
+		

@@ -6,6 +6,8 @@ const dotenv = require("dotenv");
 const UserOTPVerification = require("../model/otpModel");
 const Address=require('../model/address')
 const Product = require("../model/product");
+const Coupon=require('../model/coupon')
+const moment = require('moment');
 
 const { ObjectId } = require("mongodb");
 const Category = require('../model/category');
@@ -69,7 +71,7 @@ const userController = {
               return res.redirect("/otp");
           }
 
-          const newOtp = generateOTP(); // Assuming generateOTP is a function you've defined elsewhere
+          const newOtp = generateOTP(); 
           await sendVerifyMail(user.name, tempUser.email, user._id, newOtp);
 
           req.session.tempUser.otp = newOtp;
@@ -124,7 +126,7 @@ const userController = {
           }
 
           const name = userData.name;
-          const otp = generateOTP(); // Assuming generateOTP is a function you've defined elsewhere
+          const otp = generateOTP(); 
           await sendPassResetMail(name, email, otp);
 
           const resetOtp = new Otp({
@@ -243,30 +245,32 @@ const verifyOTPAndSaveUser = async (req, res) => {
   try {
     const enteredOTP = req.body.otp;
     const sessionOTP = req.session.otp;
+    console.log("SESSION"+sessionOTP);
+    console.log('entered'+enteredOTP);
 
     if (sessionOTP) {
+      console.log('lkdfjiofjiefjefjifjokj');
       if (sessionOTP == enteredOTP) {
         delete req.session.otp;
         const userVerification = await UserOTPVerification.findOne({
           email: req.body.email,
         });
+        console.log(userVerification+"usereifdo");
         await User.findOneAndUpdate(
           { email: userVerification.email },
           { $set: { is_verified: 1 } }
         );
         await UserOTPVerification.findOneAndDelete({ email: req.body.email });
 
-        req.session.destroy(); // Clear the session to remove the timer
-        return res.render("login", {
-          message: "Email verified successfully , Login to continue",
-        });
+        req.session.destroy();
+        return res.redirect("/login")
       } else {
         console.log(`Entered OTP: ${enteredOTP}`);
         console.log("Invalid OTP. Generated and entered OTP do not match.");
         return res.render("otp", {
           message: "Invalid OTP. Please try again.",
           email: req.body.email,
-          timer: req.session.timer // Preserve the timer value
+          timer: req.session.timer 
         });
       }
     } else {
@@ -274,7 +278,7 @@ const verifyOTPAndSaveUser = async (req, res) => {
       return res.render("otp", {
         message: "OTP expired or has not been generated. Please request a new OTP.",
         email: req.body.email,
-        timer: req.session.timer // Preserve the timer value
+        timer: req.session.timer 
       });
     }
   } catch (error) {
@@ -288,8 +292,8 @@ const resendOtp = async (req, res) => {
     const email = req.body.email;
     const newOTP = generateOTP();
     req.session.otp = newOTP;
-    req.session.timer = 60; // Reset timer to 60 seconds
-    await sendOtpToEmail(email, newOTP); // Your function to send OTP to the user's email
+    req.session.timer = 60; 
+    await sendOtpToEmail(email, newOTP); 
     res.json({ message: 'OTP resent successfully' });
   } catch (error) {
     console.error('Error resending OTP:', error);
@@ -373,14 +377,15 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
-    const products = await Product.find({ is_Listed: false });
-    const categorys=await Category.find({is_Listed:false});
-    res.render("shop", { products, user: userData ,categorys});
+    const products = await Product.find({ is_Listed: false }).select('name price image stock isNew');
+    const categorys = await Category.find({ is_Listed: false });
+    res.render("shop", { products, user: userData, categorys });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const loadFullPage = async (req, res) => {
   try {
@@ -478,7 +483,7 @@ const postAddress = async (req, res) => {
   try {
     const { address, state, city, zipcode, country, language, gender } = req.body;
     const userId = req.session.user_id;
-    const currentUrl = req.query.currentUrl; // Get the current URL from the query parameter
+    const currentUrl = req.query.currentUrl; 
 
     const newAddress = new Address({
       userId,
@@ -493,12 +498,12 @@ const postAddress = async (req, res) => {
 
     await newAddress.save();
 
-    // Determine the redirection URL based on the currentUrl
+    
     let redirectUrl;
     if (currentUrl && currentUrl.includes('/checkout')) {
-      redirectUrl = '/checkout'; // Redirect to the checkout page
+      redirectUrl = '/checkout'; 
     } else {
-      redirectUrl = '/manageAddress'; // Redirect to the manage address page
+      redirectUrl = '/manageAddress'; 
     }
 
     return res.redirect(redirectUrl);
@@ -541,17 +546,44 @@ const renderEditAddress = async (req, res) => {
 };
 
 
-const postProfile=async(req,res)=>{
-  try{
-    const userId=req.session.user_id;
-    const {name,email,mobile}=req.body
-     await User.findByIdAndUpdate(userId,{name,email,mobile},{new:true})
-     console.log(name);
-    res.redirect('/userProfile')
-  }catch(error){
-    console.log(error.message);
+const postProfile = async (req, res) => {
+  try {
+      const userId = req.session.user_id;
+      const { name, email, phoneNumber } = req.body;
+
+      // Trim the inputs to remove leading and trailing spaces
+      const trimmedName = name.trim();
+      const trimmedPhoneNumber = phoneNumber.trim();
+
+      // Regex for validation
+      const nameRegex = /^[a-zA-Z\s]+$/; // Only allows letters and spaces
+      const phoneNumberRegex = /^\d{10}$/; // Only allows 10 digit numbers
+
+      // Validate name
+      if (!nameRegex.test(trimmedName)) {
+          req.flash('error', 'Invalid name format. Only letters and spaces are allowed.');
+          return res.redirect('/userProfile');
+      }
+
+      // Validate phoneNumber
+      if (!phoneNumberRegex.test(trimmedPhoneNumber)) {
+          req.flash('error', 'Invalid phone number format. It should be a 10-digit number.');
+          return res.redirect('/userProfile');
+      }
+
+      // Update the user profile
+      await User.findByIdAndUpdate(userId, { name: trimmedName, mobile: trimmedPhoneNumber }, { new: true });
+
+      req.flash('success', 'Profile updated successfully.');
+      res.redirect('/userProfile');
+  } catch (error) {
+      console.log(error.message);
+      req.flash('error', 'Internal Server Error');
+      res.redirect('/userProfile');
   }
-}
+};
+
+
 
 const deleteAddress = async (req, res) => {
   try {
@@ -588,11 +620,10 @@ const editedAddressPost = async (req, res) => {
     const addressDoc = await Address.findOne({ userId, _id: addressId });
 
     if (!addressDoc) {
-      // Handle the case where the address document is not found
+     
       return res.status(404).send('Address not found');
     }
 
-    // Update the address document with the new data
     addressDoc.address = address;
     addressDoc.state = state;
     addressDoc.city = city;
@@ -612,32 +643,37 @@ const editedAddressPost = async (req, res) => {
 
 const sortProducts = async (req, res) => {
   try {
-      const sortingCriteria = req.query.sort;
-      let sortedProducts; // Declare sortedProducts here
-      
-      switch (sortingCriteria) {
-          case 'nameAZ':
-              sortedProducts = await Product.find().collation({locale:'en'}).sort({name:1}); // Use sortedProducts instead of sortProducts
-              break;
-          case 'nameZA':
-              sortedProducts = await Product.find().collation({locale:'en'}).sort({name:-1}); // Use sortedProducts instead of sortProducts
-              break;
-          case 'priceLowToHigh':
-              sortedProducts = await Product.find().sort({ price: 1 }); // Use sortedProducts instead of sortProducts
-              break;
-          case 'priceHighToLow':
-              sortedProducts = await Product.find().sort({ price: -1 }); // Use sortedProducts instead of sortProducts
-              break;
-          default:
-              sortedProducts = await Product.find(); // Use sortedProducts instead of sortProducts
-      }
+    const { sort, category, brand } = req.query;
+    let query = {};
 
-      res.json({ products: sortedProducts });
+    if (category) query = { ...query, category };
+    if (brand) query = { ...query, brand };
+
+    let sortedProducts;
+    switch (sort) {
+      case 'nameAZ':
+        sortedProducts = await Product.find(query).collation({ locale: 'en' }).sort({ name: 1 });
+        break;
+      case 'nameZA':
+        sortedProducts = await Product.find(query).collation({ locale: 'en' }).sort({ name: -1 });
+        break;
+      case 'priceLowToHigh':
+        sortedProducts = await Product.find(query).sort({ price: 1 });
+        break;
+      case 'priceHighToLow':
+        sortedProducts = await Product.find(query).sort({ price: -1 });
+        break;
+      default:
+        sortedProducts = await Product.find(query);
+    }
+
+    res.json({ products: sortedProducts });
   } catch (error) {
-      console.error('Error fetching and sorting products:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error fetching and sorting products:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 // ***********************************************************FORGET PASSWORD******************************************************\\
@@ -655,16 +691,16 @@ const passwordChange = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if the email exists in the database
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.render('forgetPassword', { message: 'No such email is registered here' });
     }
 
-    // Generate a random 6-digit OTP
+
     const otp = Math.floor(1000 + Math.random() * 9000);
 
-    // Create a transporter for sending email
+ 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -673,7 +709,6 @@ const passwordChange = async (req, res) => {
       },
     });
 
-    // Define the email options
     const mailOptions = {
       from: process.env.EMAIL_USERNAME,
       to: email,
@@ -681,15 +716,14 @@ const passwordChange = async (req, res) => {
       text: `Your OTP for password reset is: ${otp}`,
     };
 
-    // Send the email with the OTP
+
     await transporter.sendMail(mailOptions);
 
-    // Store the OTP and user ID in the session
     console.log(otp);
     req.session.otp = otp;
     req.session.userId = user._id;
 
-    // Render the OTP verification page
+  
     return res.render('forgetOtp', { email });
   } catch (error) {
     console.log(error.message);
@@ -704,23 +738,21 @@ const forgetPassword = async (req, res) => {
     console.log(userId);
     const sessionOTP = req.session.otp;
 
-    // Check if the session OTP exists
+
     if (!sessionOTP) {
       return res.redirect('/forgetPassword');
     }
 
-    // Check if the OTP matches
     if (sessionOTP !== parseInt(otp)) {
       return res.render('forgetOtp', { email, message: 'Invalid OTP. Please try again.' });
     }
 
-    // Find the user by ID and email
+
     const user = await User.findOne({ _id: userId, email });
     if (!user) {
       return res.render('forgetPassword', { message: 'No such email is registered here' });
     }
 
-    // Render the password change page
     return res.render('passwordChange', { userId: user._id });
   } catch (error) {
     console.log(error.message);
@@ -734,18 +766,15 @@ const changedPass = async (req, res) => {
     const { newPassword, confirmNewPassword } = req.body;
     const userId = req.session.userId;
 
-    // Check if the new password and confirm password match
     if (newPassword !== confirmNewPassword) {
       return res.render('passwordChange', { userId, message: 'Passwords do not match' });
     }
 
-    // Convert the userId string to a valid MongoDB ObjectId
+
     const objectUserId = new mongoose.Types.ObjectId(userId);
 
-    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Find the user by ID and update the password
     const user = await User.findByIdAndUpdate(
       objectUserId,
       { password: hashedPassword },
@@ -756,10 +785,8 @@ const changedPass = async (req, res) => {
       return res.render('passwordChange', { userId, message: 'User not found' });
     }
 
-    // Clear the session data
     req.session.destroy();
 
-    // Redirect to the login page
     return res.redirect('/login');
   } catch (error) {
     console.log(error.message);
@@ -799,6 +826,18 @@ const loadCheckoutAddAddress=async(req,res)=>{
   }
 }
 
+const renderCouponPage = async (req, res) => {
+  try {
+    const coupons = await Coupon.find().lean();
+    coupons.forEach(coupon => {
+      coupon.formattedDate = moment(coupon.expiryDate).format('YYYY-MM-DD');
+    });
+    res.render('coupon', { coupons });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server Error');
+  }
+};
 
 
 
@@ -835,5 +874,6 @@ module.exports = {
   forgetPassword,
   checkoutAddress,
   loadCheckoutAddAddress,
+  renderCouponPage,
   
 };

@@ -104,7 +104,7 @@
             const images = document.getElementById('productimages');
             const price = document.getElementById('price');
             const category = document.getElementById('category');
-            const quantity = document.getElementById('quantity');
+            // const quantity = document.getElementById('quantity');
       
            
             let isValid = true;
@@ -139,11 +139,11 @@
               isValid = false;
             }
       
-            showError('quantity', ''); 
-            if (quantity.value.trim() === '' || parseInt(quantity.value) <= 0) {
-              showError('quantity', 'Please enter a valid quantity.');
-              isValid = false;
-            }
+            // showError('quantity', ''); 
+            // if (quantity.value.trim() === '' || parseInt(quantity.value) <= 0) {
+            //   showError('quantity', 'Please enter a valid quantity.');
+            //   isValid = false;
+            // }
       
             if (isValid) {
               form.submit(); 

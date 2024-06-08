@@ -3,8 +3,13 @@ const Category = require("../model/category");
 const Product = require("../model/product");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
-const sharp = require("sharp"); //CROPPER JS
+const sharp = require("sharp"); 
 const Order=require('../model/order')
+const Coupon=require('../model/coupon')
+const moment = require('moment');
+const Offer = require('../model/offerModel'); 
+
+
 
 const renderLogin = async (req, res) => {
   try {
@@ -205,33 +210,26 @@ const unblockCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    // console.log('req.body:', req.body); 
-
     const { id, name, description } = req.body;
-
-    
     const existingCategory = await Category.findOne({ _id: { $ne: id }, name: { $regex: new RegExp("^" + name + "$", "i") } });
 
     if (existingCategory) {
       return res.status(400).json({ message: "Category name already exists." }); 
     }
 
-    
     const updatedCategory = await Category.findByIdAndUpdate(id, { name, description }, { new: true });
 
     if (!updatedCategory) {
       return res.status(404).json({ message: "Category not found." }); 
     }
 
-    console.log("Updated category:", updatedCategory); 
-
     res.json({ message: "Category updated successfully!" });
-
   } catch (error) {
     console.error("Error updating category:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 const renderProduct = async (req, res) => {
@@ -257,10 +255,14 @@ const addProduct = async (req, res) => {
 const addingNewProduct = async (req, res) => {
   try {
     const { name, description, price, stock, dateCreated, category } = req.body;
+    console.log(stock);
     const categoryId = await Category.findOne({ _id: category, is_Listed: false });
     const categoryData = await Category.find({ is_Listed: false });
     if (!categoryId) {
       return res.render("addProduct", { message: "Category not found or is not listed.", categoryData});
+    }
+    if(stock < 0){
+      return res.render("addProduct", { message: "Stock cannot be negative.", categoryData});
     }
     const normalizedProductName = name.trim().toLowerCase();
     const existingProduct = await Product.findOne({ name: normalizedProductName });
@@ -396,14 +398,17 @@ const blockProduct = async (req, res) => {
   }
 };
 //************************************************** ORDER DETAILS ****************************************************************/
-const renderOrders=async(req,res)=>{
-  try{
-    const orderData=await Order.find().populate('orderedItem.productId').populate('userId')
-    res.render('orderDetails',{orderData})
-  }catch(error){
-    console.log(error.message)
+const renderOrders = async (req, res) => {
+  try {
+      const orderData = await Order.find()
+          .populate('orderedItem.productId')
+          .populate('userId')
+          .populate('deliveryAddress');
+      res.render('orderDetails', { orderData });
+  } catch (error) {
+      console.log(error.message);
   }
-}
+};
 
 const renderSingleView=async(req,res)=>{
   try{
@@ -414,56 +419,557 @@ const renderSingleView=async(req,res)=>{
 }
 
 const updateStatus = async (req, res) => {
+  const { orderId, itemId, status } = req.body;
   try {
-    const { status, orderId } = req.body;
-console.log(status);
-    // Validate input
-    if (!status ||!orderId) {
-        return res.status(400).json({ success: false, message: 'Missing status or orderId' });
-    }
-
-    // Find the order by ID
-    const order = await Order.findById(orderId);
-    if (!order) {
-        return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    // Update the order status
-    order.orderStatus = status;
-
-    // Update the product status within the order
-    for (let i = 0; i < order.orderedItem.length; i++) {
-        let productStatus = 'pending'; // Default status
-        switch (status) {
-            case 'shipped':
-                productStatus = 'shipped';
-                break;
-            case 'delivered':
-                productStatus = 'delivered';
-                break;
-            case 'cancelled':
-                productStatus = 'cancelled';
-                break;
-            case 'returned':
-                productStatus = 'returned';
-                break;
-            default:
-                break;
-        }
-        
-        order.orderedItem[i].productStatus = productStatus;
-    }
-
-    // Save the updated order
-    await order.save();
-
-    res.status(200).json({ success: true, message: 'Order status updated successfully.' });
+      const order = await Order.findById(orderId);
+      if (order) {
+          const item = order.orderedItem.id(itemId);
+          if (item) {
+              item.orderStatus = status;
+              await order.save();
+              return res.json({ success: true, order });
+          }
+      }
+      return res.json({ success: false, message: 'Order or item not found' });
   } catch (error) {
-    console.error('Error in updating order status:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+      return res.json({ success: false, message: error.message });
   }
 };
 
+
+const approveReturn= async (req, res) => {
+  const { itemId } = req.body;
+  try {
+      const order = await Order.findOne({ 'orderedItem._id': itemId });
+      if (order) {
+          const item = order.orderedItem.id(itemId);
+          if (item) {
+              item.orderStatus = 'approved';
+              await order.save();
+              return res.json({ success: true, order });
+          }
+      }
+      return res.json({ success: false, message: 'Order or item not found' });
+  } catch (error) {
+      return res.json({ success: false, message: error.message });
+  }
+};
+
+// Route to reject return
+const rejectReturn= async (req, res) => {
+  const { itemId } = req.body;
+  try {
+      const order = await Order.findOne({ 'orderedItem._id': itemId });
+      if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+      const item = order.orderedItem.id(itemId);
+      if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+
+      item.orderStatus = 'Rejected';
+      await order.save();
+      res.json({ success: true, message: 'Return rejected successfully' });
+  } catch (error) {
+      console.error('Error rejecting return:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+
+
+
+const renderCoupon = async (req, res) => {
+  try {
+    const coupons = await Coupon.find().lean();
+    coupons.forEach(coupon => {
+      coupon.formattedDate = moment(coupon.expiryDate).format('YYYY-MM-DD');
+    });
+    res.render('coupon', { coupons });
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const addCoupon = async (req, res) => {
+  try {
+    res.render('addCoupon');
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const submitAddCoupon = async (req, res) => {
+  try {
+    const { couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
+    const newCoupon = new Coupon({
+      couponCode,
+      discountAmount,
+      minimumAmount,
+      description,
+      expiryDate
+    });
+    await newCoupon.save();
+    res.redirect('/admin/coupon');
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+
+const renderEditCoupon = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const couponData = await Coupon.findOne({ _id: id }).lean();
+    if (couponData && couponData.expiryDate) {
+      couponData.formattedExpiryDate = moment(couponData.expiryDate).format('YYYY-MM-DD');
+    }
+    res.render('editCoupon', { couponData });
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const deleteCoupon = async (req, res) => {
+  try {
+    const couponId = req.body.couponId; 
+    await Coupon.deleteOne({ _id: couponId });
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
+
+//offer
+const renderOffer = async (req, res) => {
+  try {
+      console.log('entered offer page');
+      const offers = await Offer.find(); 
+      res.render('offer', { offers }); 
+  } catch (error) {
+      console.log('Error in loading offer page:', error);
+      res.status(500).send('Internal Server Error');
+  }
+};
+
+const loadAddOffer = async (req, res) => {
+  try {
+      console.log('entering load add offer page');
+
+      const products = await Product.find({})
+
+      const categories = await Category.find({})
+
+
+      res.render('addOffer', { products: products, categories: categories })
+  } catch (error) {
+      console.log('error in loading the add offer page');
+  }
+}
+
+const addOffer = async (req, res) => {
+  try {
+      console.log('adding offer started');
+
+      console.log(req.body);
+
+      const details = req.body;
+      console.log('details', details);
+
+      const { offerName, discount, startDate, endDate, offerType, productId, categoryId } = details;
+
+     console.log('catogoryId',categoryId)
+
+     
+      if (new Date(startDate) >= new Date(endDate)) {
+          
+          return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+      }
+      const newOffer = new Offer({
+          offerName,
+          discount,
+          startDate,
+          endDate,
+          offerType,
+         
+      }); 
+      console.log('reached here') 
+      console.log('offer',newOffer)
+
+      if (offerType === 'Product') {
+          console.log('going with ptoduct offer');
+          newOffer.productId=productId
+          console.log('offer.productId',newOffer.productId)
+          const proData= await Product.findOne({_id:productId})
+          console.log('proData',proData)
+            await Product.findByIdAndUpdate(
+              {_id:productId},
+          
+              {$set:{
+                  productOfferId:newOffer._id,
+                  productDiscount:discount,
+                  price:proData.price-discount
+              }}
+          )
+      }
+     
+      else if (offerType === 'Category') {
+          console.log('going with category offer');
+          newOffer.categoryId = categoryId; 
+          console.log(' newOffer.categoryId', newOffer.categoryId)
+          try {
+              const catProducts = await Product.find({ categoryId: categoryId });
+              console.log('catProducts', catProducts);
+              for (const product of catProducts) {
+                  await Product.findOneAndUpdate(
+                      { _id: product._id },
+                      {
+                          $set: {
+                              categoryOfferId: newOffer._id,
+                              categoryDiscount: discount,
+                              price: product.price - discount
+                          }
+                      }
+                  );
+              }
+          } catch (error) {
+              console.error('Error updating products:', error);
+          }
+      }
+     
+      const updatedProduct=    await newOffer.save();
+
+      console.log('updatedProduct', updatedProduct);
+
+      res.redirect('/admin/offer');
+
+  } catch (error) {
+      console.log('error in adding offer', error);
+      res.status(500).send('Error adding offer: ' + error.message);
+  }
+}
+
+
+const loadEditOffer = async (req, res) => {
+  try {
+      console.log('starting to laod the edit offer page');
+
+      const id = req.query.id
+      console.log("id", id);
+
+      const products = await Product.find({})
+
+      const categories = await Category.find({})
+
+      const offer = await Offer.findOne({ _id: id })
+
+      console.log('offer', offer);
+
+      res.render('editOffer', { products: products, offer: offer, categories: categories })
+
+  } catch (error) {
+      console.log('error loading edit offer page', error)
+  }
+}
+
+
+const editOffer = async (req, res) => {
+  try {
+
+      console.log('starting to edit coupon');
+
+      const details = req.body;
+      console.log('details', details);
+
+      const id = details.id;
+      console.log('id', id);
+
+      const startDate = new Date(details.startDate)
+      console.log('startDate', startDate);
+      const endDate = new Date(details.endDate);
+      console.log('endDate', endDate);
+      if (startDate >= endDate) {
+          return res.status(400).json({ error: 'Start date must be less than end date' });
+      }
+      const updateOffer = await Offer.findByIdAndUpdate(
+          { _id: id },
+          { $set: details },
+          { new: true }
+      )
+      console.log('updateOffer', updateOffer)
+
+      if (updateOffer) {
+          res.redirect('/admin/offer');
+      } else {
+          console.log(' editing issue in offer');
+      }
+
+  } catch (error) {
+      console.log('error in editing the offer', error)
+      res.status(500).send("Internal server error");
+  }
+}
+
+
+
+const deleteOffer = async (req, res) => {
+  try {
+      console.log('Started deleting offer');
+
+      const { offerId } = req.body;
+
+      const offer = await Offer.findById(offerId);
+
+      if (!offer) {
+          console.log(`Offer with ID ${offerId} not found`);
+          return res.status(404).json({ success: false, message: "Offer not found" });
+      }
+
+      if (offer.offerType === 'Product') {
+
+          await Product.findOneAndUpdate(
+              { _id: offer.productId },
+              {
+                  $unset: {
+                      productOfferId: 1, 
+                      productDiscount: 1, 
+                  },
+                  $inc: { price: offer.discount } 
+              }
+          );
+          console.log(`Updated product with ID ${offer.productId}`);
+      } else if (offer.offerType === 'Category') {
+          
+          const catProducts = await Product.find({ categoryId: offer.categoryId });
+          for (const product of catProducts) {
+              await Product.findOneAndUpdate(
+                  { _id: product._id },
+                  {
+                      $unset: {
+                          categoryOfferId: 1, 
+                          categoryDiscount: 1, 
+                      },
+                      $inc: { price: offer.discount } 
+                  }
+              );
+              console.log(`Updated product with ID ${product._id} in category ${offer.categoryId}`);
+          }
+      }
+
+   
+      await Offer.deleteOne({ _id: offerId });
+      console.log(`Deleted offer with ID ${offerId}`);
+
+      res.status(200).json({ success: true, message: "Offer deleted successfully" });
+  } catch (error) {
+      console.error('Error in deleting the offer', error);
+      res.status(500).json({ success: false, message: "Error deleting offer: " + error.message });
+  }
+}
+
+const loadSalesReport = async (req, res) => {
+  try {
+      const orders = await Order.find({})
+          .populate('userId')
+          .populate('deliveryAddress')
+          .populate({ path: 'orderedItem.productId', model: 'Product' }) 
+          .sort({ _id: -1 });
+      console.log('orders', orders);
+
+      const formattedOrders = orders.map(order => {
+          const date = new Date(order.createdAt)
+          const formattedDate = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+          return {
+              ...order.toObject(),
+              formattedCreatedAt: formattedDate,
+          }
+      })
+      res.render('salesReport', { orderDetails: formattedOrders })
+  } catch (error) {
+      console.log('error loading sales report page', error);
+  }
+}
+
+const dailySalesReport = async (req, res) => {
+  try {
+      const startDate = moment().startOf('day');
+      const endDate = moment().endOf('day');
+
+      const dailyReport = await Order.aggregate([
+          {
+              $match: {
+                  createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+              }
+          },
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  totalOrders: { $sum: 1 },
+                  totalAmount: { $sum: "$orderAmount" },
+                  totalCouponAmount: { $sum: "$coupon" }
+              }
+          }
+      ]);
+
+
+      const totalOrders = dailyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
+      const totalAmount = dailyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
+      const totalCouponAmount = dailyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
+
+      console.log('dailyReport', dailyReport);
+
+      res.render('reports', { report: dailyReport, totalOrders, totalAmount, totalCouponAmount });
+
+  } catch (error) {
+      console.log('error loading daily sales report', error);
+      throw error;
+  }
+}
+
+
+const generateWeeklyReport = async (req, res) => {
+  try {
+      const startDate = moment().startOf('week');
+      const endDate = moment().endOf('week');
+
+      const weeklyReport = await Order.aggregate([
+          {
+              $match: {
+                  createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+              }
+          },
+          {
+              $group: {
+                  _id: { $week: "$createdAt" },
+                  totalOrders: { $sum: 1 },
+                  totalAmount: { $sum: "$orderAmount" },
+                  totalCouponAmount: { $sum: "$coupon" }
+              }
+          }
+      ]);
+
+     
+      const totalOrders = weeklyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
+      const totalAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
+      const totalCouponAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
+
+      console.log('weeklyReport', weeklyReport);
+
+      res.render('reports', { report: weeklyReport, totalOrders, totalAmount, totalCouponAmount });
+  } catch (error) {
+      console.error('Error generating weekly report:', error);
+      throw error;
+  }
+};
+
+
+const generateMonthlyReport = async (req, res) => {
+  try {
+      const monthlyReport = await Order.aggregate([
+          {
+              $group: {
+                  _id: { $month: "$createdAt" },
+                  totalOrders: { $sum: 1 },
+                  totalAmount: { $sum: "$orderAmount" },
+                  totalCouponAmount: { $sum: "$coupon" }
+              }
+          }
+      ]);
+
+      const formattedReport = monthlyReport.map(report => ({
+          _id: moment().month(report._id - 1).format('MMMM'),
+          totalOrders: report.totalOrders,
+          totalAmount: report.totalAmount
+      }));
+
+      console.log('monthlyReport', formattedReport);
+
+      // Calculate total orders and total amount
+      const totalOrders = formattedReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
+      const totalAmount = formattedReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
+      const totalCouponAmount = monthlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
+
+      // Pass report data and totals to the EJS template
+      res.render('reports', { report: formattedReport, totalOrders, totalAmount, totalCouponAmount });
+  } catch (error) {
+      console.error('Error generating monthly report:', error);
+      throw error;
+  }
+};
+
+
+const generateYearlyReport = async (req, res) => {
+  try {
+      const yearlyReport = await Order.aggregate([
+          {
+              $group: {
+                  _id: { $year: "$createdAt" },
+                  totalOrders: { $sum: 1 },
+                  totalAmount: { $sum: "$orderAmount" },
+                  totalCouponAmount: { $sum: "$coupon" }
+              }
+          }
+      ]);
+
+
+      const totalOrders = yearlyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
+      const totalAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
+      const totalCouponAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
+
+      console.log('yearlyReport', yearlyReport);
+
+      res.render('reports', { report: yearlyReport, totalOrders, totalAmount, totalCouponAmount });
+  } catch (error) {
+      console.error('Error generating yearly report:', error);
+      throw error;
+  }
+};
+
+
+const generateCustomDateReport = async (req, res) => {
+  try {
+      const startDate = moment(req.query.startDate).startOf('day');
+      const endDate = moment(req.query.endDate).endOf('day');
+
+      if (!startDate.isValid() || !endDate.isValid() || startDate.isAfter(endDate)) {
+          return res.status(400).send('Invalid date range');
+      }
+
+      const customDateReport = await Order.find({
+          createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+      });
+
+      let totalAmount = 0;
+      let totalOrders = customDateReport.length;
+
+      if (totalOrders > 0) {
+          customDateReport.forEach(order => {
+              if (order.orderAmount && !isNaN(order.orderAmount)) {
+                  totalAmount += parseFloat(order.orderAmount);
+              } else {
+                  console.warn('Invalid or missing orderAmount in order:', order);
+              }
+          });
+      } else {
+          console.warn('No orders found within the specified date range.');
+      }
+
+      console.log('Total Amount:', totalAmount);
+      console.log('Total Orders:', totalOrders);
+
+      res.render('customReport', {
+          report: customDateReport,
+          startDate: startDate.format('YYYY-MM-DD'),
+          endDate: endDate.format('YYYY-MM-DD'),
+          totalAmount: totalAmount.toFixed(2),
+          totalOrders: totalOrders
+      });
+  } catch (error) {
+      console.error('Error generating custom date report:', error);
+      res.status(500).send('Error generating custom date report');
+  }
+};
 
 module.exports = {
   renderLogin,
@@ -490,4 +996,24 @@ module.exports = {
   renderOrders,
   renderSingleView,
   updateStatus,
+  rejectReturn,
+  approveReturn,
+  renderCoupon,
+  addCoupon,
+  submitAddCoupon,
+  renderEditCoupon,
+  deleteCoupon,
+  deleteOffer,
+  loadEditOffer,
+  editOffer,
+  loadEditOffer,
+  addOffer,
+  loadAddOffer,
+  renderOffer,
+  loadSalesReport,
+  dailySalesReport,
+  generateWeeklyReport,
+  generateMonthlyReport,
+  generateYearlyReport,
+  generateCustomDateReport
 };

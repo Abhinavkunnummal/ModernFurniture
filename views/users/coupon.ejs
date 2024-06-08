@@ -18,7 +18,9 @@
     <link rel="stylesheet" href="/user_profile/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="/user_profile/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="/user_profile/css/demo.css" />
-
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
@@ -30,7 +32,7 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/user_profile/js/config.js"></script>
-
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
   <body>
     <!-- Layout wrapper -->
@@ -165,165 +167,49 @@
             </li>
           </ul>
         </aside>
-        <!--  Menu -->
-
-        <!-- Layout container -->
-        <div class="layout-page">
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-            <!-- Content -->
-              <!-- Basic Layout & Basic with Icons -->
-              <div class="row">
-                <!-- Basic Layout -->
-                <div class="col-xxl">
-                  <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="mb-0 bg-danger"><h1>Welcome <%= user.name %></h1></h5>
-                      <div class="d-flex">
-                        <!-- <small class="text-muted me-auto">Default label</small> -->
-                        <a href="/editProfile" class="btn btn-primary">Edit Profile</a>
-                        <!-- <button type="submit"  class="btn btn-primary"></button> -->
-                      </div>
+      <div class="container mt-4">
+    <h2 class="text-center mb-4">Coupons</h2>
+    <div class="row">
+        <% coupons.forEach(coupon => { %>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-lg" style="border: none; border-radius: 10px; overflow: hidden;">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                        <h5 class="card-title mb-0"><%= coupon.code %></h5>
                     </div>
-                  </div>
-                <div class="col-xxl">
-                  <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="mb-0">Basic with Icons</h5>
-                      <small class="text-muted float-end">Merged input group</small>
+                    <div class="card-body" style="background-color: #f8f9fa;">
+                        <p class="card-text"><strong>Description:</strong> <%= coupon.description %></p>
+                        <p class="card-text"><strong>Discount:</strong> <span class="badge bg-success"><%= coupon.discountAmount %>%</span></p>
+                        <p class="card-text"><strong>Coupon Code:</strong> <span class="text-muted" id="couponCode-<%= coupon.couponCode %>"><%= coupon.couponCode %></span></p>
+                        <p class="card-text"><strong>Minimum Amount:</strong> <span class="badge bg-warning"><%= coupon.minimumAmount %></span></p>
+                        <p class="card-text"><strong>Expiry Date:</strong> <span class="text-muted"><%= coupon.formattedDate %></span></p>
+                        <button class="btn btn-primary mt-2" onclick="copyToClipboard('<%= coupon.couponCode %>')">
+                            <i class="fas fa-copy"></i> Copy Code
+                        </button>
                     </div>
-                    <div class="card-body">
-                      <form>
-                        <div class="row mb-3">
-                          <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Name</label>
-                          <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                              <span id="basic-icon-default-fullname2" class="input-group-text"
-                                ><i class="bx bx-user"></i
-                              ></span>
-                              <input
-                                type="text"
-                                class="form-control"
-                                id="basic-icon-default-fullname"
-                                placeholder="John Doe"
-                                aria-label="John Doe"
-                                aria-describedby="basic-icon-default-fullname2"
-                                value="<%= user.name %>" disabled
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
-                          <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                              <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                              <input
-                                type="text"
-                                id="basic-icon-default-email"
-                                class="form-control"
-                                placeholder="john.doe"
-                                aria-label="john.doe"
-                                aria-describedby="basic-icon-default-email2" disabled
-                                value="<%= user.email %>"
-                              />
-                            </div>
-                       
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-2 form-label" for="basic-icon-default-phone">Phone No</label>
-                          <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                              <span id="basic-icon-default-phone2" class="input-group-text"
-                                ><i class="bx bx-phone"></i
-                              ></span>
-                              <input
-                                type="text"
-                                id="basic-icon-default-phone"
-                                class="form-control phone-mask"
-                                placeholder="658 799 8941"
-                                aria-label="658 799 8941"
-                                aria-describedby="basic-icon-default-phone2"
-                                value="<%= user.mobile %>" disabled
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row mb-3">
-                          <label class="col-sm-2 col-form-label" for="basic-icon-default-home">Address</label>
-                          <div class="col-sm-10">
-                            <div class="input-group input-group-merge">
-                              <span id="basic-icon-default-home" class="input-group-text"
-                                ><i class="bx bx-user"></i
-                              ></span>
-                              <input
-                              type="text"
-                              class="form-control"
-                              id="basic-icon-default-Address"
-                              placeholder="Address"
-                              aria-label="Address"
-                              aria-describedby="basic-icon-default-Address"
-                              <% if(!user.address || !user.address.address) { %>
-                                  value="No address available , Add an address."
-                                  disabled
-                              <% } else { %>
-                                  value="<%= user.address.address %>"
-                                  disabled
-                              <% } %>
-                          />
-                            </div>
-                          </div>
-                        </div>
-                       
-                        <div style="display: flex; justify-content: center;">
-                          <a href="/manageAddress" class="btn btn-primary">Manage Address</a>
-                        </div>
-                        
-                      </form>
-                    </div>
-                  </div>
                 </div>
-              </div>
-           
-            <!-- / Content -->
-
-            <!-- Footer -->
-          
-            <!-- / Footer -->
-
-            <div class="content-backdrop fade"></div>
-          </div>
-          <!-- Content wrapper -->
-        </div>
-        <!-- / Layout page -->
-      </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
+            </div>
+        <% }) %>
     </div>
-    <!-- / Layout wrapper -->
+</div>
 
-
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="/user_profile/vendor/libs/jquery/jquery.js"></script>
-    <script src="/user_profile/vendor/libs/popper/popper.js"></script>
-    <script src="/user_profile/vendor/js/bootstrap.js"></script>
-    <script src="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
-    <script src="/user_profile/vendor/js/menu.js"></script>
-    <!-- endbuild -->
-
-    <!-- Vendors JS -->
-
-    <!-- Main JS -->
-    <script src="/user_profile/js/main.js"></script>
-
-    <!-- Page JS -->
-
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    function copyToClipboard(code) {
+        var couponText = document.getElementById('couponCode-' + code).innerText;
+        
+        navigator.clipboard.writeText(couponText).then(function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Copied!',
+                text: 'Coupon code ' + couponText + ' copied to clipboard!'
+            });
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong while copying the coupon code.'
+            });
+        });
+    }
+</script>

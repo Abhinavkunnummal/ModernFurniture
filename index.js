@@ -16,8 +16,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const GoogleSignIn = require('./model/googleSignIn');
-app.use(nocache())
-app.use(flash())
+
 
 app.use(session({
     secret:process.env.SESSION_SECRET,
@@ -27,6 +26,10 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(nocache())
+app.use(flash())
+
 
    // Passport setup for Google authentication
    passport.use(new GoogleStrategy({

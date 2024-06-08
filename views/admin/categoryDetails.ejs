@@ -10,6 +10,16 @@
     <section class="content-main">
         <h1 class="mb-4 text-center">Category Dashboard</h1>
         <div class="text-center mb-4">
+            <% if (locals.error && locals.error.length > 0) { %>
+                <div class="alert alert-danger">
+                  <%= locals.error %>
+                </div>
+              <% } %>
+              <% if (locals.success && locals.success.length > 0) { %>
+                <div class="alert alert-success">
+                  <%= locals.success %>
+                </div>
+              <% } %>
             <a href="/admin/addCategory" class="btn btn-primary">Add Category</a>
         </div>
         <div class="table-responsive">
