@@ -240,7 +240,7 @@
                                                   <div id="returnForm-<%= item._id %>" class="return-form" style="display: none;">
                                                       <!-- Return form code -->
                                                   </div>
-                                                  <a href="/invoice?orderId=<%= item._id %>" class="btn btn-sm btn-primary" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
+                                                  <a href="/invoice?orderId=<%= orders._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
                                               <% } else if (item.orderStatus === 'approved') { %>
                                                   <!-- Show appropriate buttons for approved or rejected orders -->
                                                   <button class="btn btn-secondary" disabled>Returned</button>

@@ -171,7 +171,6 @@ const renderPlaceOrder = async (req, res) => {
   try {
     const { selectedAddress, paymentMethod } = req.body;
     const userId = req.session.user_id;
-    const coupon=await Coupon.findOne({couponCode:req.session.coupon})
 
     if (!userId) {
       return res.redirect("/login");
@@ -189,6 +188,15 @@ const renderPlaceOrder = async (req, res) => {
     }
 
     const orderAmount = calculateOrderAmount(cartItems);
+    let finalOrderAmount = orderAmount;
+
+    if (req.session.coupon) {
+      const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
+      if (coupon) {
+        const discountAmount = coupon.discountAmount;
+        finalOrderAmount = orderAmount - discountAmount;
+      }
+    }
 
     if (paymentMethod === 'razorPay') {
       const razorpay = new Razorpay({
@@ -197,7 +205,7 @@ const renderPlaceOrder = async (req, res) => {
       });
 
       const options = {
-        amount: orderAmount * 100,
+        amount: finalOrderAmount * 100,
         currency: 'INR',
         receipt: `receipt_${new Date().getTime()}`,
       };
@@ -206,40 +214,35 @@ const renderPlaceOrder = async (req, res) => {
 
       return res.json({
         orderId: razorpayOrder.id,
-        amount: orderAmount,
+        amount: finalOrderAmount,
         currency: 'INR',
       });
     } else if (paymentMethod === 'Wallet') {
-      console.log('Wallet');
       const wallet = await Wallet.findOne({ userId });
-      console.log(wallet);
-      console.log("Wallet Balance"+wallet.balance);
-      if (wallet.balance < orderAmount) {
+
+      if (wallet.balance < finalOrderAmount) {
         return res.status(400).json({ error: 'Insufficient wallet balance' });
       }
-      console.log('OrderAmt'+orderAmount);
-      wallet.balance -= orderAmount;
+
+      wallet.balance -= finalOrderAmount;
       wallet.transaction.push({
-        amount: -orderAmount,
+        amount: -finalOrderAmount,
         transactionMethod: "Debit",
         formattedDate: new Date().toISOString()
       });
+
       await wallet.save();
-if(req.session.coupon){
-  var discountAmount = coupon.discountAmount;
-      var newTotal = orderAmount - discountAmount;
-}
-      
+
       const newOrder = new Order({
         userId,
-        coupon: req.session.coupon?req.session.coupon:null,
+        coupon: req.session.coupon || null,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
           quantity: item.product[0].quantity,
           totalProductAmount: item.product[0].totalPrice,
         })),
-        orderAmount:req.session.coupon?newTotal:orderAmount,
+        orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
         orderStatus: "pending",
         paymentMethod,
@@ -260,13 +263,14 @@ if(req.session.coupon){
     } else {
       const newOrder = new Order({
         userId,
+        coupon: req.session.coupon || null,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
           quantity: item.product[0].quantity,
           totalProductAmount: item.product[0].totalPrice,
         })),
-        orderAmount,
+        orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
         orderStatus: "pending",
         paymentMethod,
@@ -290,6 +294,7 @@ if(req.session.coupon){
     return res.status(500).send('Server Error');
   }
 };
+
 
 function calculateOrderAmount(cartItems) {
   let totalAmount = 0;
@@ -871,44 +876,121 @@ const renderUserDashboard = async (req, res) => {
 
 const renderThankyou=async(req,res)=>{
   try{
-    res.render('thankyou')
+    const userData = await User.findById(req.session.user_id)
+    res.render('thankyou',{user:userData})
   }catch(error){
     console.log(error.message);
   }
 }
-
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
 const loadInvoice = async (req, res) => {
   try {
-    console.log('entering invoice page');
+    const { orderId } = req.query; // Retrieve order ID from the query parameters
+    const userId = req.session.user_id;
+    // Assuming you fetch order details from the database using the order ID
+    const order = await Order.findById(orderId).populate('deliveryAddress').populate('orderedItem.productId').populate('userId');
+    console.log('orderdata' + order);
 
-    const orderId = req.query.orderId;
-    console.log('orderId', orderId);
-
-    const userId = req.session?.user_id || req.user?.id; 
-    console.log('userId', userId);
-
-    const orderDetails = await Order.findOne({ _id: orderId })
-      .populate('userId') 
-      .populate({ path: 'orderedItem.productId', model: 'Product' })
-      .populate('deliveryAddress'); 
-
-    console.log('orderDetails', orderDetails);
-
-    if (!orderDetails) {
-      
-      return res.status(404).send('Order not found'); 
+    if (!order) {
+      return res.status(400).send('Invalid order ID');
     }
 
-    const products = orderDetails.orderedItem;
-    console.log('products', products);
+    // Iterate over each item in the orderedItem array and generate an invoice for each item
+    for (const item of order.orderedItem) {
+      const doc = new PDFDocument({ margin: 50 });
+      const fileName = `invoice_${item._id}.pdf`; // Use item._id as the file name
+      const filePath = path.join(__dirname, '../invoice', fileName); // Update the file path here
 
-    res.render('users/invoice', { order: orderDetails });
+      // Create a stream to write the file
+      const writeStream = fs.createWriteStream(filePath);
+      doc.pipe(writeStream);
+
+      // Invoice header
+      doc
+        .fontSize(20)
+        .text('Modern Furniture', { align: 'center' })
+        .moveDown()
+        .fontSize(12)
+        .text(`Invoice Number: ${item._id}`, { align: 'right' }) // Use item._id as the invoice number
+        .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
+        .moveDown();
+
+      // Delivery address
+      doc
+        .fontSize(12)
+        .text('Delivery Address:', { bold: true })
+        .text(`Name: ${order.userId.name}`)
+        .text(`Mobile: ${order.userId.mobile}`)
+        .text(`Street Address: ${order.deliveryAddress.address}`)
+        .text(`City: ${order.deliveryAddress.city}`)
+        .text(`State: ${order.deliveryAddress.state}`)
+        .text(`Pincode: ${order.deliveryAddress.zipcode}`)
+        .moveDown();
+
+      // Table headers
+      doc
+        .fontSize(12)
+        .text('Items', 50, doc.y, { bold: true })
+        .text('Product ID', 200, doc.y, { bold: true })
+        .text('Quantity', 300, doc.y, { bold: true })
+        .text('Sub Total', 400, doc.y, { bold: true })
+        .moveDown();
+
+      // Table row for the current item
+      doc
+        .fontSize(12)
+        .text(item.productId.name, 50, doc.y)
+        .text(item.productId._id, 200, doc.y)
+        .text(item.quantity, 300, doc.y)
+        .text(`$${item.totalProductAmount.toFixed(2)}`, 400, doc.y)
+        .moveDown();
+
+      // Subtotal and grand total (assuming only one item in this invoice)
+      const subtotal = item.totalProductAmount;
+      doc
+        .fontSize(12)
+        .text('Subtotal', 300, doc.y, { bold: true })
+        .text(`$${subtotal.toFixed(2)}`, 400, doc.y)
+        .moveDown()
+        .fontSize(12)
+        .text('Grand Total', 300, doc.y, { bold: true })
+        .text(`$${subtotal.toFixed(2)}`, 400, doc.y)
+        .moveDown(2);
+
+      // Footer
+      doc
+        .fontSize(10)
+        .text('Thank you for your business.', { align: 'center' })
+        .moveDown();
+
+      doc.end();
+
+      // Send the file to the client
+      writeStream.on('finish', () => {
+        res.download(filePath, fileName, (err) => {
+          if (err) {
+            console.error('Error downloading the file', err);
+            res.status(500).send('Error downloading the file');
+          }
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error('Error deleting the file', err);
+            }
+          });
+        });
+      });
+    }
   } catch (error) {
-    console.error('error', error);
-    res.status(500).send('Error loading invoice'); 
+    console.error('Error generating invoice:', error);
+    res.status(500).send('Error generating invoice');
   }
 };
+
+
+
 
 const applyCoupon = async (req, res) => {
   try {

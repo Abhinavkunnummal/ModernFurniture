@@ -138,5 +138,4 @@ userRoute.post('/placeorderwallet',cartController.placeOrderWallet)
 userRoute.get('/invoice',cartController.loadInvoice)
 
 
-
 module.exports = userRoute;

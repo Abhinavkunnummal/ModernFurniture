@@ -257,21 +257,28 @@
             </thead>
             <tbody id="transactionTableBody">
               <% if (WalletDetails) { %>
-                  <% WalletDetails.transaction.reverse().forEach(item => { %>
-                      <tr>
-                          <td><%= item.formattedDate %></td>
-                          <td>
-                              <% if (item.transactionMethod === 'Debit') { %>
-                                  <span style="color: red;">Debit</span>
-                              <% } else { %>
-                                  <span style="color: green;">Credit</span>
-                              <% } %>
-                          </td>
-                          <td>₹<%= item.amount %></td>
-                      </tr>
-                  <% }); %>
+                <% WalletDetails.transaction.reverse().forEach(item => { %>
+                  <tr>
+                    <td><%= item.formattedDate %></td>
+                    <td>
+                      <% if (item.transactionMethod === 'Debit') { %>
+                        <span style="color: red;">Debit</span>
+                      <% } else if (item.transactionMethod === 'Razorpay') { %>
+                        <span style="color: blue;">Razorpay</span>
+                      <% } else if (item.transactionMethod === 'Referral') { %>
+                        <span style="color: purple;">Referral</span>
+                      <% } else if (item.transactionMethod === 'Refund') { %>
+                        <span style="color: orange;">Refund</span>
+                      <% } else { %>
+                        <span style="color: green;">Credit</span>
+                      <% } %>
+                    </td>
+                    <td>₹<%= item.amount %></td>
+                  </tr>
+                <% }); %>
               <% } %>
             </tbody>
+            
           </table>
         </div>
       </div>

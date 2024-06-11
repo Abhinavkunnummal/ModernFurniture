@@ -276,6 +276,25 @@
                             </div>
                           </div>
                         </div>
+
+                        <div class="row mb-3">
+                          <label class="col-sm-2 col-form-label" for="referral-code">Referral Code</label>
+                          <div class="col-sm-10">
+                            <div class="input-group input-group-merge">
+                              <span class="input-group-text"><i class="bx bx-user"></i></span>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="referral-code"
+                                value="<%= user.referralCode %>"
+                                aria-label="Referral Code"
+                                readonly
+                              />
+                              <button type="button" class="btn btn-outline-secondary" id="copy-referral-code">Copy</button>
+                              <button type="button" class="btn btn-outline-primary" id="share-referral-code">Share</button>
+                            </div>
+                          </div>
+                        </div>
                        
                         <div style="display: flex; justify-content: center;">
                           <a href="/manageAddress" class="btn btn-primary">Manage Address</a>
@@ -304,7 +323,57 @@
       <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- / Layout wrapper -->
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.getElementById('copy-referral-code').addEventListener('click', function() {
+      var referralCodeInput = document.getElementById('referral-code');
+      referralCodeInput.select();
+      referralCodeInput.setSelectionRange(0, 99999); // For mobile devices
+      document.execCommand('copy');
+      
+      // Use SweetAlert to notify the user
+      Swal.fire({
+        icon: 'success',
+        title: 'Copied!',
+        text: 'Referral Code copied: ' + referralCodeInput.value,
+        timer: 1500,
+        showConfirmButton: false
+      });
+    });
+    
+    document.getElementById('share-referral-code').addEventListener('click', function() {
+      var referralCode = document.getElementById('referral-code').value;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Referral Code',
+          text: 'Use my referral code to sign up: ' + referralCode,
+          url: window.location.href
+        }).then(() => {
+          // Use SweetAlert to thank the user
+          Swal.fire({
+            icon: 'success',
+            title: 'Thanks for sharing!',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }).catch(err => {
+          console.error('Error sharing:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Error sharing the referral code. Please try again later.',
+          });
+        });
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sharing not supported',
+          text: 'Sharing not supported on this browser. Please copy the referral code manually.',
+        });
+      }
+    });
+    </script>
+    
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

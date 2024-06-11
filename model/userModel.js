@@ -37,6 +37,17 @@ const userSchema = new mongoose.Schema(
       type:mongoose.Schema.Types.ObjectId,
       ref:'Address',
     
+    },
+    referralCode: {
+      type: String,
+      unique: true,
+    },
+    referredCode: {
+      type: String,
+    },
+    wallet: {
+      type: Number,
+      default: 0,
     }
     
   }

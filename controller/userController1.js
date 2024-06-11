@@ -8,6 +8,7 @@ const Address=require('../model/address')
 const Product = require("../model/product");
 const Coupon=require('../model/coupon')
 const moment = require('moment');
+const Wallet = require('../model/wallet');
 
 const { ObjectId } = require("mongodb");
 const Category = require('../model/category');
@@ -194,6 +195,28 @@ const insertUser = async (req, res) => {
 
     // Hash password
     const spassword = await securePassword(req.body.password);
+
+    // Generate a unique referral code for the new user
+    function generateReferralCode(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let code = '';
+      for (let i = 0; i < length; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    let newReferralCode;
+    let isUnique = false;
+    while (!isUnique) {
+      newReferralCode = generateReferralCode(8); // Adjust length as needed
+      const existingUser = await User.findOne({ referralCode: newReferralCode });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
+
+    // Create the new user
     const newUser = new User({
       name: req.body.name,
       email: req.body.email,
@@ -202,9 +225,49 @@ const insertUser = async (req, res) => {
       confirmPassword: spassword,
       is_admin: 0,
       is_verified: 0,
+      referralCode: newReferralCode,
+      referredCode: req.body.referredCode || null
     });
 
+    // Save the new user
     await newUser.save();
+
+    // Create a wallet for the new user with initial balance 0
+    const newUserWallet = new Wallet({
+      userId: newUser._id,
+      balance: 0,
+      transaction: []
+    });
+
+    // Save the new wallet
+    await newUserWallet.save();
+
+    // If the user was referred by someone, update the referrer's wallet
+    if (req.body.referredCode) {
+      const referrer = await User.findOne({ referralCode: req.body.referredCode });
+      if (referrer) {
+        // Update the referrer's wallet
+        const referrerWallet = await Wallet.findOne({ userId: referrer._id });
+        if (referrerWallet) {
+          referrerWallet.balance += 100; // Referrer gets 50
+          referrerWallet.transaction.push({
+            amount: 50,
+            transactionMethod: "Refferal",
+            formattedDate: new Date().toLocaleDateString()
+          });
+          await referrerWallet.save();
+        }
+
+        // Update the referred user's wallet
+        newUserWallet.balance += 50; // Referred user gets 100
+        newUserWallet.transaction.push({
+          amount: 100,
+          transactionMethod: "Refferal",
+          formattedDate: new Date().toLocaleDateString()
+        });
+        await newUserWallet.save();
+      }
+    }
 
     const otp = generateOTP();
     req.session.otp = otp;
