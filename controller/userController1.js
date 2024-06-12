@@ -55,40 +55,40 @@ const userController = {
       }
   },
 
-  resendOtp: async (req, res) => {
-      try {
-          const tempUser = req.session.tempUser;
+  // resendOtp: async (req, res) => {
+  //     try {
+  //         const tempUser = req.session.tempUser;
 
-          if (!tempUser ||!tempUser.userId ||!tempUser.email) {
-              req.flash("error", "User session data missing");
-              return res.redirect("/otp");
-          }
+  //         if (!tempUser ||!tempUser.userId ||!tempUser.email) {
+  //             req.flash("error", "User session data missing");
+  //             return res.redirect("/otp");
+  //         }
 
-          const userId = tempUser.userId;
-          const user = await User.findById(userId);
+  //         const userId = tempUser.userId;
+  //         const user = await User.findById(userId);
 
-          if (!user) {
-              req.flash("error", "User not found");
-              return res.redirect("/otp");
-          }
+  //         if (!user) {
+  //             req.flash("error", "User not found");
+  //             return res.redirect("/otp");
+  //         }
 
-          const newOtp = generateOTP(); 
-          await sendVerifyMail(user.name, tempUser.email, user._id, newOtp);
+  //         const newOtp = generateOTP(); 
+  //         await sendVerifyMail(user.name, tempUser.email, user._id, newOtp);
 
-          req.session.tempUser.otp = newOtp;
-          const otpDoc = new Otp({
-              user_id: user._id,
-              otp: newOtp,
-          });
-          await otpDoc.save();
+  //         req.session.tempUser.otp = newOtp;
+  //         const otpDoc = new Otp({
+  //             user_id: user._id,
+  //             otp: newOtp,
+  //         });
+  //         await otpDoc.save();
 
-          req.flash("success", "New OTP has been sent to your email");
-          res.redirect("/otp");
-      } catch (error) {
-          console.error(error.message);
-          res.status(500).send({ error: "Internal server error" });
-      }
-  },
+  //         req.flash("success", "New OTP has been sent to your email");
+  //         res.redirect("/otp");
+  //     } catch (error) {
+  //         console.error(error.message);
+  //         res.status(500).send({ error: "Internal server error" });
+  //     }
+  // },
 
   verifyResetOtp: async (req, res) => {
       try {
@@ -188,96 +188,91 @@ const loadSignIn = async (req, res) => {
 
 const insertUser = async (req, res) => {
   try {
-    const exist = await User.findOne({ email: req.body.email });
-    if (exist) {
-      return res.render("signup", { message: "Email already exists" });
-    }
-
-    // Hash password
-    const spassword = await securePassword(req.body.password);
-
-    // Generate a unique referral code for the new user
-    function generateReferralCode(length) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let code = '';
-      for (let i = 0; i < length; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      const exist = await User.findOne({ email: req.body.email });
+      if (exist) {
+          return res.render("signup", { message: "Email already exists" });
       }
-      return code;
-    }
 
-    let newReferralCode;
-    let isUnique = false;
-    while (!isUnique) {
-      newReferralCode = generateReferralCode(8); // Adjust length as needed
-      const existingUser = await User.findOne({ referralCode: newReferralCode });
-      if (!existingUser) {
-        isUnique = true;
+      const spassword = await securePassword(req.body.password);
+      
+      // Generate a unique referral code for the new user
+      function generateReferralCode(length) {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          let code = '';
+          for (let i = 0; i < length; i++) {
+              code += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return code;
       }
-    }
 
-    // Create the new user
-    const newUser = new User({
-      name: req.body.name,
-      email: req.body.email,
-      mobile: req.body.mobile,
-      password: spassword,
-      confirmPassword: spassword,
-      is_admin: 0,
-      is_verified: 0,
-      referralCode: newReferralCode,
-      referredCode: req.body.referredCode || null
-    });
-
-    // Save the new user
-    await newUser.save();
-
-    // Create a wallet for the new user with initial balance 0
-    const newUserWallet = new Wallet({
-      userId: newUser._id,
-      balance: 0,
-      transaction: []
-    });
-
-    // Save the new wallet
-    await newUserWallet.save();
-
-    // If the user was referred by someone, update the referrer's wallet
-    if (req.body.referredCode) {
-      const referrer = await User.findOne({ referralCode: req.body.referredCode });
-      if (referrer) {
-        // Update the referrer's wallet
-        const referrerWallet = await Wallet.findOne({ userId: referrer._id });
-        if (referrerWallet) {
-          referrerWallet.balance += 100; // Referrer gets 50
-          referrerWallet.transaction.push({
-            amount: 50,
-            transactionMethod: "Refferal",
-            formattedDate: new Date().toLocaleDateString()
-          });
-          await referrerWallet.save();
-        }
-
-        // Update the referred user's wallet
-        newUserWallet.balance += 50; // Referred user gets 100
-        newUserWallet.transaction.push({
-          amount: 100,
-          transactionMethod: "Refferal",
-          formattedDate: new Date().toLocaleDateString()
-        });
-        await newUserWallet.save();
+      let newReferralCode;
+      let isUnique = false;
+      while (!isUnique) {
+          newReferralCode = generateReferralCode(8);
+          const existingUser = await User.findOne({ referralCode: newReferralCode });
+          if (!existingUser) {
+              isUnique = true;
+          }
       }
-    }
 
-    const otp = generateOTP();
-    req.session.otp = otp;
-    console.log(`Generated OTP: ${otp}`);
-    await saveOTP(newUser.email, otp);
-    await sendOTPVerifyMail(newUser.email, otp);
-    return res.render("otp", { email: newUser.email });
+      const newUser = new User({
+          name: req.body.name,
+          email: req.body.email,
+          mobile: req.body.mobile,
+          password: spassword,
+          confirmPassword: spassword,
+          is_admin: 0,
+          is_verified: 0,
+          referralCode: newReferralCode,
+          referredCode: req.body.referredCode || null
+      });
+
+      await newUser.save();
+
+      const newUserWallet = new Wallet({
+          userId: newUser._id,
+          balance: 0,
+          transaction: []
+      });
+
+      await newUserWallet.save();
+
+      if (req.body.referredCode) {
+          const referrer = await User.findOne({ referralCode: req.body.referredCode });
+          if (referrer) {
+              const referrerWallet = await Wallet.findOne({ userId: referrer._id });
+              if (referrerWallet) {
+                  referrerWallet.balance += 100;
+                  referrerWallet.transaction.push({
+                      amount: 50,
+                      transactionMethod: "Referral",
+                      formattedDate: new Date().toLocaleDateString()
+                  });
+                  await referrerWallet.save();
+              }
+
+              newUserWallet.balance += 50;
+              newUserWallet.transaction.push({
+                  amount: 100,
+                  transactionMethod: "Refferal",
+                  formattedDate: new Date().toLocaleDateString()
+              });
+              await newUserWallet.save();
+          }
+      }
+
+      const otp = generateOTP();
+      req.session.otp = otp;
+      req.session.timer = 20; // Set timer to 20 seconds
+      req.session.timerStart = Date.now();
+      console.log(`Generated OTP: ${otp}`);
+      await saveOTP(newUser.email, otp);
+      await sendOTPVerifyMail(newUser.email, otp);
+
+      return res.render("otp", { email: newUser.email, timer: req.session.timer });
   } catch (error) {
-    console.error("Error inserting user:", error);
-    res.status(500).send("Internal Server Error");
+      console.error("Error inserting user:", error);
+      res.status(500).send("Internal Server Error");
   }
 };
 
@@ -306,63 +301,73 @@ const generateOTP = () => {
 
 const verifyOTPAndSaveUser = async (req, res) => {
   try {
-    const enteredOTP = req.body.otp;
-    const sessionOTP = req.session.otp;
-    console.log("SESSION"+sessionOTP);
-    console.log('entered'+enteredOTP);
+      const enteredOTP = req.body.otp;
+      const sessionOTP = req.session.otp;
 
-    if (sessionOTP) {
-      console.log('lkdfjiofjiefjefjifjokj');
-      if (sessionOTP == enteredOTP) {
-        delete req.session.otp;
-        const userVerification = await UserOTPVerification.findOne({
-          email: req.body.email,
-        });
-        console.log(userVerification+"usereifdo");
-        await User.findOneAndUpdate(
-          { email: userVerification.email },
-          { $set: { is_verified: 1 } }
-        );
-        await UserOTPVerification.findOneAndDelete({ email: req.body.email });
-
-        req.session.destroy();
-        return res.redirect("/login")
+      if (sessionOTP) {
+          if (sessionOTP == enteredOTP) {
+              delete req.session.otp;
+              await User.findOneAndUpdate(
+                  { email: req.body.email },
+                  { $set: { is_verified: 1 } }
+              );
+              await UserOTPVerification.findOneAndDelete({ email: req.body.email });
+              req.session.destroy();
+              return res.redirect("/login");
+          } else {
+              const currentTime = Date.now();
+              req.session.timer -= Math.floor((currentTime - req.session.timerStart) / 1000);
+              req.session.timerStart = currentTime; // Reset the timer start time
+              return res.render("otp", {
+                  message: "Invalid OTP. Please try again.",
+                  email: req.body.email,
+                  timer: Math.max(0, req.session.timer) // Ensure timer does not go negative
+              });
+          }
       } else {
-        console.log(`Entered OTP: ${enteredOTP}`);
-        console.log("Invalid OTP. Generated and entered OTP do not match.");
-        return res.render("otp", {
-          message: "Invalid OTP. Please try again.",
-          email: req.body.email,
-          timer: req.session.timer 
-        });
+          return res.render("otp", {
+              message: "OTP expired or has not been generated. Please request a new OTP.",
+              email: req.body.email,
+              timer: 0 // Timer expired
+          });
       }
-    } else {
-      console.log("OTP expired or has not been generated.");
-      return res.render("otp", {
-        message: "OTP expired or has not been generated. Please request a new OTP.",
-        email: req.body.email,
-        timer: req.session.timer 
-      });
-    }
   } catch (error) {
-    console.error("Error verifying OTP and saving user:", error);
-    res.status(500).send("Internal Server Error");
+      console.error("Error verifying OTP and saving user:", error);
+      res.status(500).send("Internal Server Error");
   }
 };
+
+
 
 const resendOtp = async (req, res) => {
   try {
     const email = req.body.email;
-    const newOTP = generateOTP();
-    req.session.otp = newOTP;
-    req.session.timer = 60; 
-    await sendOtpToEmail(email, newOTP); 
-    res.json({ message: 'OTP resent successfully' });
+    const newOTP = generateOTP(); // Generate a new OTP
+    req.session.otp = newOTP; // Update session with new OTP
+    req.session.timer = 20; // Reset the timer to 20 seconds
+    req.session.timerStart = Date.now(); // Reset the timer start time
+    await sendOtpToEmail(email, newOTP); // Send the new OTP to the email
+    console.log(`Generated Resended OTP : ${newOTP}`);
+    res.json({ message: 'OTP resent successfully' }); // Send response indicating success
   } catch (error) {
     console.error('Error resending OTP:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' }); // Send response indicating failure
   }
 };
+
+
+
+const sendOtpToEmail = async (email, otp) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USERNAME,
+    to: email,
+    subject: "Your OTP Code",
+    html: `<p>Your OTP code is: ${otp}</p>`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 
 const loadHome = async (req, res) => {
   try {

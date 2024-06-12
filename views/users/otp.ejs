@@ -16,7 +16,7 @@
                             <div class="w-100">
                                 <h3 class="mb-4">Verify Email</h3>
                                 <p style="color: #3b5d50;">Check your email to verify OTP</p>
-                                <% if (typeof message !='undefined') { %>
+                                <% if (typeof message != 'undefined') { %>
                                     <p class="text-danger"><%= message %></p>
                                 <% } %>
                             </div>
@@ -32,11 +32,13 @@
                             </div>
                         </form>
                         <div class="form-group text-center">
-                            <p id="timerMessage">Resend OTP in <span id="timer">60</span> seconds</p>
+                            <p id="timerMessage">Resend OTP in <span id="timer">20</span> seconds</p>
                         </div>
                         <div class="form-group text-center" id="resendLink" style="display: none;">
-                            <a href="#" id="resendOTP">Resend OTP</a>
+                            <button id="resendOTP" class="btn btn-link">Resend OTP</button>
+                            <p id="resendMessage" style="color: green;"></p> <!-- New element for success message -->
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -47,7 +49,7 @@
 <%- include('../form_layouts/footer.ejs') %>
 
 <script>
-    var timeLeft = 60;
+    var timeLeft = <%= typeof timer !== 'undefined' ? Math.floor(timer) : 20 %>;
     var timerElement = document.getElementById('timer');
     var timerMessage = document.getElementById('timerMessage');
     var resendLink = document.getElementById('resendLink');
@@ -55,38 +57,36 @@
     var timer;
 
     function countdown() {
-        if (timeLeft == 0) {
-            clearTimeout(timer);
-            resendLink.style.display = 'block';
-            timerMessage.innerHTML = "Resend OTP now";
-            return;
-        }
-        timerElement.innerHTML = timeLeft;
-        timeLeft--;
-        timer = setTimeout(countdown, 1000);
-    }
-
-    countdown();
-
-    setTimeout(function(){
+    console.log('Countdown function called');
+    if (timeLeft <= 0) {
+        clearTimeout(timer);
         resendLink.style.display = 'block';
         timerMessage.innerHTML = "Resend OTP now";
-    }, 60000);
+        return;
+    }
+    timerElement.innerHTML = timeLeft; // Move this line inside the countdown function
+    timeLeft--;
+    timer = setTimeout(countdown, 1000);
+}
+    countdown();
 
     resendOTPButton.addEventListener('click', function(e) {
         e.preventDefault();
+        console.log('Resend OTP button clicked');
         resendOTP();
     });
 
     function resetTimer() {
-        timeLeft = 60;
-        clearTimeout(timer);
-        countdown();
-        resendLink.style.display = 'none';
-        timerMessage.innerHTML = "Resend OTP in <span id='timer'>60</span> seconds";
-    }
+    console.log('Timer reset');
+    timeLeft = 20;
+    clearTimeout(timer);
+    timerMessage.innerHTML = "Resend OTP in <span id='timer'>" + timeLeft + "</span> seconds";
+    countdown(); // Call countdown after updating timerMessage
+    resendLink.style.display = 'none';
+}
 
     function resendOTP() {
+        console.log('Resending OTP');
         fetch('/resendOtp', {
             method: 'POST',
             headers: {
@@ -94,24 +94,16 @@
             },
             body: JSON.stringify({ email: '<%= email %>' })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log(data);
-            resetTimer();
+            if (data.message === 'OTP resent successfully') {
+                resetTimer();
+            } else {
+                console.error('Error:', data.message);
+            }
         })
         .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
+            console.error('Error:', error);
         });
     }
-
-    document.getElementById('verificationForm').addEventListener('submit', function(e) {
-        // e.preventDefault();
-        resetTimer();
-       
-    });
 </script>

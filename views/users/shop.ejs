@@ -26,12 +26,13 @@
            <select class="form-select" id="categoryFilter">
                <option value="">All Categories</option>
                <% categorys.forEach(element => { %>
-               <option value="<%= element.name %>"><%= element.name %></option>
+               <option value="<%= element.id %>"><%= element.name %></option>
                <% }) %>
            </select>
         </div>
     </div>
 </div>
+
 
 <!-- Product Listing -->
 <div class="untree_co-section product-section before-footer-section">
@@ -172,13 +173,14 @@ function attachEventListeners() {
 attachEventListeners();
 
 document.getElementById('categoryFilter').addEventListener('change', function () {
-  var category = this.value;
-  var sortingCriteria = document.getElementById('sortingOptions').value;
-  fetch(`/sortProducts?sort=${sortingCriteria}&category=${category}`)
-   .then(response => response.json())
-   .then(data => {
-      renderProducts(data.products);
-    })
-   .catch(error => console.error('Error fetching and sorting products:', error));
+    var categoryId = this.value; // Get the selected category ID
+    var sortingCriteria = document.getElementById('sortingOptions').value;
+    fetch(`/sortProducts?sort=${sortingCriteria}&category=${categoryId}`)
+       .then(response => response.json())
+       .then(data => {
+            renderProducts(data.products);
+        })
+       .catch(error => console.error('Error fetching and sorting products:', error));
 });
+
 </script>
