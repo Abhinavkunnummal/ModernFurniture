@@ -90,24 +90,16 @@ const removeFromCart = async (req, res) => {
 const updateCartItem = async (req, res) => {
   try {
     const userId = req.session.user_id;
-    // console.log(`userId is ${userId}`);
     const { productId, quantityChange } = req.body;
-    // console.log(
-    //   `product id is ${productId}     quantity chane is ${quantityChange}`
-    // );
-    const cartItems = await CartItem.find({ userId }).populate(
-      "product.productId"
-    );
+
+    // Retrieve the cart items with product information including stock
+    const cartItems = await CartItem.find({ userId }).populate("product.productId");
 
     if (!cartItems || cartItems.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No cart items found for the user" });
+      return res.status(404).json({ error: "No cart items found for the user" });
     }
 
-    const cartItemToUpdate = cartItems.find(
-      (item) => item.product[0].productId.toString() === productId
-    );
+    const cartItemToUpdate = cartItems.find((item) => item.product[0].productId.toString() === productId);
 
     if (!cartItemToUpdate) {
       return res.status(404).json({ error: "Cart item not found" });
@@ -116,34 +108,40 @@ const updateCartItem = async (req, res) => {
     const product = cartItemToUpdate.product[0];
     const newQuantity = product.quantity + parseInt(quantityChange);
 
-    if (newQuantity < 1) {
-      return res.status(400).json({ error: "Quantity cannot be less than 1" });
-    }
-
-    const newPrice = product.price * newQuantity;
-    const updatedCartItem = await CartItem.findOneAndUpdate(
-      { _id: cartItemToUpdate._id, "product.productId": product.productId },
-      {
-        $inc: { "product.$.quantity": quantityChange },
-        $set: { "product.$.totalPrice": newPrice },
-      },
-      { new: true }
-    );
-
-    const updatedCartItems = await CartItem.find({ userId }).populate(
-      "product.productId"
-    );
-    res
-      .status(200)
-      .json({
+    // Check if the requested quantity exceeds the product stock
+    if (newQuantity > product.productId.stock) {
+      return res.status(400).json({ error: "Insufficient product stock" });
+    }else{
+      if (newQuantity < 1) {
+        return res.status(400).json({ error: "Quantity cannot be less than 1" });
+      }
+  
+      const newPrice = product.price * newQuantity;
+  
+      const updatedCartItem = await CartItem.findOneAndUpdate(
+        { _id: cartItemToUpdate._id, "product.productId": product.productId },
+        {
+          $inc: { "product.$.quantity": quantityChange },
+          $set: { "product.$.totalPrice": newPrice },
+        },
+        { new: true }
+      );
+  
+      const updatedCartItems = await CartItem.find({ userId }).populate("product.productId");
+  
+      res.status(200).json({
         message: "Cart items updated successfully",
         cartItems: updatedCartItems,
       });
+    }
+
+    
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 const checkoutPage = async (req, res) => {
   try {

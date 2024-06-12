@@ -144,7 +144,7 @@
         const quantityElement = this.closest('.quantity-wrapper').querySelector('.quantity');
         let quantity = parseInt(quantityElement.textContent);
         if (quantity < 5) {
-          quantityElement.textContent = ++quantity;
+        //   quantityElement.textContent = ++quantity;
           const productId = this.dataset.productId;
           updateCart(productId, 1);
         } else {
@@ -176,7 +176,11 @@
         data: { productId: productId, quantityChange: quantityChange },
         success: function(response) {
           if (response.error) {
-            alert(response.error);
+            Swal.fire({
+              icon: 'warning',
+              title: 'Oops...',
+              text: 'Insufficient Stock',
+          });
           } else {
             window.location.reload();
             $('#subtotal').text('₹' + response.subtotal.toFixed(2));
@@ -189,7 +193,12 @@
         },
         error: function(xhr, status, error) {
           console.error('Error updating quantity:', error);
-          alert('An error occurred while updating the quantity. Please try again.');
+        //   alert('An error occurred while updating the quantity. Please try again.');
+        Swal.fire({
+              icon: 'warning',
+              title: 'Oops...',
+              text: 'Insufficient Stock',
+          });
         }
       });
     }
