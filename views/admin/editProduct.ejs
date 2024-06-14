@@ -28,7 +28,6 @@
                                     <button type="button" class="btn btn-primary change-image-btn" data-index="<%= index %>">Change Image</button>
                                     <button type="button" class="btn btn-danger remove-image-btn" data-index="<%= index %>" data-path="/productimage/<%= image %>">Remove Image</button>
 
-                                    
                                     <input type="hidden" name="existing_images[]" value="<%= image %>">
                                 </div>
                             <% }) %>
@@ -45,7 +44,7 @@
                         <label for="category">Category</label>
                         <select class="form-control border" name="category" id="category" required>
                             <% categorydata.forEach((category) => { %>
-                                <option value="<%= category._id %>" <%= productsData.category == category._id ? 'selected' : '' %>><%= category.name %></option>
+                                <option value="<%= category._id %>" <%= productsData.category.toString() === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
                             <% }) %>
                         </select>
                     </div>
@@ -71,8 +70,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
-
-  
 
     document.addEventListener('DOMContentLoaded', () => {
       const maxImageCount = 4;
@@ -116,31 +113,29 @@
       });
   
       previewContainer.addEventListener('click', function (e) {
-  if (e.target && e.target.classList.contains('remove-image-btn')) {
-    const imageItem = e.target.parentElement;
-    const existingImagesInput = imageItem.querySelector('input[name="existing_images[]"]');
-    const imagePath = e.target.dataset.path; 
-    if (existingImagesInput) {
-      existingImagesInput.remove();
-    }
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-     
-        imageItem.remove();
-        showAlert('success', 'Image deleted successfully.');
-      }
-    });
-  }
-});
-
+        if (e.target && e.target.classList.contains('remove-image-btn')) {
+          const imageItem = e.target.parentElement;
+          const existingImagesInput = imageItem.querySelector('input[name="existing_images[]"]');
+          const imagePath = e.target.dataset.path; 
+          if (existingImagesInput) {
+            existingImagesInput.remove();
+          }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              imageItem.remove();
+              showAlert('success', 'Image deleted successfully.');
+            }
+          });
+        }
+      });
 
       document.getElementById("editProductForm").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -176,4 +171,4 @@
         });
       }
     });
-  </script>
+</script>

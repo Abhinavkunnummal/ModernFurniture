@@ -445,14 +445,45 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
-    const products = await Product.find({ is_Listed: false }).select('name price image stock isNew');
-    const categorys = await Category.find({ is_Listed: false });
-    res.render("shop", { products, user: userData, categorys });
+    let products = await Product.find({ is_Listed: false })
+                                .populate('productOfferId')
+                                .populate({
+                                  path: 'category',
+                                  populate: { path: 'categoryOfferId' }
+                                })
+                                .select('name price image stock isNew productOfferId category');
+
+    // Apply offers to products
+    products = products.map(product => {
+      let discount = 0;
+
+      // Check for product-specific offer
+      if (product.productOfferId) {
+        discount = product.productOfferId.discount;
+      }
+
+      // Check for category-specific offer
+      if (product.category && product.category.categoryOfferId) {
+        discount = Math.max(discount, product.category.categoryOfferId.discount);
+      }
+
+      // Apply the discount to the price
+      const discountedPrice = product.price - discount;
+      return {
+        ...product._doc,
+        discountedPrice: discountedPrice > 0 ? discountedPrice : 0,
+        discount
+      };
+    });
+
+    const categories = await Category.find({ is_Listed: false });
+    res.render("shop", { products, user: userData, categories });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 const loadFullPage = async (req, res) => {
@@ -711,36 +742,61 @@ const editedAddressPost = async (req, res) => {
 
 const sortProducts = async (req, res) => {
   try {
-    const { sort, category, brand } = req.query;
-    let query = {};
+    const { sort, category } = req.query;
+    let filter = { is_Listed: false };
 
-    if (category) query = { ...query, category };
-    if (brand) query = { ...query, brand };
-
-    let sortedProducts;
-    switch (sort) {
-      case 'nameAZ':
-        sortedProducts = await Product.find(query).collation({ locale: 'en' }).sort({ name: 1 });
-        break;
-      case 'nameZA':
-        sortedProducts = await Product.find(query).collation({ locale: 'en' }).sort({ name: -1 });
-        break;
-      case 'priceLowToHigh':
-        sortedProducts = await Product.find(query).sort({ price: 1 });
-        break;
-      case 'priceHighToLow':
-        sortedProducts = await Product.find(query).sort({ price: -1 });
-        break;
-      default:
-        sortedProducts = await Product.find(query);
+    if (category) {
+      filter.category = category;
     }
 
-    res.json({ products: sortedProducts });
+    let products = await Product.find(filter)
+                                .populate('productOfferId')
+                                .populate({
+                                  path: 'category',
+                                  populate: { path: 'categoryOfferId' }
+                                })
+                                .select('name price image stock isNew productOfferId category');
+
+    // Apply offers to products
+    products = products.map(product => {
+      let discount = 0;
+
+      if (product.productOfferId) {
+        discount = product.productOfferId.discount;
+      }
+
+      if (product.category && product.category.categoryOfferId) {
+        discount = Math.max(discount, product.category.categoryOfferId.discount);
+      }
+
+      const discountedPrice = product.price - (product.price * (discount / 100));
+      return {
+        ...product._doc,
+        discountedPrice: discountedPrice > 0 ? discountedPrice : 0,
+        discount
+      };
+    });
+
+    // Sort products
+    if (sort === 'nameAZ') {
+      products = products.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'nameZA') {
+      products = products.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sort === 'newArrivals') {
+      products = products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sort === 'priceLowToHigh') {
+      products = products.sort((a, b) => a.discountedPrice - b.discountedPrice);
+    } else if (sort === 'priceHighToLow') {
+      products = products.sort((a, b) => b.discountedPrice - a.discountedPrice);
+    }
+
+    res.json({ products });
   } catch (error) {
     console.error('Error fetching and sorting products:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send('Internal Server Error');
   }
 };
+
 
 
 

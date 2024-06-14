@@ -117,7 +117,7 @@ userRoute.get('/orders',cartController.renderOrders)
 
 userRoute.get('/orderDetails',cartController.renderFullDetails)
 
-userRoute.get('/cancelOrders',cartController.cancelOrder)
+userRoute.post('/cancelOrders',cartController.cancelOrder)
 
 
 userRoute.get('/wishlist', cartController.renderWishlist);

@@ -58,7 +58,7 @@ adminRoute.get('/viewsingle',adminController.renderSingleView)
 adminRoute.post('/updatestatus',adminController.updateStatus)
 adminRoute.post('/approveReturn',adminController.approveReturn)
 adminRoute.post('/rejectReturn',adminController.rejectReturn)
-
+adminRoute.post('/approveCancellation',adminController.approveCancelOrder)
 
 adminRoute.get('/coupon',adminController.renderCoupon)
 adminRoute.get('/addCoupon',adminController.addCoupon)
@@ -81,6 +81,7 @@ adminRoute.get('/salesWeekly',adminController.generateWeeklyReport)
 adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
 adminRoute.get('/salesYearly',adminController.generateYearlyReport)
 adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
+
 
 module.exports = adminRoute;
 

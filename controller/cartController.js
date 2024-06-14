@@ -385,32 +385,71 @@ const renderOrders = async (req, res) => {
   }
 };
 
-const returnOrder=async (req, res) => {
+const returnOrder = async (req, res) => {
   try {
-      const { itemId, returnReason } = req.body;
-    console.log(itemId+"itemId",returnReason+"return Reason");
+    const userId = req.session.user_id;
+    const { orderId, returnReason } = req.body;
 
-      const order = await Order.findOne({ 'orderedItem._id': itemId });
+    // Assuming you have a model named Order
+    const order = await Order.findOne({
+      userId: userId,
+      'orderedItem._id': orderId
+    });
 
-      if (!order) {
-          return res.status(404).json({ message: 'Order not found' });
+    if (order) {
+
+
+      // Find the specific ordered item by orderId
+      const orderedItem = order.orderedItem.find(item => item._id.toString() === orderId);
+
+      if (orderedItem) {
+        if (orderedItem.orderStatus === 'delivered') {
+          // Update order status to 'returned' and save return reason
+          orderedItem.orderStatus = 'returned';
+          order.returnReason = returnReason;
+
+          const product = await Product.findById(orderedItem.productId);
+          if (product) {
+            product.stock += orderedItem.quantity; // Increase the product stock
+            await product.save();
+          }
+      
+          const wallet = await Wallet.findOne({ userId: userId });
+          const refundAmount = +orderedItem.totalProductAmount;
+      
+          if (wallet) {
+            const refundTransaction = {
+              amount: refundAmount,
+              transactionMethod: "Refund",
+              formattedDate: new Date().toISOString()
+            };
+            wallet.balance += refundAmount;
+            wallet.transaction.push(refundTransaction);
+            await wallet.save();
+            console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
+          } else {
+            req.flash('error', 'Wallet not found');
+            return res.status(404).json({ error: 'Wallet not found' });
+          }
+      
+          await order.save();
+
+          res.status(200).json({ success: true, message: 'Return request processed successfully' });
+        } else {
+          console.log('Order status is not "delivered":', orderedItem.orderStatus);
+          res.status(400).json({ success: false, message: 'Order status is not eligible for return' });
+        }
+      } else {
+        console.log('Ordered item not found for orderId:', orderId);
+        res.status(404).json({ success: false, message: 'Ordered item not found' });
       }
-
-      const item = order.orderedItem.id(itemId);
-      console.log(item);
-
-      if (!item) {
-          return res.status(404).json({ message: 'Ordered item not found' });
-      }
-      item.orderStatus = 'Returned';
-      item.returnReason = returnReason;
-
-      await order.save();
-
-      res.status(200).json({ message: 'Return request submitted successfully' });
+    } else {
+      console.log('Order not found for orderId:', orderId);
+      res.status(404).json({ success: false, message: 'Order not found' });
+    }
   } catch (error) {
-      console.error('Error processing return request:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error processing return request:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
 
@@ -438,21 +477,33 @@ const renderFullDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
+    console.log('ethis');
     const userId = req.session.user_id;
-    const itemId = req.query.id;
+    const { itemId, cancelReason } = req.body; // Use req.body to get itemId and cancelReason
+    console.log(itemId + " cancel only if cancel id is there");
 
     const order = await Order.findOne({
       userId: userId,
       'orderedItem._id': itemId
     });
-
+console.log('order is'+order);
     if (!order) {
       req.flash('error', 'Order not found');
       return res.status(404).json({ error: 'Order not found' });
     }
 
     const item = order.orderedItem.id(itemId);
-    item.orderStatus = 'cancelled';
+    console.log(item.orderStatus+"orderstatus");
+
+    if (item.orderStatus !== 'pending' && item.orderStatus !== 'approved') {
+      // req.flash('error', 'Order status is not eligible for cancellation');
+      return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
+    }
+ 
+    item.orderStatus = 'Cancellation Request Sent';
+    console.log("orderstatus "+item.orderStatus);
+    
+    item.cancelReason = cancelReason;
 
     const product = await Product.findById(item.productId);
     if (product) {
@@ -480,13 +531,14 @@ const cancelOrder = async (req, res) => {
 
     await order.save();
 
-    req.flash('success', 'Order item cancelled successfully');
-    return res.redirect('/orders');
+    req.flash('success', 'Cancellation request sent successfully');
+    return res.status(200).json({ success: true, message: 'Cancellation request sent successfully' }); // Use JSON response for front-end handling
   } catch (error) {
     console.error('Error cancelling order item:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 

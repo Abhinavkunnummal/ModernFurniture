@@ -316,18 +316,17 @@ const editproductsLoad = async (req, res) => {
   }
 };
 
+
 const updateProduct = async (req, res) => {
   try {
     const { id, name, description, price, category, stock, dateCreated } = req.body;
 
-   
     const existingProduct = await Product.findById(id);
 
     if (!existingProduct) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-   
     const existingProductName = await Product.findOne({
       _id: { $ne: id },
       name: { $regex: new RegExp("^" + name + "$", "i") }
@@ -337,10 +336,8 @@ const updateProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "Product name already exists" });
     }
 
-   
     let updatedImages = [];
 
-    
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const croppedBuffer = await sharp(file.path)
@@ -353,13 +350,11 @@ const updateProduct = async (req, res) => {
       }
     }
 
-
     if (req.body.existing_images && req.body.existing_images.length > 0) {
       const existingImages = req.body.existing_images;
       updatedImages = [...updatedImages, ...existingImages];
     }
 
-  
     existingProduct.name = name;
     existingProduct.description = description;
     existingProduct.price = price;
@@ -368,18 +363,17 @@ const updateProduct = async (req, res) => {
     existingProduct.image = updatedImages; 
     existingProduct.dateCreated = dateCreated;
 
-  
     await existingProduct.save();
 
-   
     res.status(200).json({ success: true, message: 'Product updated successfully' });
-    
 
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+
 
 
 const blockProduct = async (req, res) => {
@@ -971,6 +965,37 @@ const generateCustomDateReport = async (req, res) => {
   }
 };
 
+
+const approveCancelOrder=async(req,res)=>{
+  try {
+    const { itemId } = req.body;
+    
+    const order = await Order.findOne({
+      'orderedItem._id': itemId
+    });
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const item = order.orderedItem.id(itemId);
+
+    if (item.orderStatus !== 'Cancellation Request Sent') {
+      return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
+    }
+
+    item.orderStatus = 'cancelled';
+
+    await order.save();
+
+    return res.status(200).json({ success: true, message: 'Cancellation request approved successfully' });
+  } catch (error) {
+    console.error('Error approving cancellation request:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+
 module.exports = {
   renderLogin,
   verifyLogin,
@@ -998,6 +1023,7 @@ module.exports = {
   updateStatus,
   rejectReturn,
   approveReturn,
+  approveCancelOrder,
   renderCoupon,
   addCoupon,
   submitAddCoupon,
