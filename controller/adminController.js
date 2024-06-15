@@ -50,12 +50,52 @@ const verifyLogin = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
   try {
-    res.render("dashboard");
+    // Fetch orders where at least one orderedItem has orderStatus 'delivered'
+    const deliveredOrders = await Order.find({
+      'orderedItem.orderStatus': 'delivered'
+    });
+
+    // Log retrieved delivered orders for debugging
+    console.log("Delivered Orders:", deliveredOrders);
+
+    // Check if deliveredOrders is correctly fetched
+    if (!deliveredOrders || deliveredOrders.length === 0) {
+      console.log("No delivered orders found.");
+    }
+
+    const categories = await Category.find({});
+    const products = await Product.find({});
+
+    // Calculate total revenue from delivered orders
+    const totalRevenue = deliveredOrders.reduce((acc, order) => acc + order.orderAmount, 0);
+
+    // Get current month and year
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+
+    // Calculate monthly earnings for the current month
+    const currentMonthEarnings = deliveredOrders.reduce((acc, order) => {
+      const orderDate = new Date(order.createdAt);
+      if (orderDate.getMonth() === thisMonth && orderDate.getFullYear() === thisYear) {
+        acc += order.orderAmount;
+      }
+      return acc;
+    }, 0);
+
+    res.render('dashboard', {
+      orders: deliveredOrders,
+      categories,
+      products,
+      totalRevenue,
+      monthlyEarning: currentMonthEarnings
+    });
   } catch (error) {
-    console.error("Error loading dashboard:", error);
-    res.status(500).send("Internal Server Error");
+    console.log("Error loading dashboard:", error);
   }
 };
+
+
 
 const customerDetails = async (req, res) => {
   try {
@@ -564,85 +604,65 @@ const loadAddOffer = async (req, res) => {
 
 const addOffer = async (req, res) => {
   try {
-      console.log('adding offer started');
+    console.log('adding offer started');
+    console.log(req.body);
 
-      console.log(req.body);
+    const details = req.body;
+    const { offerName, discount, startDate, endDate, offerType, productId, categoryId } = details;
 
-      const details = req.body;
-      console.log('details', details);
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+    }
 
-      const { offerName, discount, startDate, endDate, offerType, productId, categoryId } = details;
+    const newOffer = new Offer({
+      offerName,
+      discount,
+      startDate,
+      endDate,
+      offerType,
+    });
 
-     console.log('catogoryId',categoryId)
-
-     
-      if (new Date(startDate) >= new Date(endDate)) {
-          
-          return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
-      }
-      const newOffer = new Offer({
-          offerName,
-          discount,
-          startDate,
-          endDate,
-          offerType,
-         
-      }); 
-      console.log('reached here') 
-      console.log('offer',newOffer)
-
-      if (offerType === 'Product') {
-          console.log('going with ptoduct offer');
-          newOffer.productId=productId
-          console.log('offer.productId',newOffer.productId)
-          const proData= await Product.findOne({_id:productId})
-          console.log('proData',proData)
-            await Product.findByIdAndUpdate(
-              {_id:productId},
-          
-              {$set:{
-                  productOfferId:newOffer._id,
-                  productDiscount:discount,
-                  price:proData.price-discount
-              }}
-          )
-      }
-     
-      else if (offerType === 'Category') {
-          console.log('going with category offer');
-          newOffer.categoryId = categoryId; 
-          console.log(' newOffer.categoryId', newOffer.categoryId)
-          try {
-              const catProducts = await Product.find({ categoryId: categoryId });
-              console.log('catProducts', catProducts);
-              for (const product of catProducts) {
-                  await Product.findOneAndUpdate(
-                      { _id: product._id },
-                      {
-                          $set: {
-                              categoryOfferId: newOffer._id,
-                              categoryDiscount: discount,
-                              price: product.price - discount
-                          }
-                      }
-                  );
-              }
-          } catch (error) {
-              console.error('Error updating products:', error);
+    if (offerType === 'Product') {
+      console.log('going with product offer');
+      newOffer.productId = productId;
+      const proData = await Product.findOne({ _id: productId });
+      await Product.findByIdAndUpdate(
+        { _id: productId },
+        {
+          $set: {
+            productOfferId: newOffer._id,
+            productDiscount: discount,
+            discountedPrice: proData.price - discount,
+          },
+        }
+      );
+    } else if (offerType === 'Category') {
+      console.log('going with category offer');
+      newOffer.categoryId = categoryId;
+      const catProducts = await Product.find({ category: categoryId });
+      console.log('catProducts', catProducts);
+      for (const product of catProducts) {
+        await Product.findByIdAndUpdate(
+          { _id: product._id },
+          {
+            $set: {
+              categoryOfferId: newOffer._id,
+              categoryDiscount: discount,
+              discountedPrice: product.price - discount,
+            },
           }
+        );
       }
-     
-      const updatedProduct=    await newOffer.save();
+    }
 
-      console.log('updatedProduct', updatedProduct);
-
-      res.redirect('/admin/offer');
-
+    await newOffer.save();
+    res.redirect('/admin/offer');
   } catch (error) {
-      console.log('error in adding offer', error);
-      res.status(500).send('Error adding offer: ' + error.message);
+    console.log('error in adding offer', error);
+    res.status(500).send('Error adding offer: ' + error.message);
   }
-}
+};
+
 
 
 const loadEditOffer = async (req, res) => {
@@ -996,6 +1016,96 @@ const approveCancelOrder=async(req,res)=>{
 }
 
 
+
+// const daily= async (req, res) => {
+//   try {
+//     const startDate = moment().startOf('day');
+//     const endDate = moment().endOf('day');
+
+//     const dailyReport = await Order.aggregate([
+//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
+//       {
+//         $group: {
+//           _id: { $hour: "$createdAt" },
+//           totalOrders: { $sum: 1 },
+//           totalAmount: { $sum: "$orderAmount" }
+//         }
+//       }
+//     ]);
+
+//     res.json(dailyReport);
+//   } catch (error) {
+//     res.status(500).send('Error generating daily report');
+//   }
+// };
+
+// const weekly = async (req, res) => {
+//   try {
+//     const startDate = moment().startOf('week');
+//     const endDate = moment().endOf('week');
+
+//     const weeklyReport = await Order.aggregate([
+//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
+//       {
+//         $group: {
+//           _id: { $dayOfWeek: "$createdAt" },
+//           totalOrders: { $sum: 1 },
+//           totalAmount: { $sum: "$orderAmount" }
+//         }
+//       }
+//     ]);
+
+//     res.json(weeklyReport);
+//   } catch (error) {
+//     res.status(500).send('Error generating weekly report');
+//   }
+// };
+
+// const monthly = async (req, res) => {
+//   try {
+//     const startDate = moment().startOf('month');
+//     const endDate = moment().endOf('month');
+
+//     const monthlyReport = await Order.aggregate([
+//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
+//       {
+//         $group: {
+//           _id: { $dayOfMonth: "$createdAt" },
+//           totalOrders: { $sum: 1 },
+//           totalAmount: { $sum: "$orderAmount" }
+//         }
+//       }
+//     ]);
+
+//     res.json(monthlyReport);
+//   } catch (error) {
+//     res.status(500).send('Error generating monthly report');
+//   }
+// };
+
+// const yearly = async (req, res) => {
+//   try {
+//     const startDate = moment().startOf('year');
+//     const endDate = moment().endOf('year');
+
+//     const yearlyReport = await Order.aggregate([
+//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
+//       {
+//         $group: {
+//           _id: { $month: "$createdAt" },
+//           totalOrders: { $sum: 1 },
+//           totalAmount: { $sum: "$orderAmount" }
+//         }
+//       }
+//     ]);
+
+//     res.json(yearlyReport);
+//   } catch (error) {
+//     res.status(500).send('Error generating yearly report');
+//   }
+// };
+
+
 module.exports = {
   renderLogin,
   verifyLogin,
@@ -1041,5 +1151,11 @@ module.exports = {
   generateWeeklyReport,
   generateMonthlyReport,
   generateYearlyReport,
-  generateCustomDateReport
+  generateCustomDateReport,
+  
+
+  // daily,
+  // weekly,
+  // monthly,
+  // yearly
 };

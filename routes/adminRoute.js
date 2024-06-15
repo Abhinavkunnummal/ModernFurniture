@@ -83,5 +83,221 @@ adminRoute.get('/salesYearly',adminController.generateYearlyReport)
 adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
 
 
+// adminRoute.get('/report/daily',adminController.daily)
+// adminRoute.get('/report/weekly',adminController.weekly)
+// adminRoute.get('/report/monthly', adminController.monthly);
+// adminRoute.get('/report/yearly', adminController.yearly);
+const Order=require('../model/order')
+
+const moment = require('moment');
+adminRoute.get('/reports/:type', async (req, res) => {
+    const reportType = req.params.type;
+    let reportData = {};
+
+    try {
+        switch (reportType) {
+            case 'daily':
+                reportData = await getDailyReport();
+                break;
+            case 'weekly':
+                reportData = await getWeeklyReport();
+                break;
+            case 'monthly':
+                reportData = await getMonthlyReport();
+                break;
+            case 'yearly':
+                reportData = await getYearlyReport();
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid report type' });
+        }
+
+        res.json(reportData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
+// Functions to get report data
+async function getDailyReport() {
+    const startDate = moment().startOf('day');
+    const endDate = moment().endOf('day');
+
+    const dailyReport = await Order.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+            }
+        },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                totalOrders: { $sum: 1 },
+                totalAmount: { $sum: "$orderAmount" }
+            }
+        }
+    ]);
+
+    return {
+        sales: {
+            labels: dailyReport.map(report => report._id),
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: dailyReport.map(report => report.totalAmount),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        orders: {
+            labels: dailyReport.map(report => report._id),
+            datasets: [
+                {
+                    label: 'Orders',
+                    data: dailyReport.map(report => report.totalOrders),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }
+    };
+}
+
+async function getWeeklyReport() {
+    console.log('ethissfkfjfodj');
+    // Fetch and process weekly report data
+    const startDate = moment().startOf('week');
+    const endDate = moment().endOf('week');
+
+    const weeklyReport = await Order.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+            }
+        },
+        {
+            $group: {
+                _id: { $week: "$createdAt" },
+                totalOrders: { $sum: 1 },
+                totalAmount: { $sum: "$orderAmount" },
+                totalCouponAmount: { $sum: "$coupon" }
+            }
+        }
+    ]);
+
+    return {
+        sales: {
+            labels: weeklyReport.map(report => `Week ${report._id}`),
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: weeklyReport.map(report => report.totalAmount),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        orders: {
+            labels: weeklyReport.map(report => `Week ${report._id}`),
+            datasets: [
+                {
+                    label: 'Orders',
+                    data: weeklyReport.map(report => report.totalOrders),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }
+    };
+}
+
+async function getMonthlyReport() {
+    // Fetch and process monthly report data
+    const monthlyReport = await Order.aggregate([
+        {
+            $group: {
+                _id: { $month: "$createdAt" },
+                totalOrders: { $sum: 1 },
+                totalAmount: { $sum: "$orderAmount" },
+                totalCouponAmount: { $sum: "$coupon" }
+            }
+        }
+    ]);
+
+    return {
+        sales: {
+            labels: monthlyReport.map(report => moment().month(report._id - 1).format('MMMM')),
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: monthlyReport.map(report => report.totalAmount),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        orders: {
+            labels: monthlyReport.map(report => moment().month(report._id - 1).format('MMMM')),
+            datasets: [
+                {
+                    label: 'Orders',
+                    data: monthlyReport.map(report => report.totalOrders),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }
+    };
+}
+
+async function getYearlyReport() {
+    // Fetch and process yearly report data
+    const yearlyReport = await Order.aggregate([
+        {
+            $group: {
+                _id: { $year: "$createdAt" },
+                totalOrders: { $sum: 1 },
+                totalAmount: { $sum: "$orderAmount" },
+                totalCouponAmount: { $sum: "$coupon" }
+            }
+        }
+    ]);
+
+    return {
+        sales: {
+            labels: yearlyReport.map(report => report._id),
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: yearlyReport.map(report => report.totalAmount),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        orders: {
+            labels: yearlyReport.map(report => report._id),
+            datasets: [
+                {
+                    label: 'Orders',
+                    data: yearlyReport.map(report => report.totalOrders),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }
+    };
+}
+
 module.exports = adminRoute;
 

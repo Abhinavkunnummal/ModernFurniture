@@ -111,7 +111,7 @@
                         </span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Revenue</h6>
-                            <span>$13,456.5</span>
+                            <span>₹<%= totalRevenue.toLocaleString('en-IN') %></span>
                             <span class="text-sm">Shipping fees are not included</span>
                         </div>
                     </article>
@@ -125,7 +125,7 @@
                         </span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Orders</h6>
-                            <span>53,668</span>
+                            <span><%= orders.length %></span>
                             <span class="text-sm">Excluding orders in transit</span>
                         </div>
                     </article>
@@ -139,8 +139,8 @@
                         </span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Products</h6>
-                            <span>9,856</span>
-                            <span class="text-sm">In 19 Categories</span>
+                            <span><%=products.length%></span>
+                            <span class="text-sm">In <%= categories.length %> Categories</span>
                         </div>
                     </article>
                 </div>
@@ -153,81 +153,122 @@
                         </span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Monthly Earning</h6>
-                            <span>$6,982</span>
+                            <span> <%=monthlyEarning%></span>
                             <span class="text-sm">Based in your local time</span>
                         </div>
                     </article>
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-xl-8 col-lg-12">
-                <div class="card mb-4">
-                    <article class="card-body">
-                        <h5 class="card-title">Sale Statistics</h5>
-                        <canvas id="salesChart" height="120px"></canvas>
-                    </article>
+        
+      
+            <header class="main-header navbar">
+                <!-- existing header content -->
+            </header>
+        
+            <section class="content-main">
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title card-title">Dashboard</h2>
+                        <p>Whole data about your business here</p>
+                    </div>
+                    <div>
+                        <select id="reportType" class="form-select">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
                 </div>
-               
-            </div>
-            <div class="col-xl-4 col-lg-12">
-                <div class="card mb-4">
-                    <article class="card-body">
-                        <h5 class="card-title">Order Statistics</h5>
-                        <canvas id="orderChart" height="217"></canvas>
-                    </article>
+        
+                <div class="row">
+                    <div class="col-xl-8 col-lg-12">
+                        <div class="card mb-4">
+                            <article class="card-body">
+                                <h5 class="card-title">Sale Statistics</h5>
+                                <canvas id="salesChart" height="120px"></canvas>
+                            </article>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-12">
+                        <div class="card mb-4">
+                            <article class="card-body">
+                                <h5 class="card-title">Order Statistics</h5>
+                                <canvas id="orderChart" height="217"></canvas>
+                            </article>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </section>
-</main>
+            </section>
 
-<%- include('../admin_layouts/footer.ejs') %>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+        
+        <%- include('../admin_layouts/footer.ejs') %>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Your custom script to handle fetching data and updating charts -->
+    <script src="/path/to/your/script.js"></script>
+    <script>
     const salesCtx = document.getElementById('salesChart').getContext('2d');
-    const salesChart = new Chart(salesCtx, {
-        type: 'line',
+    const orderCtx = document.getElementById('orderChart').getContext('2d');
+    
+    let salesChart = new Chart(salesCtx, {
+        type: 'bar', // Change type to bar
         data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+            labels: [], // Initial empty labels
             datasets: [{
                 label: 'Sales',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                data: [], // Initial empty data
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN'); // Format y-axis labels
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
+                },
+                title: {
+                    display: true,
+                    text: 'Sales Statistics'
                 }
             }
         }
     });
-
-    const orderCtx = document.getElementById('orderChart').getContext('2d');
-    const orderChart = new Chart(orderCtx, {
+    
+    let orderChart = new Chart(orderCtx, {
         type: 'doughnut',
         data: {
-            labels: ['North America', 'Europe', 'Asia', 'Australia'],
+            labels: [], // Initial empty labels
             datasets: [{
-                label: 'Revenue',
-                data: [3000, 5000, 1000, 2000],
+                label: 'Orders',
+                data: [], // Initial empty data
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
                     'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)'
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
                     'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)',
                     'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)'
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -236,13 +277,55 @@
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'top'
+                    position: 'top',
                 },
                 title: {
                     display: true,
-                    text: 'Revenue by Area'
+                    text: 'Order Statistics'
                 }
             }
         }
+    });
+    
+    async function fetchData(reportType) {
+        try {
+            const response = await fetch(`/admin/reports/${reportType}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+            const data = await response.json();
+            console.log('Fetched data:', data);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+            return null;
+        }
+    }
+    
+    function updateCharts(data) {
+        if (data) {
+            console.log('Updating charts with data:', data);
+            // Update Sales Chart
+            salesChart.data.labels = data.sales.labels;
+            salesChart.data.datasets[0].data = data.sales.datasets[0].data;
+            salesChart.update();
+    
+            // Update Order Chart
+            orderChart.data.labels = data.orders.labels;
+            orderChart.data.datasets[0].data = data.orders.datasets[0].data;
+            orderChart.update();
+        }
+    }
+    
+    document.getElementById('reportType').addEventListener('change', async (e) => {
+        const reportType = e.target.value;
+        const data = await fetchData(reportType);
+        updateCharts(data);
+    });
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const data = await fetchData('daily');
+        updateCharts(data);
     });
 </script>

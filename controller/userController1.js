@@ -445,12 +445,14 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
+    const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
+
     let products = await Product.find({ is_Listed: false })
                                 .populate('productOfferId')
                                 .populate({
                                   path: 'category',
                                   populate: { path: 'categoryOfferId' }
-                                })
+                                })                                
                                 .select('name price image stock isNew productOfferId category');
 
     // Apply offers to products
@@ -476,14 +478,24 @@ const loadShop = async (req, res) => {
       };
     });
 
-    const categories = await Category.find({ is_Listed: false });
-    res.render("shop", { products, user: userData, categories });
+    // Process categories to include offer information
+    const processedCategories = categories.map(category => {
+      return {
+        ...category._doc,
+        offerDiscount: category.categoryOfferId ? category.categoryOfferId.discount : 0
+      };
+    });
+
+    res.render("shop", { 
+      products, 
+      user: userData, 
+      categories: processedCategories 
+    });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 
 const loadFullPage = async (req, res) => {
