@@ -244,8 +244,8 @@ const insertUser = async (req, res) => {
               if (referrerWallet) {
                   referrerWallet.balance += 100;
                   referrerWallet.transaction.push({
-                      amount: 50,
-                      transactionMethod: "Referral",
+                      amount: 100,
+                      transactionMethod: "Refferal",
                       formattedDate: new Date().toLocaleDateString()
                   });
                   await referrerWallet.save();
@@ -253,7 +253,7 @@ const insertUser = async (req, res) => {
 
               newUserWallet.balance += 50;
               newUserWallet.transaction.push({
-                  amount: 100,
+                  amount: 50,
                   transactionMethod: "Refferal",
                   formattedDate: new Date().toLocaleDateString()
               });
@@ -446,13 +446,13 @@ const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
-
+    
     let products = await Product.find({ is_Listed: false })
                                 .populate('productOfferId')
                                 .populate({
                                   path: 'category',
                                   populate: { path: 'categoryOfferId' }
-                                })                                
+                                })
                                 .select('name price image stock isNew productOfferId category');
 
     // Apply offers to products
@@ -464,13 +464,14 @@ const loadShop = async (req, res) => {
         discount = product.productOfferId.discount;
       }
 
-      // Check for category-specific offer
+      // Check for category-specific offer and apply the greater discount
       if (product.category && product.category.categoryOfferId) {
         discount = Math.max(discount, product.category.categoryOfferId.discount);
       }
 
-      // Apply the discount to the price
-      const discountedPrice = product.price - discount;
+      // Calculate the discounted price
+      const discountedPrice = product.price * ((100 - discount) / 100);
+
       return {
         ...product._doc,
         discountedPrice: discountedPrice > 0 ? discountedPrice : 0,
@@ -496,6 +497,7 @@ const loadShop = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 const loadFullPage = async (req, res) => {

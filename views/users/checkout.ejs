@@ -149,6 +149,10 @@
 									<td class="text-black discount-amount">₹0.00</td>
 								</tr>
 								<tr>
+									<td colspan="3" class="text-right text-black font-weight-bold"><strong>Delivery Charge</strong></td>
+									<td class="text-black discount-amount">₹0.00</td>
+								</tr>
+								<tr>
 									<td colspan="3" class="text-right text-black font-weight-bold"><strong>Order Total</strong></td>
 									<td id="orderTotalValue" class="text-black order-total">₹<%= cartItems.reduce((acc, item) => acc + (item.product[0].price * item.product[0].quantity), 0).toFixed(2) %></td>
 								</tr>
@@ -306,176 +310,187 @@
 		<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script>
-	document.addEventListener("DOMContentLoaded", async function () {
-    const placeOrderButton = document.getElementById("placeOrderButton");
-    const applyCouponButton = document.getElementById("applyCouponButton");
-    const removeCouponButton = document.getElementById("removeCouponButton");
-    const couponCodeInput = document.getElementById("c_code");
-	const orderTotalElement = document.getElementById("orderTotalValue"); 
-	const s = document.getElementById("orderTotalValue").value
-
-    let appliedCoupon = null;
-	console.log(s+"Hallo");
-    let originalTotal = parseFloat(orderTotalElement.textContent.replace('₹', '')); // Parse the order total value
-	console.log('originalTotal', originalTotal);
-    let currentTotal = originalTotal;
-
-    applyCouponButton.addEventListener("click", async function () {
-        const couponCode = couponCodeInput.value;
-        if (!couponCode) {
-            Swal.fire("Error", "Please enter a coupon code.", "error");
-            return;
-        }
-
-        try {
-            const response = await fetch('/apply-coupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ couponCode, originalTotal }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to apply coupon');
-            }
-
-            const couponData = await response.json();
-            console.log('Coupon Data:', couponData); // Debugging line
-
-            if (couponData.success) {
-                appliedCoupon = couponCode;
-                currentTotal = couponData.newTotal;
-                updateOrderTotal(currentTotal);
-                displayDiscountAmount(couponData.discountAmount);
-                Swal.fire("Success", "Coupon applied successfully!", "success");
-            } else {
-                Swal.fire("Error", couponData.message || 'Invalid coupon code.', "error");
-            }
-        } catch (error) {
-            console.error('Error applying coupon:', error);
-            Swal.fire("Error", "Error applying coupon. Please try again.", "error");
-        }
-    });
-
-    removeCouponButton.addEventListener("click", function () {
-        if (appliedCoupon) {
-            appliedCoupon = null;
-            couponCodeInput.value = '';
-            currentTotal = originalTotal;
-            updateOrderTotal(currentTotal);
-            displayDiscountAmount(0); // Clear discount amount
-            Swal.fire("Success", "Coupon removed successfully!", "success");
-        } else {
-            Swal.fire("Error", "No coupon applied.", "error");
-        }
-    });
-
-    placeOrderButton.addEventListener("click", async function (event) {
-        event.preventDefault();
-
-        try {
-            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-            const response = await fetch('/checkoutAddress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    selectedAddress,
-                    paymentMethod,
-                    couponCode: appliedCoupon,
-                    finalTotal: currentTotal // Added finalTotal to the request body
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch response from server');
-            }
-
-            const orderData = await response.json();
-
-            if (paymentMethod === 'razorPay') {
-                const options = {
-                    key: 'rzp_test_xRxsOz9knBNBUy',
-                    amount: currentTotal * 100, // Updated to use the final total amount
-                    currency: orderData.currency,
-                    name: 'MODERN FURNITURE',
-                    description: 'Purchase Description',
-                    order_id: orderData.orderId,
-                    handler: async function (response) {
-                        try {
-                            const verifyResponse = await fetch('/verify-payment', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    razorpayPaymentId: response.razorpay_payment_id,
-                                    razorpayOrderId: response.razorpay_order_id,
-                                    razorpaySignature: response.razorpay_signature,
-                                    selectedAddress,
-                                    paymentMethod
-                                }),
-                            });
-
-                            if (!verifyResponse.ok) {
-                                throw new Error('Payment verification failed');
-                            }
-
-                            const verifyData = await verifyResponse.json();
-                            if (verifyData.success) {
-                                window.location.href = '/thankyou';
-                            } else {
-                                Swal.fire("Error", "Payment verification failed", "error");
-                            }
-                        } catch (error) {
-                            console.error('Error verifying payment:', error);
-                            Swal.fire("Error", "Error verifying payment. Please try again.", "error");
-                        }
-                    },
-                    prefill: {
-                        name: 'ABHINAV.K',
-                        email: 'abhinavkkunnummal@gmail.com',
-                        contact: '9778519430'
-                    },
-                    theme: {
-                        color: '#3399cc'
-                    }
-                };
-
-                const rzp1 = new Razorpay(options);
-                rzp1.on('payment.failed', function (response) {
-                    console.error('Payment failed:', response.error.code, response.error.description);
-                    Swal.fire("Error", "Payment failed. Please try again.", "error");
-                });
-                rzp1.open();
-            } else {
-                if (orderData.success) {
-                    window.location.href = '/thankyou';
-                } else {
-                    Swal.fire("Error", "Error placing order. Please try again.", "error");
-                }
-            }
-
-        } catch (error) {
-            console.error('Error placing order:', error);
-            Swal.fire("Error", "Insufficient Balance. You do not have enough balance in your wallet.", "error");
-        }
-    });
-
-    function updateOrderTotal(newTotal) {
-        const orderTotalElement = document.querySelector('.order-total');
-        orderTotalElement.textContent = `₹${newTotal.toFixed(2)}`;
-    }
-
-    function displayDiscountAmount(discountAmount) {
-        const discountAmountElement = document.querySelector('.discount-amount');
-        discountAmountElement.textContent = `₹${discountAmount.toFixed(2)}`;
-    }
-});
-</script>
+		document.addEventListener("DOMContentLoaded", async function () {
+			const placeOrderButton = document.getElementById("placeOrderButton");
+			const applyCouponButton = document.getElementById("applyCouponButton");
+			const removeCouponButton = document.getElementById("removeCouponButton");
+			const couponCodeInput = document.getElementById("c_code");
+			const orderTotalElement = document.getElementById("orderTotalValue"); 
+			const s = document.getElementById("orderTotalValue").value
+		
+			let appliedCoupon = null;
+			console.log(s+"Hallo");
+			let originalTotal = parseFloat(orderTotalElement.textContent.replace('₹', '')); // Parse the order total value
+			console.log('originalTotal', originalTotal);
+			let currentTotal = originalTotal;
+		
+			applyCouponButton.addEventListener("click", async function () {
+				const couponCode = couponCodeInput.value;
+				if (!couponCode) {
+					Swal.fire("Error", "Please enter a coupon code.", "error");
+					return;
+				}
+		
+				try {
+					const response = await fetch('/apply-coupon', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ couponCode, originalTotal }),
+					});
+		
+					if (!response.ok) {
+						throw new Error('Failed to apply coupon');
+					}
+		
+					const couponData = await response.json();
+					console.log('Coupon Data:', couponData); // Debugging line
+		
+					if (couponData.success) {
+						appliedCoupon = couponCode;
+						currentTotal = couponData.newTotal;
+						updateOrderTotal(currentTotal);
+						displayDiscountAmount(couponData.discountAmount);
+						Swal.fire("Success", "Coupon applied successfully!", "success");
+					} else {
+						Swal.fire("Error", couponData.message || 'Invalid coupon code.', "error");
+					}
+				} catch (error) {
+					console.error('Error applying coupon:', error);
+					Swal.fire("Error", "Error applying coupon. Please try again.", "error");
+				}
+			});
+		
+			removeCouponButton.addEventListener("click", function () {
+				if (appliedCoupon) {
+					appliedCoupon = null;
+					couponCodeInput.value = '';
+					currentTotal = originalTotal;
+					updateOrderTotal(currentTotal);
+					displayDiscountAmount(0); // Clear discount amount
+					Swal.fire("Success", "Coupon removed successfully!", "success");
+				} else {
+					Swal.fire("Error", "No coupon applied.", "error");
+				}
+			});
+		
+			placeOrderButton.addEventListener("click", async function (event) {
+				event.preventDefault();
+		
+				try {
+					const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked').value;
+					const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+		
+					// Check if payment method is COD and order total is above 1000
+					if (paymentMethod === 'cashOnDelivery' && currentTotal > 1000) {
+						Swal.fire({
+							icon: 'error',
+							title: 'Order Total Exceeds Limit',
+							text: 'Cash on Delivery is not allowed for orders above ₹1000. Please select another payment method.'
+						});
+						return; // Stop further execution
+					}
+		
+					const response = await fetch('/checkoutAddress', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							selectedAddress,
+							paymentMethod,
+							couponCode: appliedCoupon,
+							finalTotal: currentTotal // Added finalTotal to the request body
+						}),
+					});
+		
+					if (!response.ok) {
+						throw new Error('Failed to fetch response from server');
+					}
+		
+					const orderData = await response.json();
+		
+					if (paymentMethod === 'razorPay') {
+						const options = {
+							key: 'rzp_test_xRxsOz9knBNBUy',
+							amount: currentTotal * 100, // Updated to use the final total amount
+							currency: orderData.currency,
+							name: 'MODERN FURNITURE',
+							description: 'Purchase Description',
+							order_id: orderData.orderId,
+							handler: async function (response) {
+								try {
+									const verifyResponse = await fetch('/verify-payment', {
+										method: 'POST',
+										headers: {
+											'Content-Type': 'application/json',
+										},
+										body: JSON.stringify({
+											razorpayPaymentId: response.razorpay_payment_id,
+											razorpayOrderId: response.razorpay_order_id,
+											razorpaySignature: response.razorpay_signature,
+											selectedAddress,
+											paymentMethod
+										}),
+									});
+		
+									if (!verifyResponse.ok) {
+										throw new Error('Payment verification failed');
+									}
+		
+									const verifyData = await verifyResponse.json();
+									if (verifyData.success) {
+										window.location.href = '/thankyou';
+									} else {
+										Swal.fire("Error", "Payment verification failed", "error");
+									}
+								} catch (error) {
+									console.error('Error verifying payment:', error);
+									Swal.fire("Error", "Error verifying payment. Please try again.", "error");
+								}
+							},
+							prefill: {
+								name: 'ABHINAV.K',
+								email: 'abhinavkkunnummal@gmail.com',
+								contact: '9778519430'
+							},
+							theme: {
+								color: '#3399cc'
+							}
+						};
+		
+						const rzp1 = new Razorpay(options);
+						rzp1.on('payment.failed', function (response) {
+							console.error('Payment failed:', response.error.code, response.error.description);
+							Swal.fire("Error", "Payment failed. Please try again.", "error");
+						});
+						rzp1.open();
+					} else {
+						if (orderData.success) {
+							window.location.href = '/thankyou';
+						} else {
+							Swal.fire("Error", "Error placing order. Please try again.", "error");
+						}
+					}
+		
+				} catch (error) {
+					console.error('Error placing order:', error);
+					Swal.fire("Error", "Insufficient Balance. You do not have enough balance in your wallet.", "error");
+				}
+			});
+		
+			function updateOrderTotal(newTotal) {
+				const orderTotalElement = document.querySelector('.order-total');
+				orderTotalElement.textContent = `₹${newTotal.toFixed(2)}`;
+			}
+		
+			function displayDiscountAmount(discountAmount) {
+				const discountAmountElement = document.querySelector('.discount-amount');
+				discountAmountElement.textContent = `₹${discountAmount.toFixed(2)}`;
+			}
+		});
+		</script>
+		
 
 		

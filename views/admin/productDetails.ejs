@@ -26,7 +26,6 @@
                         <% products.forEach((product) => { %>
                             <tr>
                                 <td><%= product.name %></td>
-                               
                                 <td>$<%= product.price.toFixed(2) %></td>
                                 <td><%= product.category?.name || 'N/A' %></td>
                                 <td><%= product.stock %></td>
@@ -55,9 +54,33 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <% } %>
+            </ul>
+        </nav>
     </section>
 
-   
     <%- include('../admin_layouts/footer.ejs') %>
 </main>
 
@@ -70,47 +93,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-
-document.querySelectorAll('.block-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const productId = this.getAttribute('data-product-id');
-        Swal.fire({
-            title: 'Confirmation',
-            text: 'Are you sure you want to block this product?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, block it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-        
-                window.location.href = `/admin/blockproduct?id=${productId}`;
-            }
+    document.querySelectorAll('.block-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'Are you sure you want to block this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, block it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/blockproduct?id=${productId}`;
+                }
+            });
         });
     });
-});
 
-
-document.querySelectorAll('.unblock-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const productId = this.getAttribute('data-product-id');
-        Swal.fire({
-            title: 'Confirmation',
-            text: 'Are you sure you want to unblock this product?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, unblock it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/blockproduct?id=${productId}`;
-            }
+    document.querySelectorAll('.unblock-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'Are you sure you want to unblock this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, unblock it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/admin/blockproduct?id=${productId}`;
+                }
+            });
         });
     });
-});
-
 
     // JavaScript for popups
     function openPopup(imageSrc) {
@@ -140,4 +159,3 @@ document.querySelectorAll('.unblock-btn').forEach(button => {
         border: 1px solid #dee2e6;
     }
 </style>
-

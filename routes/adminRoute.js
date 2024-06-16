@@ -82,11 +82,13 @@ adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
 adminRoute.get('/salesYearly',adminController.generateYearlyReport)
 adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
 
+adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
+adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
 
-// adminRoute.get('/report/daily',adminController.daily)
-// adminRoute.get('/report/weekly',adminController.weekly)
-// adminRoute.get('/report/monthly', adminController.monthly);
-// adminRoute.get('/report/yearly', adminController.yearly);
+
+
+
+
 const Order=require('../model/order')
 
 const moment = require('moment');

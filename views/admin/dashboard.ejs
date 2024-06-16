@@ -202,10 +202,45 @@
                 </div>
             </section>
 
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Best Selling Products</h5>
+                            <ul id="bestSellingProducts" class="list-group">
+                                <!-- Best Selling Products will be inserted here -->
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Best Selling Categories</h5>
+                            <ul id="bestSellingCategories" class="list-group">
+                                <!-- Best Selling Categories will be inserted here -->
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Best Selling Brands</h5>
+                            <ul id="bestSellingBrands" class="list-group">
+                                <!-- Best Selling Brands will be inserted here -->
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            
         
         <%- include('../admin_layouts/footer.ejs') %>
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/adminDashboard.js"></script>
+
     <!-- Your custom script to handle fetching data and updating charts -->
     <script src="/path/to/your/script.js"></script>
     <script>
@@ -328,4 +363,41 @@
         const data = await fetchData('daily');
         updateCharts(data);
     });
+
+    async function fetchBestSellingData() {
+    try {
+        const [productsRes, categoriesRes, brandsRes] = await Promise.all([
+            fetch('/admin/best-selling-products'),
+            fetch('/admin/best-selling-categories'),
+            fetch('/admin/best-selling-brands')
+        ]);
+
+        const [products, categories, brands] = await Promise.all([
+            productsRes.json(),
+            categoriesRes.json(),
+            brandsRes.json()
+        ]);
+
+        updateList('bestSellingProducts', products, 'productName');
+        updateList('bestSellingCategories', categories, '_id');
+        updateList('bestSellingBrands', brands, '_id');
+    } catch (error) {
+        console.error('Error fetching best selling data:', error);
+    }
+}
+
+function updateList(elementId, data, key) {
+    const listElement = document.getElementById(elementId);
+    listElement.innerHTML = '';
+    data.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+        listItem.textContent = `${item[key]} - ${item.totalQuantity}`;
+        listElement.appendChild(listItem);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', fetchBestSellingData);
+
+    
 </script>

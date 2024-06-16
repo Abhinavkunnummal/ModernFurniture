@@ -274,13 +274,32 @@ const updateCategory = async (req, res) => {
 
 const renderProduct = async (req, res) => {
   try {
-    const products = await Product.find().populate("category");
-    res.render("productDetails", { products });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Number of products per page
+    const skip = (page - 1) * limit;
+
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    const products = await Product.find()
+                                  .populate("category")
+                                  .skip(skip)
+                                  .limit(limit)
+                                  .select('name price category stock image is_Listed');
+
+    res.render("productDetails", {
+      products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+      limit
+    });
   } catch (error) {
     console.error("Error rendering product details:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const addProduct = async (req, res) => {
   try {
@@ -1016,94 +1035,53 @@ const approveCancelOrder=async(req,res)=>{
 }
 
 
+const getBestSellingProducts = async (req, res) => {
+    try {
+        const bestSellingProducts = await Order.aggregate([
+            { $unwind: "$orderedItem" },
+            { $group: { _id: "$orderedItem.productId", totalQuantity: { $sum: "$orderedItem.quantity" } } },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            { $project: { productName: "$product.name", totalQuantity: 1 } }
+        ]);
+        res.json(bestSellingProducts);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
-// const daily= async (req, res) => {
-//   try {
-//     const startDate = moment().startOf('day');
-//     const endDate = moment().endOf('day');
+const getBestSellingCategories = async (req, res) => {
+    try {
+        const bestSellingCategories = await Order.aggregate([
+            { $unwind: "$orderedItem" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "orderedItem.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" } } },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 }
+        ]);
+        res.json(bestSellingCategories);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
-//     const dailyReport = await Order.aggregate([
-//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
-//       {
-//         $group: {
-//           _id: { $hour: "$createdAt" },
-//           totalOrders: { $sum: 1 },
-//           totalAmount: { $sum: "$orderAmount" }
-//         }
-//       }
-//     ]);
-
-//     res.json(dailyReport);
-//   } catch (error) {
-//     res.status(500).send('Error generating daily report');
-//   }
-// };
-
-// const weekly = async (req, res) => {
-//   try {
-//     const startDate = moment().startOf('week');
-//     const endDate = moment().endOf('week');
-
-//     const weeklyReport = await Order.aggregate([
-//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
-//       {
-//         $group: {
-//           _id: { $dayOfWeek: "$createdAt" },
-//           totalOrders: { $sum: 1 },
-//           totalAmount: { $sum: "$orderAmount" }
-//         }
-//       }
-//     ]);
-
-//     res.json(weeklyReport);
-//   } catch (error) {
-//     res.status(500).send('Error generating weekly report');
-//   }
-// };
-
-// const monthly = async (req, res) => {
-//   try {
-//     const startDate = moment().startOf('month');
-//     const endDate = moment().endOf('month');
-
-//     const monthlyReport = await Order.aggregate([
-//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
-//       {
-//         $group: {
-//           _id: { $dayOfMonth: "$createdAt" },
-//           totalOrders: { $sum: 1 },
-//           totalAmount: { $sum: "$orderAmount" }
-//         }
-//       }
-//     ]);
-
-//     res.json(monthlyReport);
-//   } catch (error) {
-//     res.status(500).send('Error generating monthly report');
-//   }
-// };
-
-// const yearly = async (req, res) => {
-//   try {
-//     const startDate = moment().startOf('year');
-//     const endDate = moment().endOf('year');
-
-//     const yearlyReport = await Order.aggregate([
-//       { $match: { createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() } } },
-//       {
-//         $group: {
-//           _id: { $month: "$createdAt" },
-//           totalOrders: { $sum: 1 },
-//           totalAmount: { $sum: "$orderAmount" }
-//         }
-//       }
-//     ]);
-
-//     res.json(yearlyReport);
-//   } catch (error) {
-//     res.status(500).send('Error generating yearly report');
-//   }
-// };
 
 
 module.exports = {
@@ -1154,6 +1132,8 @@ module.exports = {
   generateCustomDateReport,
   
 
+  getBestSellingProducts,
+  getBestSellingCategories
   // daily,
   // weekly,
   // monthly,

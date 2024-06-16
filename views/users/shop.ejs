@@ -34,6 +34,8 @@
 </div>
 
 <!-- Product Listing -->
+
+<!-- Product Listing -->
 <div class="untree_co-section product-section before-footer-section">
     <div class="container">
         <div class="row" id="productList">
@@ -52,10 +54,10 @@
                     <% } %>
                     <h3 class="product-title"><%= product.name %></h3>
                     <% if (product.discount > 0) { %>
-                    <strong class="product-price text-decoration-line-through"><%= product.price %></strong>
-                    <strong class="product-price"><%= product.discountedPrice %></strong>
+                    <strong class="product-price text-decoration-line-through"><%= product.price.toFixed(2) %></strong>
+                    <strong class="product-price"><%= product.discountedPrice.toFixed(2) %></strong>
                     <% } else { %>
-                    <strong class="product-price"><%= product.price %></strong>
+                    <strong class="product-price"><%= product.price.toFixed(2) %></strong>
                     <% } %>
                     <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= product._id %>">
                         <i class="fas fa-heart"></i>
@@ -74,6 +76,8 @@
         </div>
     </div>
 </div>
+
+
 
 <%- include('../layouts/footer.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
