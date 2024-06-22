@@ -9,6 +9,8 @@ const Product = require("../model/product");
 const Coupon=require('../model/coupon')
 const moment = require('moment');
 const Wallet = require('../model/wallet');
+const CategoryOffer=require('../model/categoryOffer')
+const ProductOffer=require('../model/productOffer')
 
 const { ObjectId } = require("mongodb");
 const Category = require('../model/category');
@@ -446,51 +448,48 @@ const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
-    
-    let products = await Product.find({ is_Listed: false })
-                                .populate('productOfferId')
-                                .populate({
-                                  path: 'category',
-                                  populate: { path: 'categoryOfferId' }
-                                })
-                                .select('name price image stock isNew productOfferId category');
+    const products = await Product.find({}).populate('category').populate('productOfferId');
+    const currentDate = new Date();
 
-    // Apply offers to products
-    products = products.map(product => {
-      let discount = 0;
+    const categoryOffers = await CategoryOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
 
-      // Check for product-specific offer
-      if (product.productOfferId) {
-        discount = product.productOfferId.discount;
+    const productOffers = await ProductOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
+
+    const processedProducts = products.map(product => {
+      let bestDiscount = 0;
+      let discountedPrice = product.price;
+
+      const productOffer = productOffers.find(offer => offer.productId.equals(product._id));
+      if (productOffer) {
+        bestDiscount = productOffer.discount;
+        discountedPrice = product.price - (product.price * (productOffer.discount / 100));
       }
 
-      // Check for category-specific offer and apply the greater discount
-      if (product.category && product.category.categoryOfferId) {
-        discount = Math.max(discount, product.category.categoryOfferId.discount);
+      const categoryOffer = categoryOffers.find(offer => offer.categoryId.equals(product.category._id));
+      if (categoryOffer && categoryOffer.discount > bestDiscount) {
+        bestDiscount = categoryOffer.discount;
+        discountedPrice = product.price - (product.price * (categoryOffer.discount / 100));
       }
-
-      // Calculate the discounted price
-      const discountedPrice = product.price * ((100 - discount) / 100);
 
       return {
         ...product._doc,
-        discountedPrice: discountedPrice > 0 ? discountedPrice : 0,
-        discount
+        discount: bestDiscount,
+        discountedPrice: parseFloat(discountedPrice.toFixed(2)),
       };
     });
 
-    // Process categories to include offer information
-    const processedCategories = categories.map(category => {
-      return {
-        ...category._doc,
-        offerDiscount: category.categoryOfferId ? category.categoryOfferId.discount : 0
-      };
-    });
-
-    res.render("shop", { 
-      products, 
-      user: userData, 
-      categories: processedCategories 
+    res.render("shop", {
+      products: processedProducts,
+      user: userData,
+      categories
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
@@ -503,15 +502,54 @@ const loadShop = async (req, res) => {
 const loadFullPage = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
-    const id = req.query.id;
-    const products = await Product.findOne({ _id: id });
-    console.log(products)
-    res.render("productFullpage", { products, user: userData });
+    const productId = req.query.id;
+    const product = await Product.findOne({ _id: productId }).populate('category').populate('productOfferId');
+    const currentDate = new Date();
+
+    const categoryOffers = await CategoryOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
+
+    const productOffers = await ProductOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
+
+    let bestDiscount = 0;
+    let discountedPrice = product.price;
+    let discountType = '';
+
+    const productOffer = productOffers.find(offer => offer.productId.equals(product._id));
+    if (productOffer) {
+      bestDiscount = productOffer.discount;
+      discountedPrice = product.price - (product.price * (productOffer.discount / 100));
+      discountType = 'product';
+    }
+
+    const categoryOffer = categoryOffers.find(offer => offer.categoryId.equals(product.category._id));
+    if (categoryOffer && categoryOffer.discount > bestDiscount) {
+      bestDiscount = categoryOffer.discount;
+      discountedPrice = product.price - (product.price * (categoryOffer.discount / 100));
+      discountType = 'category';
+    }
+
+    const processedProduct = {
+      ...product._doc,
+      discount: bestDiscount,
+      discountedPrice: parseFloat(discountedPrice.toFixed(2)),
+      discountType: discountType
+    };
+
+    res.render("productFullpage", { products: processedProduct, user: userData });
   } catch (error) {
     console.error("Error loading full page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const logoutUser = async (req, res) => {
   try {
@@ -664,27 +702,27 @@ const postProfile = async (req, res) => {
       const userId = req.session.user_id;
       const { name, email, phoneNumber } = req.body;
 
-      // Trim the inputs to remove leading and trailing spaces
+      
       const trimmedName = name.trim();
       const trimmedPhoneNumber = phoneNumber.trim();
 
-      // Regex for validation
-      const nameRegex = /^[a-zA-Z\s]+$/; // Only allows letters and spaces
-      const phoneNumberRegex = /^\d{10}$/; // Only allows 10 digit numbers
+     
+      const nameRegex = /^[a-zA-Z\s]+$/; 
+      const phoneNumberRegex = /^\d{10}$/; 
 
-      // Validate name
+
       if (!nameRegex.test(trimmedName)) {
           req.flash('error', 'Invalid name format. Only letters and spaces are allowed.');
           return res.redirect('/userProfile');
       }
 
-      // Validate phoneNumber
+     
       if (!phoneNumberRegex.test(trimmedPhoneNumber)) {
           req.flash('error', 'Invalid phone number format. It should be a 10-digit number.');
           return res.redirect('/userProfile');
       }
 
-      // Update the user profile
+      
       await User.findByIdAndUpdate(userId, { name: trimmedName, mobile: trimmedPhoneNumber }, { new: true });
 
       req.flash('success', 'Profile updated successfully.');
@@ -757,56 +795,74 @@ const editedAddressPost = async (req, res) => {
 const sortProducts = async (req, res) => {
   try {
     const { sort, category } = req.query;
-    let filter = { is_Listed: false };
+    const currentDate = new Date();
+
+    let productsQuery = Product.find().populate('category').populate('productOfferId');
 
     if (category) {
-      filter.category = category;
+      productsQuery = productsQuery.where('category').equals(category);
     }
 
-    let products = await Product.find(filter)
-                                .populate('productOfferId')
-                                .populate({
-                                  path: 'category',
-                                  populate: { path: 'categoryOfferId' }
-                                })
-                                .select('name price image stock isNew productOfferId category');
+    let products = await productsQuery.exec();
 
-    // Apply offers to products
-    products = products.map(product => {
-      let discount = 0;
+    const categoryOffers = await CategoryOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
 
-      if (product.productOfferId) {
-        discount = product.productOfferId.discount;
+    const productOffers = await ProductOffer.find({
+      is_active: true,
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate }
+    });
+
+    const processedProducts = products.map(product => {
+      let bestDiscount = 0;
+      let discountedPrice = product.price;
+
+      const productOffer = productOffers.find(offer => offer.productId.equals(product._id));
+      if (productOffer) {
+        bestDiscount = productOffer.discount;
+        discountedPrice = product.price - (product.price * (productOffer.discount / 100));
       }
 
-      if (product.category && product.category.categoryOfferId) {
-        discount = Math.max(discount, product.category.categoryOfferId.discount);
+      const categoryOffer = categoryOffers.find(offer => offer.categoryId.equals(product.category._id));
+      if (categoryOffer && categoryOffer.discount > bestDiscount) {
+        bestDiscount = categoryOffer.discount;
+        discountedPrice = product.price - (product.price * (categoryOffer.discount / 100));
       }
 
-      const discountedPrice = product.price - (product.price * (discount / 100));
       return {
         ...product._doc,
-        discountedPrice: discountedPrice > 0 ? discountedPrice : 0,
-        discount
+        discount: bestDiscount,
+        discountedPrice: parseFloat(discountedPrice.toFixed(2)),
       };
     });
 
-    // Sort products
-    if (sort === 'nameAZ') {
-      products = products.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sort === 'nameZA') {
-      products = products.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sort === 'newArrivals') {
-      products = products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else if (sort === 'priceLowToHigh') {
-      products = products.sort((a, b) => a.discountedPrice - b.discountedPrice);
-    } else if (sort === 'priceHighToLow') {
-      products = products.sort((a, b) => b.discountedPrice - a.discountedPrice);
+    switch (sort) {
+      case 'nameAZ':
+        processedProducts.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'nameZA':
+        processedProducts.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'newArrivals':
+        processedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case 'priceLowToHigh':
+        processedProducts.sort((a, b) => a.discountedPrice - b.discountedPrice);
+        break;
+      case 'priceHighToLow':
+        processedProducts.sort((a, b) => b.discountedPrice - a.discountedPrice);
+        break;
+      default:
+        break;
     }
 
-    res.json({ products });
+    res.json({ products: processedProducts });
   } catch (error) {
-    console.error('Error fetching and sorting products:', error);
+    console.error('Error fetching sorted products:', error);
     res.status(500).send('Internal Server Error');
   }
 };
@@ -966,11 +1022,13 @@ const loadCheckoutAddAddress=async(req,res)=>{
 
 const renderCouponPage = async (req, res) => {
   try {
+    const userId = req.session.user_id;
+    const userData= await User.findById(userId)
     const coupons = await Coupon.find().lean();
     coupons.forEach(coupon => {
       coupon.formattedDate = moment(coupon.expiryDate).format('YYYY-MM-DD');
     });
-    res.render('coupon', { coupons });
+    res.render('coupon', { coupons ,user:userData});
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server Error');

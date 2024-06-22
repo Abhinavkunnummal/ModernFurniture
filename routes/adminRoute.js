@@ -82,11 +82,26 @@ adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
 adminRoute.get('/salesYearly',adminController.generateYearlyReport)
 adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
 
-adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
-adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
+// adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
+// adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
 
+//offer Dummy
 
+adminRoute.get('/offerPage', adminController.OfferPage);
+adminRoute.get('/DummyAddOffer', adminController.DummyAddOfferPage);
+adminRoute.post('/DummyOffer', adminController.DummyOffer);
+adminRoute.get('/DummyOfferList', adminController.DummyOfferList);
+adminRoute.get('/DummyEditOffer/:id', adminController.editOfferPage);
+adminRoute.post('/updateOffer/:id', adminController.updateOffer);
+adminRoute.get('/deleteOffer/:id', adminController.deleteDummyOffer);
 
+adminRoute.get('/CategoryofferPage', adminController.DummyCategoryOfferPage);
+adminRoute.get('/DummyCategoryOffer', adminController.DummyCategoryOfferPage);
+adminRoute.get('/DummyCategoryAddOffer', adminController.DummyAddCategoryOfferPage);
+adminRoute.post('/CategoryAddPost', adminController.DummyCategoryAddOfferPost);
+adminRoute.get('/DummyEditCategoryOffer/:id', adminController.DummyEditCategoryOfferPage);
+adminRoute.post('/DummyCategoryUpdateOffer/:id', adminController.DummyCategoryupdateOffer);
+adminRoute.get('/deleteCategoryOffer/:id', adminController.deleteCategoryOffer);
 
 
 const Order=require('../model/order')
@@ -121,7 +136,7 @@ adminRoute.get('/reports/:type', async (req, res) => {
     }
 });
 
-// Functions to get report data
+
 async function getDailyReport() {
     const startDate = moment().startOf('day');
     const endDate = moment().endOf('day');
@@ -171,7 +186,7 @@ async function getDailyReport() {
 
 async function getWeeklyReport() {
     console.log('ethissfkfjfodj');
-    // Fetch and process weekly report data
+    
     const startDate = moment().startOf('week');
     const endDate = moment().endOf('week');
 
@@ -220,7 +235,7 @@ async function getWeeklyReport() {
 }
 
 async function getMonthlyReport() {
-    // Fetch and process monthly report data
+  
     const monthlyReport = await Order.aggregate([
         {
             $group: {
@@ -261,7 +276,7 @@ async function getMonthlyReport() {
 }
 
 async function getYearlyReport() {
-    // Fetch and process yearly report data
+
     const yearlyReport = await Order.aggregate([
         {
             $group: {

@@ -44,6 +44,7 @@ userRoute.get("/shop", userController.loadShop);
 
 userRoute.get("/productFull", userController.loadFullPage);
 
+userRoute.get('/coupons',cartController.showCoupons)
 
 userRoute.post('/resendOtp',userController.resendOtp)
 
@@ -79,6 +80,7 @@ userRoute.get('/addressDelete',userController.deleteAddress)
 userRoute.post('/addressEdited',userController.editedAddressPost)
 userRoute.post('/checkoutPostAddress',userController.checkoutAddress)
 userRoute.post('/apply-coupon', cartController.applyCoupon);
+userRoute.post('/remove-coupon', cartController.removeCoupon);
 //Cart
 
 userRoute.get('/cart',cartController.renderCart)
@@ -136,6 +138,9 @@ userRoute.post('/placeorderwallet',cartController.placeOrderWallet)
 
 // userRoute.get('/downloadInvoice',cartController.downloadInvoice)
 userRoute.get('/invoice',cartController.loadInvoice)
+userRoute.post('/handle-failed-razorpay',cartController.handleFailedRazorpayPayment)
 
+userRoute.post('/retry-payment',cartController.razorPayRetryPayment)
+userRoute.post('/verifyretry-payment',cartController.verifyRetryPayment)
 
 module.exports = userRoute;

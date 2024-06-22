@@ -1,0 +1,51 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<div class="container" style="margin-left: 300px; margin-top: 50px;">
+    <h1>Edit Category Offer</h1>
+    <form action="/admin/DummyCategoryUpdateOffer/<%= offer._id %>" method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" class="form-control" name="offerName" value="<%= offer.offerName %>" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount</label>
+                    <input type="number" class="form-control" name="discount" style="width: 75%;" value="<%= offer.discount %>" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" name="startDate" value="<%= new Date(offer.startDate).toISOString().split('T')[0] %>" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" name="endDate" style="width: 75%;" value="<%= new Date(offer.endDate).toISOString().split('T')[0] %>" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="categoryId" class="form-label">Category</label>
+                    <select class="form-select" name="categoryId" required>
+                        <% categories.forEach((item) => { %>
+                            <option value="<%= item._id %>" <%= offer.categoryId._id.equals(item._id) ? 'selected' : '' %>><%= item.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Offer</button>
+    </form>
+</div>
+
+<%- include('../admin_layouts/footer.ejs') %>

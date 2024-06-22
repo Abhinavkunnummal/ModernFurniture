@@ -208,7 +208,6 @@
                         <article class="card-body">
                             <h5 class="card-title">Best Selling Products</h5>
                             <ul id="bestSellingProducts" class="list-group">
-                                <!-- Best Selling Products will be inserted here -->
                             </ul>
                         </article>
                     </div>
@@ -218,17 +217,6 @@
                         <article class="card-body">
                             <h5 class="card-title">Best Selling Categories</h5>
                             <ul id="bestSellingCategories" class="list-group">
-                                <!-- Best Selling Categories will be inserted here -->
-                            </ul>
-                        </article>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Best Selling Brands</h5>
-                            <ul id="bestSellingBrands" class="list-group">
-                                <!-- Best Selling Brands will be inserted here -->
                             </ul>
                         </article>
                     </div>
@@ -237,23 +225,22 @@
             
         
         <%- include('../admin_layouts/footer.ejs') %>
-    <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/adminDashboard.js"></script>
 
-    <!-- Your custom script to handle fetching data and updating charts -->
+
     <script src="/path/to/your/script.js"></script>
     <script>
     const salesCtx = document.getElementById('salesChart').getContext('2d');
     const orderCtx = document.getElementById('orderChart').getContext('2d');
     
     let salesChart = new Chart(salesCtx, {
-        type: 'bar', // Change type to bar
+        type: 'bar',
         data: {
-            labels: [], // Initial empty labels
+            labels: [], 
             datasets: [{
                 label: 'Sales',
-                data: [], // Initial empty data
+                data: [], 
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -265,7 +252,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '₹' + value.toLocaleString('en-IN'); // Format y-axis labels
+                            return '₹' + value.toLocaleString('en-IN'); 
                         }
                     }
                 }
@@ -285,10 +272,10 @@
     let orderChart = new Chart(orderCtx, {
         type: 'doughnut',
         data: {
-            labels: [], // Initial empty labels
+            labels: [], 
             datasets: [{
                 label: 'Orders',
-                data: [], // Initial empty data
+                data: [], 
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
@@ -341,12 +328,12 @@
     function updateCharts(data) {
         if (data) {
             console.log('Updating charts with data:', data);
-            // Update Sales Chart
+           
             salesChart.data.labels = data.sales.labels;
             salesChart.data.datasets[0].data = data.sales.datasets[0].data;
             salesChart.update();
     
-            // Update Order Chart
+          
             orderChart.data.labels = data.orders.labels;
             orderChart.data.datasets[0].data = data.orders.datasets[0].data;
             orderChart.update();

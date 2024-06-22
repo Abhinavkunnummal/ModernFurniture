@@ -266,7 +266,7 @@
                     });
                 });
         
-                // Approve Return Button Click
+               
                 $(document).on('click', '.approveReturnBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -283,11 +283,11 @@
                             $.post('/admin/approveReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return approved successfully.", "success").then(() => {
-                                        // Update button to "Approved" and disable it
+                                     
                                         button.text('Approved').prop('disabled', true).removeClass('approveReturnBtn').addClass('btn-success');
-                                        // Remove the reject button
+                                        
                                         button.closest('.order-actions').find('.rejectReturnBtn').remove();
-                                        // Update status in data attribute
+                                        
                                         button.closest('.order-actions').data('status', 'approved');
                                     });
                                 } else {
@@ -298,7 +298,7 @@
                     });
                 });
         
-                // Reject Return Button Click
+                
                 $(document).on('click', '.rejectReturnBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -315,11 +315,11 @@
                             $.post('/admin/rejectReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return rejected successfully.", "success").then(() => {
-                                        // Update button to "Rejected" and disable it
+                                     
                                         button.text('Rejected').prop('disabled', true).removeClass('rejectReturnBtn').addClass('btn-danger');
-                                        // Remove the approve button
+                                     
                                         button.closest('.order-actions').find('.approveReturnBtn').remove();
-                                        // Update status in data attribute
+                                     
                                         button.closest('.order-actions').data('status', 'rejected');
                                     });
                                 } else {
@@ -330,7 +330,7 @@
                     });
                 });
         
-                // Approve Cancellation Button Click
+                
                 $(document).on('click', '.approveCancellationBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -347,9 +347,9 @@
                             $.post('/admin/approveCancellation', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Cancellation request approved successfully.", "success").then(() => {
-                                        // Update button to "Approved" and disable it
+                                      
                                         button.text('Cancellation Approved').prop('disabled', true).removeClass('approveCancellationBtn').addClass('btn-success');
-                                        // Update status in data attribute
+                                      
                                         button.closest('.order-actions').data('status', 'cancelled');
                                     });
                                 } else {

@@ -1,0 +1,55 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<div class="container" style="margin-left: 300px; margin-top: 50px;">
+    <h1>Category Offers List</h1>
+    <a type="button" class="btn btn-primary" href="/admin/DummyCategoryAddOffer">Add Offer</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Offer Name</th>
+                <th>Discount</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th style="width: 25%;">Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% categoryOffers.forEach((offer) => { %>
+                <tr>
+                    <td><%= offer.offerName %></td>
+                    <td><%= offer.discount %></td>
+                    <td><%= new Date(offer.startDate).toLocaleDateString() %></td>
+                    <td><%= new Date(offer.endDate).toLocaleDateString() %></td>
+                    <td><%= offer.categoryId.name %></td>
+                    <td>
+                        <a href="/admin/DummyEditCategoryOffer/<%= offer._id %>" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= offer._id %>')">Delete</button>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('../admin_layouts/footer.ejs') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    function confirmDelete(offerId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/admin/deleteCategoryOffer/' + offerId;
+            }
+        })
+    }
+</script>

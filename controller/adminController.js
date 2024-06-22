@@ -8,6 +8,9 @@ const Order=require('../model/order')
 const Coupon=require('../model/coupon')
 const moment = require('moment');
 const Offer = require('../model/offerModel'); 
+const CategoryOffer=require('../model/categoryOffer')
+
+const ProductOffer=require('../model/productOffer')
 
 
 
@@ -50,15 +53,10 @@ const verifyLogin = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
   try {
-    // Fetch orders where at least one orderedItem has orderStatus 'delivered'
     const deliveredOrders = await Order.find({
       'orderedItem.orderStatus': 'delivered'
     });
-
-    // Log retrieved delivered orders for debugging
     console.log("Delivered Orders:", deliveredOrders);
-
-    // Check if deliveredOrders is correctly fetched
     if (!deliveredOrders || deliveredOrders.length === 0) {
       console.log("No delivered orders found.");
     }
@@ -66,15 +64,12 @@ const loadDashboard = async (req, res) => {
     const categories = await Category.find({});
     const products = await Product.find({});
 
-    // Calculate total revenue from delivered orders
     const totalRevenue = deliveredOrders.reduce((acc, order) => acc + order.orderAmount, 0);
 
-    // Get current month and year
     const now = new Date();
     const thisMonth = now.getMonth();
     const thisYear = now.getFullYear();
 
-    // Calculate monthly earnings for the current month
     const currentMonthEarnings = deliveredOrders.reduce((acc, order) => {
       const orderDate = new Date(order.createdAt);
       if (orderDate.getMonth() === thisMonth && orderDate.getFullYear() === thisYear) {
@@ -275,7 +270,7 @@ const updateCategory = async (req, res) => {
 const renderProduct = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Number of products per page
+    const limit = 10; 
     const skip = (page - 1) * limit;
 
     const totalProducts = await Product.countDocuments();
@@ -508,7 +503,7 @@ const approveReturn= async (req, res) => {
   }
 };
 
-// Route to reject return
+
 const rejectReturn= async (req, res) => {
   const { itemId } = req.body;
   try {
@@ -918,12 +913,9 @@ const generateMonthlyReport = async (req, res) => {
 
       console.log('monthlyReport', formattedReport);
 
-      // Calculate total orders and total amount
       const totalOrders = formattedReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
       const totalAmount = formattedReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
       const totalCouponAmount = monthlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
-
-      // Pass report data and totals to the EJS template
       res.render('reports', { report: formattedReport, totalOrders, totalAmount, totalCouponAmount });
   } catch (error) {
       console.error('Error generating monthly report:', error);
@@ -1035,52 +1027,252 @@ const approveCancelOrder=async(req,res)=>{
 }
 
 
-const getBestSellingProducts = async (req, res) => {
-    try {
-        const bestSellingProducts = await Order.aggregate([
-            { $unwind: "$orderedItem" },
-            { $group: { _id: "$orderedItem.productId", totalQuantity: { $sum: "$orderedItem.quantity" } } },
-            { $sort: { totalQuantity: -1 } },
-            { $limit: 10 },
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "product"
-                }
-            },
-            { $unwind: "$product" },
-            { $project: { productName: "$product.name", totalQuantity: 1 } }
-        ]);
-        res.json(bestSellingProducts);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+const OfferPage = async (req, res) => {
+  try {
+    const offers = await ProductOffer.find({ is_active: true }).populate('productId');
+    res.render('DummyOffer', { offers });
+  } catch (error) {
+    console.error('Error in the offer page:', error);
+  }
 };
 
-const getBestSellingCategories = async (req, res) => {
-    try {
-        const bestSellingCategories = await Order.aggregate([
-            { $unwind: "$orderedItem" },
-            {
-                $lookup: {
-                    from: "products",
-                    localField: "orderedItem.productId",
-                    foreignField: "_id",
-                    as: "product"
-                }
-            },
-            { $unwind: "$product" },
-            { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" } } },
-            { $sort: { totalQuantity: -1 } },
-            { $limit: 10 }
-        ]);
-        res.json(bestSellingCategories);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+const DummyAddOfferPage = async (req, res) => {
+  try {
+    const products = await Product.find({});
+    res.render('DummyAddOffer', { products });
+  } catch (error) {
+    console.error('Error in DummyAddOfferPage:', error.message);
+  }
 };
+
+const DummyOffer = async (req, res) => {
+  try {
+    const { offerName, discount, startDate, endDate, productId } = req.body;
+    console.log(req.body);
+
+    // Validate required fields
+    if (!offerName || !discount || !startDate || !endDate || !productId) {
+      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+    }
+
+    // Validate date range
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+    }
+
+    const newOffer = new ProductOffer({
+      offerName,
+      discount,
+      startDate,
+      endDate,
+      productId,
+      is_active: true
+    });
+
+    await newOffer.save();
+    res.redirect('/admin/DummyOfferList');
+  } catch (error) {
+    console.error('Error in the offer page:', error);
+  }
+};
+
+const DummyOfferList = async (req, res) => {
+  try {
+    const offers = await ProductOffer.find({}).populate('productId');
+    res.render('DummyOffer', { offers });
+  } catch (error) {
+    console.error('Error in the offer page:', error);
+  }
+};
+
+const editOfferPage = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    const offer = await ProductOffer.findById(offerId).populate('productId');
+    const products = await Product.find({});
+    res.render('DummyEditOffer', { offer, products });
+  } catch (error) {
+    console.error('Error in edit offer page:', error);
+  }
+};
+
+const updateOffer = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    const { offerName, discount, startDate, endDate, productId } = req.body;
+
+    // Validate required fields
+    if (!offerName || !discount || !startDate || !endDate || !productId) {
+      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+    }
+
+    // Validate date range
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+    }
+
+    await ProductOffer.findByIdAndUpdate(offerId, {
+      offerName,
+      discount,
+      startDate,
+      endDate,
+      productId,
+    });
+
+    res.redirect('/admin/DummyOffer');
+  } catch (error) {
+    console.error('Error in updating offer:', error);
+  }
+};
+
+const deleteDummyOffer = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    await ProductOffer.findByIdAndDelete(offerId);
+    res.redirect('/admin/DummyOfferList');
+  } catch (error) {
+    console.error('Error in deleting offer:', error);
+  }
+};
+
+const DummyCategoryOfferPage = async (req, res) => {
+  try {
+    const categoryOffers = await CategoryOffer.find({ is_active: true }).populate('categoryId');
+    res.render('DummyCategoryOffer', { categoryOffers });
+  } catch (error) {
+    console.error('Error in the category offer page:', error);
+  }
+};
+
+const DummyEditCategoryOfferPage = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    const offer = await CategoryOffer.findById(offerId).populate('categoryId');
+    const categories = await Category.find({});
+    res.render('DummyEditCategoryOffer', { offer, categories });
+  } catch (error) {
+    console.error('Error in edit category offer page:', error);
+  }
+};
+
+const deleteCategoryOffer = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    await CategoryOffer.findByIdAndDelete(offerId);
+    res.redirect('/admin/DummyCategoryOffer');
+  } catch (error) {
+    console.error('Error deleting category offer:', error);
+  }
+};
+
+const DummyAddCategoryOfferPage = async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    res.render('DummyAddCategoryOffer', { categories });
+  } catch (error) {
+    console.error('Error in DummyAddCategoryOfferPage:', error.message);
+  }
+};
+
+const DummyCategoryAddOfferPost = async (req, res) => {
+  try {
+    const { offerName, discount, startDate, endDate, categoryId } = req.body;
+    console.log(req.body);
+    if (!offerName || !discount || !startDate || !endDate || !categoryId) {
+      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+    }
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+    }
+    const newOffer = new CategoryOffer({
+      offerName,
+      discount,
+      startDate,
+      endDate,
+      categoryId,
+      is_active: true
+    });
+    await newOffer.save();
+    res.redirect('/admin/DummyCategoryOffer');
+  } catch (error) {
+    console.error('Error in DummyCategoryAddOfferPost:', error);
+  }
+};
+
+const DummyCategoryOfferList = async (req, res) => {
+  try {
+    const offers = await CategoryOffer.find({}).populate('categoryId');
+    res.render('DummyCategoryOffer', { offers });
+  } catch (error) {
+    console.error('Error in DummyCategoryOfferList:', error);
+  }
+};
+
+const DummyCategoryupdateOffer=async(req,res)=>{
+  try{
+    const offerId = req.params.id;
+    const { offerName, discount, startDate, endDate, categoryId } = req.body;
+    await CategoryOffer.findByIdAndUpdate(offerId, {
+      offerName,
+      discount,
+      startDate,
+      endDate,
+      categoryId
+    });
+    res.redirect('/admin/DummyCategoryOffer');
+  }catch(error){
+    console.error('Error in DummyCategoryupdateOffer:', error);
+  }
+}
+
+
+
+// const getBestSellingProducts = async (req, res) => {
+//     try {
+//         const bestSellingProducts = await Order.aggregate([
+//             { $unwind: "$orderedItem" },
+//             { $group: { _id: "$orderedItem.productId", totalQuantity: { $sum: "$orderedItem.quantity" } } },
+//             { $sort: { totalQuantity: -1 } },
+//             { $limit: 10 },
+//             {
+//                 $lookup: {
+//                     from: "products",
+//                     localField: "_id",
+//                     foreignField: "_id",
+//                     as: "product"
+//                 }
+//             },
+//             { $unwind: "$product" },
+//             { $project: { productName: "$product.name", totalQuantity: 1 } }
+//         ]);
+//         res.json(bestSellingProducts);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
+
+// const getBestSellingCategories = async (req, res) => {
+//     try {
+//         const bestSellingCategories = await Order.aggregate([
+//             { $unwind: "$orderedItem" },
+//             {
+//                 $lookup: {
+//                     from: "products",
+//                     localField: "orderedItem.productId",
+//                     foreignField: "_id",
+//                     as: "product"
+//                 }
+//             },
+//             { $unwind: "$product" },
+//             { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" } } },
+//             { $sort: { totalQuantity: -1 } },
+//             { $limit: 10 }
+//         ]);
+//         res.json(bestSellingCategories);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 
 
 
@@ -1132,10 +1324,25 @@ module.exports = {
   generateCustomDateReport,
   
 
-  getBestSellingProducts,
-  getBestSellingCategories
+  // getBestSellingProducts,
+  // getBestSellingCategories
   // daily,
   // weekly,
   // monthly,
   // yearly
+
+  OfferPage,
+  DummyAddOfferPage,
+  DummyOffer,
+  DummyOfferList,
+  editOfferPage,
+  updateOffer,
+  deleteDummyOffer,
+  DummyCategoryOfferPage,
+  DummyEditCategoryOfferPage,
+  deleteCategoryOffer,
+  DummyAddCategoryOfferPage,
+  DummyCategoryAddOfferPost,
+  DummyCategoryOfferList,
+  DummyCategoryupdateOffer
 };

@@ -1,0 +1,51 @@
+<%- include('../admin_layouts/header.ejs') %>
+<%- include('../admin_layouts/sidenav.ejs') %>
+
+<div class="container" style="margin-left: 300px; margin-top: 50px;">
+    <h1>Add Category Offer</h1>
+    <form action="/admin/CategoryAddPost" method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" class="form-control" name="offerName" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount</label>
+                    <input type="number" class="form-control" name="discount" style="width: 75%;" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" name="startDate" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" name="endDate" style="width: 75%;" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="categoryId" class="form-label">Category</label>
+                    <select class="form-select" name="categoryId" required>
+                        <% categories.forEach((item) => { %>
+                            <option value="<%= item._id %>"><%= item.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Offer</button>
+    </form>
+</div>
+
+<%- include('../admin_layouts/footer.ejs') %>
