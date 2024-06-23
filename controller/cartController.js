@@ -9,6 +9,8 @@ const flash = require('connect-flash');
 const crypto=require('crypto')
 const Payment=require('../model/payment')
 const Coupon=require('../model/coupon')
+const ProductOffer=require('../model/productOffer')
+const CategoryOffer=require('../model/categoryOffer')
 
 // controllers/walletController.js
 const Wallet=require('../model/wallet')
@@ -37,12 +39,28 @@ const renderCart = async (req, res) => {
   }
 };
 
+const calculateDiscountedPrice = async (product) => {
+  let discount = 0;
+
+  const productOffer = await ProductOffer.findOne({ productId: product._id, is_active: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } });
+  if (productOffer) {
+    discount = productOffer.discount;
+  } else {
+    const categoryOffer = await CategoryOffer.findOne({ categoryId: product.category, is_active: true, startDate: { $lte: new Date() }, endDate: { $gte: new Date() } });
+    if (categoryOffer) {
+      discount = categoryOffer.discount;
+    }
+  }
+
+  return product.price - (product.price * (discount / 100));
+};
+
 const addToCart = async (req, res) => {
   try {
     const userId = req.session.user_id;
     const { productId } = req.query;
     const product = await Product.findById(productId);
-    const price = product.price;
+    const discountedPrice = await calculateDiscountedPrice(product);
 
     let cartItem = await CartItem.findOne({
       userId: userId,
@@ -55,9 +73,9 @@ const addToCart = async (req, res) => {
           {
             productId: productId,
             quantity: 1,
-            offerDiscount: 0,
-            totalPrice: price,
-            price: price,
+            offerDiscount: discountedPrice < product.price ? product.price - discountedPrice : 0,
+            totalPrice: discountedPrice,
+            price: discountedPrice,
           },
         ],
       });
@@ -68,8 +86,80 @@ const addToCart = async (req, res) => {
     return res.redirect("/cart");
   } catch (error) {
     console.log(error.message);
+    res.status(500).send("Internal Server Error");
   }
 };
+
+const updateCartItem = async (req, res) => {
+  try {
+    const userId = req.session.user_id;
+    const { productId, quantityChange } = req.body;
+
+    // console.log("Received update request", { userId, productId, quantityChange });
+
+    if (!userId || !productId || quantityChange === undefined) {
+      // console.log("Missing required fields", { userId, productId, quantityChange });
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const cartItems = await CartItem.find({ userId }).populate("product.productId");
+
+    if (!cartItems || cartItems.length === 0) {
+      // console.log("No cart items found for the user", { userId });
+      return res.status(404).json({ error: "No cart items found for the user" });
+    }
+
+    const cartItemToUpdate = cartItems.find((item) => item.product[0].productId.toString() === productId);
+
+    if (!cartItemToUpdate) {
+      // console.log("Cart item not found", { userId, productId });
+      return res.status(404).json({ error: "Cart item not found" });
+    }
+
+    const product = cartItemToUpdate.product[0];
+    const newQuantity = product.quantity + parseInt(quantityChange);
+
+    if (newQuantity > product.productId.stock) {
+      // console.log("Insufficient product stock", { newQuantity, stock: product.productId.stock });
+      return res.status(400).json({ error: "Insufficient product stock" });
+    } else if (newQuantity < 1) {
+      // console.log("Quantity cannot be less than 1", { newQuantity });
+      return res.status(400).json({ error: "Quantity cannot be less than 1" });
+    }
+
+    const discountedPrice = await calculateDiscountedPrice(product.productId);
+    const newPrice = discountedPrice * newQuantity;
+
+    const updatedCartItem = await CartItem.findOneAndUpdate(
+      { _id: cartItemToUpdate._id, "product.productId": product.productId },
+      {
+        $inc: { "product.$.quantity": quantityChange },
+        $set: { "product.$.totalPrice": newPrice },
+      },
+      { new: true }
+    );
+
+    if (!updatedCartItem) {
+      // console.log("Failed to update cart item", { userId, productId });
+      return res.status(500).json({ error: "Failed to update cart item" });
+    }
+
+    const updatedCartItems = await CartItem.find({ userId }).populate("product.productId");
+
+    // console.log("Cart items updated successfully", { userId, updatedCartItems });
+
+    res.status(200).json({
+      message: "Cart items updated successfully",
+      cartItems: updatedCartItems,
+    });
+  } catch (error) {
+    console.error("Error updating cart item:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
 
 const removeFromCart = async (req, res) => {
   try {
@@ -87,60 +177,6 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-const updateCartItem = async (req, res) => {
-  try {
-    const userId = req.session.user_id;
-    const { productId, quantityChange } = req.body;
-
-    // Retrieve the cart items with product information including stock
-    const cartItems = await CartItem.find({ userId }).populate("product.productId");
-
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(404).json({ error: "No cart items found for the user" });
-    }
-
-    const cartItemToUpdate = cartItems.find((item) => item.product[0].productId.toString() === productId);
-
-    if (!cartItemToUpdate) {
-      return res.status(404).json({ error: "Cart item not found" });
-    }
-
-    const product = cartItemToUpdate.product[0];
-    const newQuantity = product.quantity + parseInt(quantityChange);
-
-    // Check if the requested quantity exceeds the product stock
-    if (newQuantity > product.productId.stock) {
-      return res.status(400).json({ error: "Insufficient product stock" });
-    }else{
-      if (newQuantity < 1) {
-        return res.status(400).json({ error: "Quantity cannot be less than 1" });
-      }
-  
-      const newPrice = product.price * newQuantity;
-  
-      const updatedCartItem = await CartItem.findOneAndUpdate(
-        { _id: cartItemToUpdate._id, "product.productId": product.productId },
-        {
-          $inc: { "product.$.quantity": quantityChange },
-          $set: { "product.$.totalPrice": newPrice },
-        },
-        { new: true }
-      );
-  
-      const updatedCartItems = await CartItem.find({ userId }).populate("product.productId");
-  
-      res.status(200).json({
-        message: "Cart items updated successfully",
-        cartItems: updatedCartItems,
-      });
-    }
-
-    
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
 
 
 const checkoutPage = async (req, res) => {
@@ -209,7 +245,7 @@ const renderPlaceOrder = async (req, res) => {
       };
 
       const razorpayOrder = await razorpay.orders.create(options);
-console.log(razorpayOrder.id + 'purchase id');
+// console.log(razorpayOrder.id + 'purchase id');
       return res.json({
         orderId: razorpayOrder.id,
         amount: finalOrderAmount,
@@ -305,7 +341,7 @@ function calculateOrderAmount(cartItems) {
 const verifyPayment = async (req, res) => {
   try {
     const { razorpayPaymentId, razorpayOrderId, razorpaySignature, selectedAddress, paymentMethod } = req.body;
-    console.log(razorpayOrderId+"    Razorpay order id");
+    // console.log(razorpayOrderId+"    Razorpay order id");
     const crypto = require('crypto');
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpayOrderId + '|' + razorpayPaymentId);
@@ -462,7 +498,7 @@ const order=await Order.findById(orderId)
 const verifyRetryPayment = async (req, res) => {  
   try{
     const {orderId} = req.body;
-    console.log(orderId+'    abhiis the order id');
+    // console.log(orderId+'    abhiis the order id');
     const order=await Order.findOneAndUpdate({_id:orderId},{$set:{paymentStatus:true}})
     if(order){
       res.json({ success: true, order: order });
@@ -614,15 +650,15 @@ const returnOrder = async (req, res) => {
 
           res.status(200).json({ success: true, message: 'Return request processed successfully' });
         } else {
-          console.log('Order status is not "delivered":', orderedItem.orderStatus);
+          // console.log('Order status is not "delivered":', orderedItem.orderStatus);
           res.status(400).json({ success: false, message: 'Order status is not eligible for return' });
         }
       } else {
-        console.log('Ordered item not found for orderId:', orderId);
+        // console.log('Ordered item not found for orderId:', orderId);
         res.status(404).json({ success: false, message: 'Ordered item not found' });
       }
     } else {
-      console.log('Order not found for orderId:', orderId);
+      // console.log('Order not found for orderId:', orderId);
       res.status(404).json({ success: false, message: 'Order not found' });
     }
   } catch (error) {
@@ -656,23 +692,23 @@ const renderFullDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    console.log('ethis');
+    // console.log('ethis');
     const userId = req.session.user_id;
     const { itemId, cancelReason } = req.body; 
-    console.log(itemId + " cancel only if cancel id is there");
+    // console.log(itemId + " cancel only if cancel id is there");
 
     const order = await Order.findOne({
       userId: userId,
       'orderedItem._id': itemId
     });
-console.log('order is'+order);
+// console.log('order is'+order);
     if (!order) {
       req.flash('error', 'Order not found');
       return res.status(404).json({ error: 'Order not found' });
     }
 
     const item = order.orderedItem.id(itemId);
-    console.log(item.orderStatus+"orderstatus");
+    // console.log(item.orderStatus+"orderstatus");
 
     if (item.orderStatus !== 'pending' && item.orderStatus !== 'approved') {
       // req.flash('error', 'Order status is not eligible for cancellation');
@@ -680,7 +716,7 @@ console.log('order is'+order);
     }
  
     item.orderStatus = 'Cancellation Request Sent';
-    console.log("orderstatus "+item.orderStatus);
+    // console.log("orderstatus "+item.orderStatus);
     
     item.cancelReason = cancelReason;
 
@@ -1111,105 +1147,141 @@ const renderThankyou=async(req,res)=>{
     console.log(error.message);
   }
 }
+
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+
 
 const loadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query; 
     const userId = req.session.user_id;
-   
-    const order = await Order.findById(orderId).populate('deliveryAddress').populate('orderedItem.productId').populate('userId');
-    console.log('orderdata' + order);
+
+    const order = await Order.findById(orderId)
+      .populate('deliveryAddress')
+      .populate('orderedItem.productId')
+      .populate('userId');
 
     if (!order) {
       return res.status(400).send('Invalid order ID');
     }
 
+    const generateInvoiceNumber = () => {
+      return Math.floor(10000 + Math.random() * 90000).toString();
+    };
 
-    for (const item of order.orderedItem) {
-      const doc = new PDFDocument({ margin: 50 });
-      const fileName = `invoice_${item._id}.pdf`; 
-      const filePath = path.join(__dirname, '../invoice', fileName);
+    const doc = new PDFDocument({ margin: 50 });
+    const fileName = `invoice_${generateInvoiceNumber()}.pdf`; 
+    const filePath = path.join(__dirname, '../invoice', fileName);
 
-      
-      const writeStream = fs.createWriteStream(filePath);
-      doc.pipe(writeStream);
+    const writeStream = fs.createWriteStream(filePath);
+    doc.pipe(writeStream);
 
-      doc
-        .fontSize(20)
-        .text('Modern Furniture', { align: 'center' })
-        .moveDown()
-        .fontSize(12)
-        .text(`Invoice Number: ${item._id}`, { align: 'right' }) // Use item._id as the invoice number
-        .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
-        .moveDown();
+    // Header
+    doc
+      .fontSize(20)
+      .font('Helvetica-Bold')
+      .text('Modern Furniture', { align: 'center' })
+      .moveDown()
+      .fontSize(12)
+      .font('Helvetica')
+      .text(`Invoice Number: ${generateInvoiceNumber()}`, { align: 'right' })
+      .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
+      .moveDown();
 
-  
-      doc
-        .fontSize(12)
-        .text('Delivery Address:', { bold: true })
-        .text(`Name: ${order.userId.name}`)
-        .text(`Mobile: ${order.userId.mobile}`)
-        .text(`Street Address: ${order.deliveryAddress.address}`)
-        .text(`City: ${order.deliveryAddress.city}`)
-        .text(`State: ${order.deliveryAddress.state}`)
-        .text(`Pincode: ${order.deliveryAddress.zipcode}`)
-        .moveDown();
+    // Delivery Address
+    doc
+      .fontSize(12)
+      .font('Helvetica-Bold')
+      .text('Delivery Address:', { underline: true })
+      .moveDown(0.5)
+      .font('Helvetica')
+      .text(`Name: ${order.userId.name}`)
+      .text(`Mobile: ${order.userId.mobile}`)
+      .text(`Street Address: ${order.deliveryAddress.address}`)
+      .text(`City: ${order.deliveryAddress.city}`)
+      .text(`State: ${order.deliveryAddress.state}`)
+      .text(`Pincode: ${order.deliveryAddress.zipcode}`)
+      .moveDown();
 
-      
-      doc
-        .fontSize(12)
-        .text('Items', 50, doc.y, { bold: true })
-        .text('Product ID', 200, doc.y, { bold: true })
-        .text('Quantity', 300, doc.y, { bold: true })
-        .text('Sub Total', 400, doc.y, { bold: true })
-        .moveDown();
+    // Table Header
+    const tableTop = doc.y;
+    const itemLineHeight = 20;
 
-    
-      doc
-        .fontSize(12)
-        .text(item.productId.name, 50, doc.y)
-        .text(item.productId._id, 200, doc.y)
-        .text(item.quantity, 300, doc.y)
-        .text(`$${item.totalProductAmount.toFixed(2)}`, 400, doc.y)
-        .moveDown();
+    doc
+      .fontSize(12)
+      .font('Helvetica-Bold')
+      .text('Product Name', 50, tableTop)
+      .text('Quantity', 250, tableTop)
+      .text('Unit Price', 350, tableTop)
+      .text('Total Price', 450, tableTop);
 
-      const subtotal = item.totalProductAmount;
-      doc
-        .fontSize(12)
-        .text('Subtotal', 300, doc.y, { bold: true })
-        .text(`$${subtotal.toFixed(2)}`, 400, doc.y)
-        .moveDown()
-        .fontSize(12)
-        .text('Grand Total', 300, doc.y, { bold: true })
-        .text(`$${subtotal.toFixed(2)}`, 400, doc.y)
-        .moveDown(2);
+    doc
+      .strokeColor('#aaaaaa')
+      .lineWidth(1)
+      .moveTo(50, tableTop + 15)
+      .lineTo(550, tableTop + 15)
+      .stroke()
+      .moveDown(0.5);
 
+    // Table Row (only one product)
+    const item = order.orderedItem[0]; // Get only the first item
+    const itemPosition = tableTop + 30;
+    const totalPrice = item.quantity * item.productId.price;
 
-      doc
-        .fontSize(10)
-        .text('Thank you for your business.', { align: 'center' })
-        .moveDown();
+    doc
+      .fontSize(12)
+      .font('Helvetica')
+      .text(item.productId.name, 50, itemPosition, { width: 150 })
+      .text(item.quantity.toString(), 250, itemPosition)
+      .text(`₹${item.productId.price.toFixed(2)}`, 350, itemPosition)
+      .text(`₹${totalPrice.toFixed(2)}`, 450, itemPosition);
 
-      doc.end();
+    // Summary
+    const summaryTop = itemPosition + itemLineHeight + 15;
 
+    doc
+      .strokeColor('#aaaaaa')
+      .lineWidth(1)
+      .moveTo(50, summaryTop)
+      .lineTo(550, summaryTop)
+      .stroke()
+      .moveDown(0.5);
 
-      writeStream.on('finish', () => {
-        res.download(filePath, fileName, (err) => {
+    doc
+      .fontSize(12)
+      .font('Helvetica-Bold')
+      .text('Subtotal', 350, summaryTop + 15)
+      .text(`₹${totalPrice.toFixed(2)}`, 450, summaryTop + 15)
+      .moveDown(0.5)
+      .text('Grand Total', 350, summaryTop + 30)
+      .text(`₹${totalPrice.toFixed(2)}`, 450, summaryTop + 30)
+      .moveDown(2);
+
+    // Footer
+    doc
+      .fontSize(10)
+      .font('Helvetica')
+      .text('Thank you for your business.', { align: 'center' })
+      .moveDown();
+
+    doc.end();
+
+    writeStream.on('finish', () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error('Error downloading the file', err);
+          res.status(500).send('Error downloading the file');
+        }
+        fs.unlink(filePath, (err) => {
           if (err) {
-            console.error('Error downloading the file', err);
-            res.status(500).send('Error downloading the file');
+            console.error('Error deleting the file', err);
           }
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error('Error deleting the file', err);
-            }
-          });
         });
       });
-    }
+    });
+
   } catch (error) {
     console.error('Error generating invoice:', error);
     res.status(500).send('Error generating invoice');
@@ -1217,17 +1289,15 @@ const loadInvoice = async (req, res) => {
 };
 
 
-
-
 const applyCoupon = async (req, res) => {
   try {
     const { couponCode, originalTotal } = req.body;
-    console.log(`Received coupon code: ${couponCode}`);
-    console.log(`Original total: ${originalTotal}`);
+    // console.log(`Received coupon code: ${couponCode}`);
+    // console.log(`Original total: ${originalTotal}`);
 
  
     const coupon = await Coupon.findOne({ couponCode });
-    console.log(`Coupon found: ${coupon}`);
+    // console.log(`Coupon found: ${coupon}`);
 
     if (!coupon) {
       return res.json({ success: false, message: 'Invalid coupon code.' });
@@ -1243,8 +1313,8 @@ const applyCoupon = async (req, res) => {
     const discountAmount = coupon.discountAmount;
     const newTotal = originalTotal - discountAmount;
 
-    console.log(`Discount amount: ${discountAmount}`);
-    console.log(`New total after applying coupon: ${newTotal}`);
+    // console.log(`Discount amount: ${discountAmount}`);
+    // console.log(`New total after applying coupon: ${newTotal}`);
 
     res.json({ success: true, discountAmount, newTotal });
 
@@ -1270,10 +1340,10 @@ const removeCoupon = (req, res) => {
 
 
 const showCoupons = async (req, res) => {
-  console.log('Fetching coupons from database...');
+  // console.log('Fetching coupons from database...');
   try {
     const coupons = await Coupon.find({});
-    console.log('Coupons found:', coupons);
+    // console.log('Coupons found:', coupons);
     res.json({ success: true, coupons });
   } catch (error) {
     console.error('Error fetching coupons:', error);

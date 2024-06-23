@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* CSS for active menu item */
+    .menu-item.active {
+      background-color: #ecf0f1; /* Background color when active */
+      border-left: 4px solid #6a11cb; /* Left border color when active */
+    }
+
+    /* CSS for menu item hover */
+    .menu-item:hover {
+      background-color: #dfe6e9; /* Background color on hover */
+    }
+
+    /* CSS for link text color */
+    .menu-link {
+      color: #2c3e50; /* Default link text color */
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+    }
+
+    /* CSS for link text color on hover */
+    .menu-link:hover {
+      color: #6a11cb; /* Link text color on hover */
+    }
+
+    /* CSS for menu icon */
+    .menu-icon {
+      margin-right: 10px;
+    }
+
+    /* Additional styling for the menu */
+    .layout-menu {
+      width: 250px;
+      background-color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      border-right: 1px solid #dfe6e9; /* Added border for separation */
+    }
+
+    .menu-inner {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .menu-item {
+      border-bottom: 1px solid #dfe6e9;
+    }
+
+    .menu-header {
+      padding: 10px 15px;
+      background-color: #ecf0f1;
+      color: #7f8c8d;
+    }
+
+    .app-brand {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      color: #ffffff;
+    }
+
+    .app-brand-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .app-brand-text {
+      margin-left: 10px;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .layout-menu-toggle {
+      color: #ffffff;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+
+    <ul class="menu-inner py-1">
+      <!-- Profile -->
+      <li class="menu-item" data-menu-item="profile">
+        <a href="/userProfile" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-home-circle"></i>
+          <div data-i18n="Analytics">Profile</div>
+        </a>
+      </li>
+
+      <!-- Wallet -->
+      <li class="menu-item" data-menu-item="wallet">
+        <a href="/wallet" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-detail"></i>
+          <div data-i18n="Form Layouts">Wallet</div>
+        </a>
+      </li>
+
+      <!-- Order Details -->
+      <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Order Details</span>
+      </li>
+
+      <!-- Orders -->
+      <li class="menu-item" data-menu-item="orders">
+        <a href="/orders" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-layout"></i>
+          <div data-i18n="Layouts">Orders</div>
+        </a>
+      </li>
+
+      <!-- Coupon -->
+      <li class="menu-item" data-menu-item="coupon">
+        <a href="/coupon" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-table"></i>
+          <div data-i18n="Tables">Coupon</div>
+        </a>
+      </li>
+
+      <!-- Misc -->
+      <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Misc</span>
+      </li>
+
+      <!-- Support -->
+      <li class="menu-item">
+        <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-support"></i>
+          <div data-i18n="Support">Support</div>
+        </a>
+      </li>
+
+      <!-- Documentation -->
+      <li class="menu-item">
+        <a href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/" target="_blank" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-file"></i>
+          <div data-i18n="Documentation">Documentation</div>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get all menu items
+      const menuItems = document.querySelectorAll(".menu-item");
+
+      // Function to set the active class based on the current URL
+      function setActiveMenuItem() {
+        const currentPath = window.location.pathname;
+        menuItems.forEach(function (menuItem) {
+          const link = menuItem.querySelector(".menu-link");
+          if (link && link.getAttribute("href") === currentPath) {
+            menuItem.classList.add("active");
+          } else {
+            menuItem.classList.remove("active");
+          }
+        });
+      }
+
+      // Set the active menu item on page load
+      setActiveMenuItem();
+
+      // Add click event listener to each menu item
+      menuItems.forEach(function (menuItem) {
+        menuItem.addEventListener("click", function () {
+          // Remove active class from all menu items
+          menuItems.forEach(function (item) {
+            item.classList.remove("active");
+          });
+
+          // Add active class to the clicked menu item
+          menuItem.classList.add("active");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

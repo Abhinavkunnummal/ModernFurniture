@@ -68,7 +68,7 @@ userRoute.get("/auth/google/callback", passport.authenticate("google", { failure
     
 //user profile
 
-userRoute.get('/userProfile',userController.renderUserProfile)
+userRoute.get('/userProfile',isLogin,userController.renderUserProfile)
 userRoute.get('/editProfile',userController.editProfile)
 userRoute.post('/editedProfile',userController.postProfile)
 userRoute.get('/manageAddress',userController.renderAddress)
@@ -83,7 +83,7 @@ userRoute.post('/apply-coupon', cartController.applyCoupon);
 userRoute.post('/remove-coupon', cartController.removeCoupon);
 //Cart
 
-userRoute.get('/cart',cartController.renderCart)
+userRoute.get('/cart',isLogin,cartController.renderCart)
 userRoute.get('/addToCart',cartController.addToCart)
 // userRoute.post('/updateCartQuantity', cartController.updateCartItemQuantity);
 

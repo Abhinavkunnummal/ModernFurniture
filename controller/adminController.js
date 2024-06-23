@@ -1227,52 +1227,59 @@ const DummyCategoryupdateOffer=async(req,res)=>{
 
 
 
-// const getBestSellingProducts = async (req, res) => {
-//     try {
-//         const bestSellingProducts = await Order.aggregate([
-//             { $unwind: "$orderedItem" },
-//             { $group: { _id: "$orderedItem.productId", totalQuantity: { $sum: "$orderedItem.quantity" } } },
-//             { $sort: { totalQuantity: -1 } },
-//             { $limit: 10 },
-//             {
-//                 $lookup: {
-//                     from: "products",
-//                     localField: "_id",
-//                     foreignField: "_id",
-//                     as: "product"
-//                 }
-//             },
-//             { $unwind: "$product" },
-//             { $project: { productName: "$product.name", totalQuantity: 1 } }
-//         ]);
-//         res.json(bestSellingProducts);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+const getBestSellingProducts = async (req, res) => {
+  try {
+      const bestSellingProducts = await Order.aggregate([
+          { $unwind: "$orderedItem" },
+          {
+              $lookup: {
+                  from: "products",
+                  localField: "orderedItem.productId",
+                  foreignField: "_id",
+                  as: "product"
+              }
+          },
+          { $unwind: "$product" },
+          {
+              $group: {
+                  _id: "$orderedItem.productId",
+                  productName: { $first: "$product.name" },
+                  productImage: { $first: "$product.image" },
+                  totalQuantity: { $sum: "$orderedItem.quantity" }
+              }
+          },
+          { $sort: { totalQuantity: -1 } },
+          { $limit: 10 }
+      ]);
+      res.json(bestSellingProducts);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
 
-// const getBestSellingCategories = async (req, res) => {
-//     try {
-//         const bestSellingCategories = await Order.aggregate([
-//             { $unwind: "$orderedItem" },
-//             {
-//                 $lookup: {
-//                     from: "products",
-//                     localField: "orderedItem.productId",
-//                     foreignField: "_id",
-//                     as: "product"
-//                 }
-//             },
-//             { $unwind: "$product" },
-//             { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" } } },
-//             { $sort: { totalQuantity: -1 } },
-//             { $limit: 10 }
-//         ]);
-//         res.json(bestSellingCategories);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+
+const getBestSellingCategories = async (req, res) => {
+  try {
+      const bestSellingCategories = await Order.aggregate([
+          { $unwind: "$orderedItem" },
+          {
+              $lookup: {
+                  from: "products",
+                  localField: "orderedItem.productId",
+                  foreignField: "_id",
+                  as: "product"
+              }
+          },
+          { $unwind: "$product" },
+          { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" }, categoryName: { $first: "$product.category" } } },
+          { $sort: { totalQuantity: -1 } },
+          { $limit: 10 }
+      ]);
+      res.json(bestSellingCategories);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
 
 
 
@@ -1324,8 +1331,8 @@ module.exports = {
   generateCustomDateReport,
   
 
-  // getBestSellingProducts,
-  // getBestSellingCategories
+  getBestSellingProducts,
+  getBestSellingCategories,
   // daily,
   // weekly,
   // monthly,

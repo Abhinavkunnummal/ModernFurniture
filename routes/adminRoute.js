@@ -82,8 +82,8 @@ adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
 adminRoute.get('/salesYearly',adminController.generateYearlyReport)
 adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
 
-// adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
-// adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
+adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
+adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
 
 //offer Dummy
 

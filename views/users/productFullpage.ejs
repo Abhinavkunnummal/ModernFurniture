@@ -3,7 +3,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="zoomContainer">
                 <img id="zoom_04" src="/productimage/<%= products.image[0] %>" data-zoom-image="/productimage/<%= products.image[0] %>">
                 <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= products._id %>">
@@ -18,8 +18,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="description">
+        <div class="col-12 col-md-6">
+            <div class="description mt-4 mt-md-0">
                 <h1><%= products.name %></h1>
                 <p><%= products.description %></p>
                 <% if (products.discount > 0) { %>

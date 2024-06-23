@@ -162,85 +162,93 @@
         </div>
         
       
-            <header class="main-header navbar">
-                <!-- existing header content -->
-            </header>
-        
-            <section class="content-main">
-                <div class="content-header">
-                    <div>
-                        <h2 class="content-title card-title">Dashboard</h2>
-                        <p>Whole data about your business here</p>
-                    </div>
-                    <div>
-                        <select id="reportType" class="form-select">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
-                        </select>
-                    </div>
-                </div>
-        
-                <div class="row">
-                    <div class="col-xl-8 col-lg-12">
-                        <div class="card mb-4">
-                            <article class="card-body">
-                                <h5 class="card-title">Sale Statistics</h5>
-                                <canvas id="salesChart" height="120px"></canvas>
-                            </article>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-12">
-                        <div class="card mb-4">
-                            <article class="card-body">
-                                <h5 class="card-title">Order Statistics</h5>
-                                <canvas id="orderChart" height="217"></canvas>
-                            </article>
-                        </div>
-                    </div>
-                </div>
-            </section>
+         <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .best-selling-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .best-selling-item {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <section class="content-main">
+        <div class="content-header">
+          
+            <div>
+                <select id="reportType" class="form-select">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+        </div>
 
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Best Selling Products</h5>
-                            <ul id="bestSellingProducts" class="list-group">
-                            </ul>
-                        </article>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Best Selling Categories</h5>
-                            <ul id="bestSellingCategories" class="list-group">
-                            </ul>
-                        </article>
-                    </div>
+        <div class="row">
+            <div class="col-xl-8 col-lg-12">
+                <div class="card mb-4">
+                    <article class="card-body">
+                        <h5 class="card-title">Sale Statistics</h5>
+                        <canvas id="salesChart" height="120px"></canvas>
+                    </article>
                 </div>
             </div>
-            
-        
-        <%- include('../admin_layouts/footer.ejs') %>
+            <div class="col-xl-4 col-lg-12">
+                <div class="card mb-4">
+                    <article class="card-body">
+                        <h5 class="card-title">Order Statistics</h5>
+                        <canvas id="orderChart" height="217"></canvas>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Best Selling Products</h5>
+                    <ul id="bestSellingProducts" class="list-group">
+                    </ul>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Best Selling Categories</h5>
+                    <ul id="bestSellingCategories" class="list-group">
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../admin_layouts/footer.ejs') %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/adminDashboard.js"></script>
-
-
-    <script src="/path/to/your/script.js"></script>
-    <script>
+<script>
+   document.addEventListener('DOMContentLoaded', () => {
     const salesCtx = document.getElementById('salesChart').getContext('2d');
     const orderCtx = document.getElementById('orderChart').getContext('2d');
-    
+
     let salesChart = new Chart(salesCtx, {
         type: 'bar',
         data: {
-            labels: [], 
+            labels: [],
             datasets: [{
                 label: 'Sales',
-                data: [], 
+                data: [],
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -252,7 +260,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '₹' + value.toLocaleString('en-IN'); 
+                            return '₹' + value.toLocaleString('en-IN');
                         }
                     }
                 }
@@ -268,14 +276,14 @@
             }
         }
     });
-    
+
     let orderChart = new Chart(orderCtx, {
         type: 'doughnut',
         data: {
-            labels: [], 
+            labels: [],
             datasets: [{
                 label: 'Orders',
-                data: [], 
+                data: [],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
@@ -308,7 +316,7 @@
             }
         }
     });
-    
+
     async function fetchData(reportType) {
         try {
             const response = await fetch(`/admin/reports/${reportType}`);
@@ -317,74 +325,81 @@
                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
             }
             const data = await response.json();
-            console.log('Fetched data:', data);
             return data;
         } catch (error) {
             console.error('Failed to fetch data:', error);
             return null;
         }
     }
-    
+
     function updateCharts(data) {
         if (data) {
-            console.log('Updating charts with data:', data);
-           
             salesChart.data.labels = data.sales.labels;
             salesChart.data.datasets[0].data = data.sales.datasets[0].data;
             salesChart.update();
-    
-          
+
             orderChart.data.labels = data.orders.labels;
             orderChart.data.datasets[0].data = data.orders.datasets[0].data;
             orderChart.update();
         }
     }
-    
+
     document.getElementById('reportType').addEventListener('change', async (e) => {
         const reportType = e.target.value;
         const data = await fetchData(reportType);
         updateCharts(data);
     });
-    
-    document.addEventListener('DOMContentLoaded', async () => {
+
+    async function fetchInitialData() {
         const data = await fetchData('daily');
         updateCharts(data);
-    });
+    }
 
     async function fetchBestSellingData() {
-    try {
-        const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-            fetch('/admin/best-selling-products'),
-            fetch('/admin/best-selling-categories'),
-            fetch('/admin/best-selling-brands')
-        ]);
+        try {
+            const [productsRes, categoriesRes] = await Promise.all([
+                fetch('/admin/best-selling-products'),
+                fetch('/admin/best-selling-categories')
+            ]);
 
-        const [products, categories, brands] = await Promise.all([
-            productsRes.json(),
-            categoriesRes.json(),
-            brandsRes.json()
-        ]);
+            const [products, categories] = await Promise.all([
+                productsRes.json(),
+                categoriesRes.json()
+            ]);
 
-        updateList('bestSellingProducts', products, 'productName');
-        updateList('bestSellingCategories', categories, '_id');
-        updateList('bestSellingBrands', brands, '_id');
-    } catch (error) {
-        console.error('Error fetching best selling data:', error);
+            updateProductList('bestSellingProducts', products);
+            updateList('bestSellingCategories', categories, 'categoryName');
+        } catch (error) {
+            console.error('Error fetching best selling data:', error);
+        }
     }
-}
 
-function updateList(elementId, data, key) {
-    const listElement = document.getElementById(elementId);
-    listElement.innerHTML = '';
-    data.forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.className = 'list-group-item';
-        listItem.textContent = `${item[key]} - ${item.totalQuantity}`;
-        listElement.appendChild(listItem);
-    });
-}
+    function updateProductList(elementId, data) {
+        const listElement = document.getElementById(elementId);
+        listElement.innerHTML = '';
+        data.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item best-selling-item';
+            const img = document.createElement('img');
+            img.src = item.productImage;
+            listItem.appendChild(img);
+            listItem.appendChild(document.createTextNode(`${item.productName} - ${item.totalQuantity}`));
+            listElement.appendChild(listItem);
+        });
+    }
 
-document.addEventListener('DOMContentLoaded', fetchBestSellingData);
+    function updateList(elementId, data, key) {
+        const listElement = document.getElementById(elementId);
+        listElement.innerHTML = '';
+        data.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.textContent = `${item[key]} - ${item.totalQuantity}`;
+            listElement.appendChild(listItem);
+        });
+    }
 
-    
+    fetchInitialData();
+    fetchBestSellingData();
+});
 </script>
