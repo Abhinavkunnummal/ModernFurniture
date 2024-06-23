@@ -1229,55 +1229,87 @@ const DummyCategoryupdateOffer=async(req,res)=>{
 
 const getBestSellingProducts = async (req, res) => {
   try {
-      const bestSellingProducts = await Order.aggregate([
-          { $unwind: "$orderedItem" },
-          {
-              $lookup: {
-                  from: "products",
-                  localField: "orderedItem.productId",
-                  foreignField: "_id",
-                  as: "product"
-              }
-          },
-          { $unwind: "$product" },
-          {
-              $group: {
-                  _id: "$orderedItem.productId",
-                  productName: { $first: "$product.name" },
-                  productImage: { $first: "$product.image" },
-                  totalQuantity: { $sum: "$orderedItem.quantity" }
-              }
-          },
-          { $sort: { totalQuantity: -1 } },
-          { $limit: 10 }
-      ]);
-      res.json(bestSellingProducts);
+    const bestSellingProducts = await Order.aggregate([
+      { $unwind: "$orderedItem" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderedItem.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $group: {
+          _id: "$orderedItem.productId",
+          productName: { $first: "$product.name" },
+          productImage: { $first: { $arrayElemAt: ["$product.image", 0] } },
+          totalQuantity: { $sum: "$orderedItem.quantity" }
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Prepend the public path to the product image filenames
+    bestSellingProducts.forEach(product => {
+      product.productImage = `/productimage/${product.productImage}`;
+    });
+
+    // Log the bestSellingProducts to debug
+    console.log(bestSellingProducts);
+
+    res.json(bestSellingProducts);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 
+
 const getBestSellingCategories = async (req, res) => {
   try {
-      const bestSellingCategories = await Order.aggregate([
-          { $unwind: "$orderedItem" },
-          {
-              $lookup: {
-                  from: "products",
-                  localField: "orderedItem.productId",
-                  foreignField: "_id",
-                  as: "product"
-              }
-          },
-          { $unwind: "$product" },
-          { $group: { _id: "$product.category", totalQuantity: { $sum: "$orderedItem.quantity" }, categoryName: { $first: "$product.category" } } },
-          { $sort: { totalQuantity: -1 } },
-          { $limit: 10 }
-      ]);
-      res.json(bestSellingCategories);
+    const bestSellingCategories = await Order.aggregate([
+      { $unwind: "$orderedItem" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderedItem.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $group: {
+          _id: "$product.category",
+          totalQuantity: { $sum: "$orderedItem.quantity" }
+        }
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      { $unwind: "$category" },
+      {
+        $project: {
+          _id: 1,
+          totalQuantity: 1,
+          categoryName: "$category.name"
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 }
+    ]);
+
+    res.json(bestSellingCategories);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
