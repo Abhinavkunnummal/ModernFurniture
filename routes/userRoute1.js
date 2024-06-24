@@ -117,6 +117,8 @@ userRoute.get('/thankyou',cartController.renderThankyou)
 userRoute.get('/orders',cartController.renderOrders)
 // userRoute.get('/createOrder',cartController.rend)
 
+userRoute.get('/coupons',cartController.showAllCoupons)
+
 userRoute.get('/orderDetails',cartController.renderFullDetails)
 
 userRoute.post('/cancelOrders',cartController.cancelOrder)

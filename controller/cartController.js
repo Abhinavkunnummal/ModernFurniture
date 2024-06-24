@@ -1352,6 +1352,14 @@ const showCoupons = async (req, res) => {
   }
 };
 
+const showAllCoupons= async (req, res) => {
+  try {
+    const coupons = await Coupon.find({});
+    res.json({ success: true, coupons });
+  } catch (error) {
+    res.json({ success: false, message: 'Failed to fetch coupons' });
+  }
+};
 
 
 module.exports = {
@@ -1391,5 +1399,6 @@ module.exports = {
     removeCoupon,
     showCoupons,
     razorPayRetryPayment,
-    verifyRetryPayment
+    verifyRetryPayment,
+    showAllCoupons
 };
