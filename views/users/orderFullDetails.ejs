@@ -228,55 +228,62 @@
                               <tbody>
                                 <% if (orders.orderedItem && orders.orderedItem.length > 0) { %>
                                   <% orders.orderedItem.forEach(item => { %>
-                                  <tr>
-                                    <td><%= item.productId.name %></td>
-                                    <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
-                                    <td><%= item.quantity %></td>
-                                    <td><%= item.orderStatus %></td>
-                                    <td><%= item.totalProductAmount %></td>
-                                    <td>
-                                      <% if (item.orderStatus === 'delivered') { %>
-                                        <button class="btn btn-warning" onclick="showReturnForm('<%= item._id %>')">Return</button>
-                                        <div id="returnForm-<%= item._id %>" class="return-form" style="display: none;">
-                                          <div class="form-group">
-                                            <label for="returnReason-<%= item._id %>">Reason for Return:</label>
-                                            <select class="form-control" id="returnReason-<%= item._id %>">
-                                              <option value="">Select a reason</option>
-                                              <option value="defective">Defective</option>
-                                              <option value="damaged">Damaged</option>
-                                              <option value="not_as_described">Not as Described</option>
-                                              <option value="other">Other</option>
-                                            </select>
+                                    <tr>
+                                      <td><%= item.productId.name %></td>
+                                      <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
+                                      <td><%= item.quantity %></td>
+                                      <td><%= item.orderStatus %></td>
+                                      <td><%= item.totalProductAmount %></td>
+                                      <td>
+                                        <% if (item.orderStatus === 'delivered') { %>
+                                          <!-- Show return form for delivered items -->
+                                          <button class="btn btn-warning" onclick="showReturnForm('<%= item._id %>')">Return</button>
+                                          <div id="returnForm-<%= item._id %>" class="return-form" style="display: none;">
+                                            <div class="form-group">
+                                              <label for="returnReason-<%= item._id %>">Reason for Return:</label>
+                                              <select class="form-control" id="returnReason-<%= item._id %>">
+                                                <option value="">Select a reason</option>
+                                                <option value="defective">Defective</option>
+                                                <option value="damaged">Damaged</option>
+                                                <option value="not_as_described">Not as Described</option>
+                                                <option value="other">Other</option>
+                                              </select>
+                                            </div>
+                                            <button class="btn btn-primary mt-2" onclick="submitReturn('<%= item._id %>')">Submit Return</button>
                                           </div>
-                                          <button class="btn btn-primary mt-2" onclick="submitReturn('<%= item._id %>')">Submit Return</button>
-                                        </div>
-                                        <a href="/invoice?orderId=<%= orders._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
-                                      <% } else if (item.orderStatus === 'returned') { %>
-                                        <button class="btn btn-success" disabled>Returned</button>
-                                      <% } else if (item.orderStatus === 'approved') { %>
-                                        <button class="btn btn-secondary" disabled>Approved</button>
-                                      <% } else if (item.orderStatus === 'rejected') { %>
-                                        <button class="btn btn-danger" disabled>Rejected</button>
-                                      <% } else if (item.orderStatus === 'cancelled') { %>
-                                        <button class="btn btn-secondary" disabled>Cancelled</button>
-                                      <% } else { %>
-                                        <button class="btn btn-danger" onclick="showCancelForm('<%= item._id %>')">Cancel Order</button>
-                                        <div id="cancelForm-<%= item._id %>" class="cancel-form" style="display: none;">
-                                          <div class="form-group">
-                                            <label for="cancelReason-<%= item._id %>">Reason for Cancellation:</label>
-                                            <select class="form-control" id="cancelReason-<%= item._id %>">
-                                              <option value="">Select a reason</option>
-                                              <option value="changed_mind">Changed Mind</option>
-                                              <option value="found_cheaper">Found Cheaper Elsewhere</option>
-                                              <option value="shipping_delay">Shipping Delay</option>
-                                              <option value="other">Other</option>
-                                            </select>
+                                          <!-- Link to download invoice -->
+                                          <a href="/invoice?orderId=<%= orders._id %>" class="btn btn-sm btn-primary" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
+                                        <% } else if (item.orderStatus === 'returned') { %>
+                                          <!-- Show returned status -->
+                                          <button class="btn btn-success" disabled>Returned</button>
+                                        <% } else if (item.orderStatus === 'approved') { %>
+                                          <!-- Show approved status -->
+                                          <button class="btn btn-secondary" disabled>Approved</button>
+                                        <% } else if (item.orderStatus === 'rejected') { %>
+                                          <!-- Show rejected status -->
+                                          <button class="btn btn-danger" disabled>Rejected</button>
+                                        <% } else if (item.orderStatus === 'cancelled') { %>
+                                          <!-- Show cancelled status -->
+                                          <button class="btn btn-secondary" disabled>Cancelled</button>
+                                        <% } else { %>
+                                          <!-- Show cancel form for other statuses -->
+                                          <button id="cancelButton-<%= item._id %>" class="btn btn-danger" onclick="showCancelForm('<%= item._id %>')">Cancel Order</button>
+                                          <div id="cancelForm-<%= item._id %>" class="cancel-form" style="display: none;">
+                                            <div class="form-group">
+                                              <label for="cancelReason-<%= item._id %>">Reason for Cancellation:</label>
+                                              <select class="form-control" id="cancelReason-<%= item._id %>">
+                                                <option value="">Select a reason</option>
+                                                <option value="changed_mind">Changed Mind</option>
+                                                <option value="found_cheaper">Found Cheaper Elsewhere</option>
+                                                <option value="shipping_delay">Shipping Delay</option>
+                                                <option value="other">Other</option>
+                                              </select>
+                                            </div>
+                                            <button class="btn btn-primary mt-2" onclick="submitCancel('<%= item._id %>')">Submit Cancellation</button>
                                           </div>
-                                          <button class="btn btn-primary mt-2" onclick="submitCancel('<%= item._id %>')">Submit Cancellation</button>
-                                        </div>
-                                      <% } %>
-                                    </td>
-                                  </tr>
+                                        <% } %>
+                                      </td>
+                                    </tr>
                                   <% }) %>
                                 <% } %>
                               </tbody>
@@ -352,47 +359,56 @@
                         }
                         
                         async function submitCancel(itemId) {
-                            const cancelReasonSelect = document.getElementById(`cancelReason-${itemId}`);
-                            const cancelReason = cancelReasonSelect.value;
-                        
-                            if (!cancelReason) {
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Warning',
-                                    text: 'Please select a cancellation reason',
-                                });
-                                return;
-                            }
-                        
-                            try {
-                                const response = await fetch('/cancelOrders', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ itemId: itemId, cancelReason: cancelReason })
-                                    
-                                });
-                        console.log(itemId, cancelReason);
-                                if (response.ok) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Success',
-                                        text: 'Cancellation request submitted successfully',
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    throw new Error('Failed to submit cancellation request');
-                                }
-                            } catch (error) {
-                                console.error('Error processing cancellation request:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Error processing cancellation request: ' + error.message,
-                                });
-                            }
-                        }
+  const cancelReasonSelect = document.getElementById(`cancelReason-${itemId}`);
+  const cancelReason = cancelReasonSelect.value;
+
+  if (!cancelReason) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Warning',
+      text: 'Please select a cancellation reason',
+    });
+    return;
+  }
+
+  try {
+    const response = await fetch('/cancelOrders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ itemId: itemId, cancelReason: cancelReason })
+    });
+
+    if (response.ok) {
+      // Update UI to show cancelled status and disable the cancel button
+      const cancelButton = document.getElementById(`cancelButton-${itemId}`);
+      cancelButton.textContent = 'Cancelled';
+      cancelButton.classList.remove('btn-danger');
+      cancelButton.classList.add('btn-secondary');
+      cancelButton.disabled = true;
+
+      // Optionally, you can update other UI elements to reflect cancelled status
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Cancellation request submitted successfully',
+      }).then(() => {
+        // Reload the page or update other UI elements as needed
+        window.location.reload();
+      });
+    } else {
+      throw new Error('Failed to submit cancellation request');
+    }
+  } catch (error) {
+    console.error('Error processing cancellation request:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error processing cancellation request: ' + error.message,
+    });
+  }
+}
                         </script>
                         

@@ -693,58 +693,55 @@ const renderFullDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    // console.log('ethis');
     const userId = req.session.user_id;
-    const { itemId, cancelReason } = req.body; 
-    // console.log(itemId + " cancel only if cancel id is there");
+    const { itemId, cancelReason } = req.body;
 
+    // Find the order based on userId and itemId
     const order = await Order.findOne({
       userId: userId,
       'orderedItem._id': itemId
     });
-// console.log('order is'+order);
+
     if (!order) {
-      req.flash('error', 'Order not found');
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    // Find the specific ordered item within the order
     const item = order.orderedItem.id(itemId);
-    // console.log(item.orderStatus+"orderstatus");
 
+    // Check if the order status allows cancellation
     if (item.orderStatus !== 'pending' && item.orderStatus !== 'approved') {
-      // req.flash('error', 'Order status is not eligible for cancellation');
       return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
     }
- 
-    item.orderStatus = 'Cancellation Request Sent';
-    // console.log("orderstatus "+item.orderStatus);
-    
+
+    // Update order item status to 'Cancelled' and add cancelReason
+    item.orderStatus = 'cancelled';
     item.cancelReason = cancelReason;
 
+    // Update product stock if applicable (assuming you have a Product model with 'stock' field)
     const product = await Product.findById(item.productId);
     if (product) {
       product.stock += item.quantity;
       await product.save();
     }
 
-    const wallet = await Wallet.findOne({ userId: userId });
+    // Update wallet balance with refund amount (assuming you have a Wallet model with 'balance' field)
     const refundAmount = +item.totalProductAmount;
-
+    const wallet = await Wallet.findOne({ userId: userId });
+    
     if (wallet) {
-      const refundTransaction = {
+      wallet.balance += refundAmount;
+      wallet.transaction.push({
         amount: refundAmount,
         transactionMethod: "Refund",
         formattedDate: new Date().toISOString()
-      };
-      wallet.balance += refundAmount;
-      wallet.transaction.push(refundTransaction);
+      });
       await wallet.save();
-      console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
     } else {
-      req.flash('error', 'Wallet not found');
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
+    // Save the updated order
     await order.save();
 
     req.flash('success', 'Cancellation request sent successfully');
@@ -754,6 +751,8 @@ const cancelOrder = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
 
 
 
