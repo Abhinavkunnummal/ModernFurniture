@@ -184,8 +184,8 @@
                                         <% if (item.orderStatus === 'returned') { %>
                                             <button class="btn btn-success approveReturnBtn" data-item-id="<%= item._id %>">Approve</button>
                                             <button class="btn btn-danger rejectReturnBtn" data-item-id="<%= item._id %>">Reject</button>
-                                        <% } else if (item.orderStatus === 'Cancelled') { %>
-                                            <button class="btn btn-success approveCancellationBtn" data-item-id="<%= item._id %>" dis>Approve Cancellation</button>
+                                        <% } else if (item.orderStatus === 'Cancellation Request Sent') { %>
+                                            <button class="btn btn-success approveCancellationBtn" data-item-id="<%= item._id %>">Approve Cancellation</button>
                                         <% } else if (item.orderStatus === 'approved') { %>
                                             <button class="btn btn-success approveBtn" data-item-id="<%= item._id %>" disabled>Approved</button>
                                             <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" disabled>Change Status</button>
