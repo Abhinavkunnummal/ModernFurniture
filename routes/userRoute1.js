@@ -64,7 +64,7 @@ userRoute.get("/logout", userController.logoutUser);
 // Google OAuth routes
 userRoute.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-userRoute.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login",successRedirect:"/home" }))
+userRoute.get("https://abhinavkunnummal.online/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login",successRedirect:"/home" }))
     
 //user profile
 
