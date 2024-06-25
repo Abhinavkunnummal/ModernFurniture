@@ -693,32 +693,25 @@ const renderFullDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    // console.log('ethis');
     const userId = req.session.user_id;
     const { itemId, cancelReason } = req.body; 
-    // console.log(itemId + " cancel only if cancel id is there");
 
     const order = await Order.findOne({
       userId: userId,
       'orderedItem._id': itemId
     });
-// console.log('order is'+order);
+
     if (!order) {
-      req.flash('error', 'Order not found');
       return res.status(404).json({ error: 'Order not found' });
     }
 
     const item = order.orderedItem.id(itemId);
-    // console.log(item.orderStatus+"orderstatus");
 
     if (item.orderStatus !== 'pending' && item.orderStatus !== 'approved') {
-      // req.flash('error', 'Order status is not eligible for cancellation');
       return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
     }
- 
-    item.orderStatus = 'Cancellation Request Sent';
-    // console.log("orderstatus "+item.orderStatus);
-    
+
+    item.orderStatus = 'Cancelled';
     item.cancelReason = cancelReason;
 
     const product = await Product.findById(item.productId);
@@ -739,15 +732,12 @@ const cancelOrder = async (req, res) => {
       wallet.balance += refundAmount;
       wallet.transaction.push(refundTransaction);
       await wallet.save();
-      console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
     } else {
-      req.flash('error', 'Wallet not found');
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
     await order.save();
 
-    req.flash('success', 'Cancellation request sent successfully');
     return res.status(200).json({ success: true, message: 'Cancellation request sent successfully' });
   } catch (error) {
     console.error('Error cancelling order item:', error);
