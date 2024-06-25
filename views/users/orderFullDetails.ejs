@@ -214,191 +214,185 @@
                         <div class="ordered-items">
                           <h4 class="bg-success text-white p-3 rounded shadow"><i class="fas fa-shopping-cart"></i> Ordered Items:</h4>
                           <div class="table-responsive">
-                              <table class="table table-striped table-bordered">
-                                  <thead>
-                                      <tr>
-                                          <th>Product ID</th>
-                                          <th>Product Name</th>
-                                          <th>Quantity</th>
-                                          <th>Order Status</th>
-                                          <th>Price</th>
-                                          <th>Action</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody>
-                                      <% if (orders.orderedItem && orders.orderedItem.length > 0) { %>
-                                          <% orders.orderedItem.forEach(item => { %>
-                                          <tr id="order-row-<%= item._id %>">
-                                              <td><%= item.productId.name %></td>
-                                              <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
-                                              <td><%= item.quantity %></td>
-                                              <td id="order-status-<%= item._id %>"><%= item.orderStatus %></td>
-                                              <td><%= item.totalProductAmount %></td>
-                                              <td>
-                                                  <% if (item.orderStatus === 'delivered') { %>
-                                                      <button class="btn btn-warning" onclick="showReturnForm('<%= item._id %>')">Return</button>
-                                                      <div id="returnForm-<%= item._id %>" class="return-form" style="display: none;">
-                                                          <div class="form-group">
-                                                              <label for="returnReason-<%= item._id %>">Reason for Return:</label>
-                                                              <select class="form-control" id="returnReason-<%= item._id %>">
-                                                                  <option value="">Select a reason</option>
-                                                                  <option value="defective">Defective</option>
-                                                                  <option value="damaged">Damaged</option>
-                                                                  <option value="not_as_described">Not as Described</option>
-                                                                  <option value="other">Other</option>
-                                                              </select>
-                                                          </div>
-                                                          <button class="btn btn-primary mt-2" onclick="submitReturn('<%= item._id %>')">Submit Return</button>
-                                                      </div>
-                                                      <a href="/invoice?orderId=<%= orders._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
-                                                  <% } else if (item.orderStatus === 'returned') { %>
-                                                      <button class="btn btn-success" disabled>Returned</button>
-                                                  <% } else if (item.orderStatus === 'approved') { %>
-                                                      <button class="btn btn-secondary" disabled>Approved</button>
-                                                  <% } else if (item.orderStatus === 'rejected') { %>
-                                                      <button class="btn btn-danger" disabled>Rejected</button>
-                                                  <% } else if (item.orderStatus === 'cancelled') { %>
-                                                      <button class="btn btn-secondary" disabled>Cancelled</button>
-                                                  <% } else { %>
-                                                      <button class="btn btn-danger" onclick="showCancelForm('<%= item._id %>')">Cancel Order</button>
-                                                      <div id="cancelForm-<%= item._id %>" class="cancel-form" style="display: none;">
-                                                          <div class="form-group">
-                                                              <label for="cancelReason-<%= item._id %>">Reason for Cancellation:</label>
-                                                              <select class="form-control" id="cancelReason-<%= item._id %>">
-                                                                  <option value="">Select a reason</option>
-                                                                  <option value="changed_mind">Changed Mind</option>
-                                                                  <option value="found_cheaper">Found Cheaper Elsewhere</option>
-                                                                  <option value="shipping_delay">Shipping Delay</option>
-                                                                  <option value="other">Other</option>
-                                                              </select>
-                                                          </div>
-                                                          <button class="btn btn-primary mt-2" onclick="submitCancel('<%= item._id %>')">Submit Cancellation</button>
-                                                      </div>
-                                                  <% } %>
-                                              </td>
-                                          </tr>
-                                          <% }) %>
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th>Product ID</th>
+                                  <th>Product Name</th>
+                                  <th>Quantity</th>
+                                  <th>Order Status</th>
+                                  <th>Price</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <% if (orders.orderedItem && orders.orderedItem.length > 0) { %>
+                                  <% orders.orderedItem.forEach(item => { %>
+                                  <tr>
+                                    <td><%= item.productId.name %></td>
+                                    <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
+                                    <td><%= item.quantity %></td>
+                                    <td><%= item.orderStatus %></td>
+                                    <td><%= item.totalProductAmount %></td>
+                                    <td>
+                                      <% if (item.orderStatus === 'delivered') { %>
+                                        <button class="btn btn-warning" onclick="showReturnForm('<%= item._id %>')">Return</button>
+                                        <div id="returnForm-<%= item._id %>" class="return-form" style="display: none;">
+                                          <div class="form-group">
+                                            <label for="returnReason-<%= item._id %>">Reason for Return:</label>
+                                            <select class="form-control" id="returnReason-<%= item._id %>">
+                                              <option value="">Select a reason</option>
+                                              <option value="defective">Defective</option>
+                                              <option value="damaged">Damaged</option>
+                                              <option value="not_as_described">Not as Described</option>
+                                              <option value="other">Other</option>
+                                            </select>
+                                          </div>
+                                          <button class="btn btn-primary mt-2" onclick="submitReturn('<%= item._id %>')">Submit Return</button>
+                                        </div>
+                                        <a href="/invoice?orderId=<%= orders._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
+                                      <% } else if (item.orderStatus === 'returned') { %>
+                                        <button class="btn btn-success" disabled>Returned</button>
+                                      <% } else if (item.orderStatus === 'approved') { %>
+                                        <button class="btn btn-secondary" disabled>Approved</button>
+                                      <% } else if (item.orderStatus === 'rejected') { %>
+                                        <button class="btn btn-danger" disabled>Rejected</button>
+                                      <% } else if (item.orderStatus === 'cancelled') { %>
+                                        <button class="btn btn-secondary" disabled>Cancelled</button>
+                                      <% } else { %>
+                                        <button class="btn btn-danger" onclick="showCancelForm('<%= item._id %>')">Cancel Order</button>
+                                        <div id="cancelForm-<%= item._id %>" class="cancel-form" style="display: none;">
+                                          <div class="form-group">
+                                            <label for="cancelReason-<%= item._id %>">Reason for Cancellation:</label>
+                                            <select class="form-control" id="cancelReason-<%= item._id %>">
+                                              <option value="">Select a reason</option>
+                                              <option value="changed_mind">Changed Mind</option>
+                                              <option value="found_cheaper">Found Cheaper Elsewhere</option>
+                                              <option value="shipping_delay">Shipping Delay</option>
+                                              <option value="other">Other</option>
+                                            </select>
+                                          </div>
+                                          <button class="btn btn-primary mt-2" onclick="submitCancel('<%= item._id %>')">Submit Cancellation</button>
+                                        </div>
                                       <% } %>
-                                  </tbody>
-                              </table>
+                                    </td>
+                                  </tr>
+                                  <% }) %>
+                                <% } %>
+                              </tbody>
+                            </table>
                           </div>
-                      </div>
-                      <% } else { %>
-                      <p>No orders found.</p>
-                      <% } %>
-                      
+                        </div>
+                        <% } else { %>
+                        <p>No orders found.</p>
+                        <% } %>
                         
-                      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                      <script>
-                          function showReturnForm(itemId) {
-                              var returnForm = document.getElementById('returnForm-' + itemId);
-                              if (returnForm) {
-                                  returnForm.style.display = 'block';
-                              } else {
-                                  console.error('Return form not found for item ID:', itemId);
-                              }
-                          }
-                      
-                          async function submitReturn(itemId) {
-                              const returnReasonSelect = document.getElementById(`returnReason-${itemId}`);
-                              const returnReason = returnReasonSelect.value;
-                      
-                              if (!returnReason) {
-                                  Swal.fire({
-                                      icon: 'warning',
-                                      title: 'Warning',
-                                      text: 'Please select a return reason',
-                                  });
-                                  return;
-                              }
-                      
-                              try {
-                                  const response = await fetch('/returnOrder', {
-                                      method: 'POST',
-                                      headers: {
-                                          'Content-Type': 'application/json'
-                                      },
-                                      body: JSON.stringify({ orderId: itemId, returnReason })
-                                  });
-                      
-                                  if (response.ok) {
-                                      Swal.fire({
-                                          icon: 'success',
-                                          title: 'Success',
-                                          text: 'Return request submitted successfully',
-                                      }).then(() => {
-                                          window.location.reload();
-                                      });
-                                  } else {
-                                      throw new Error('Failed to submit return request');
-                                  }
-                              } catch (error) {
-                                  console.error('Error processing return request:', error);
-                                  Swal.fire({
-                                      icon: 'error',
-                                      title: 'Error',
-                                      text: 'Error processing return request: ' + error.message,
-                                  });
-                              }
-                          }
-                      
-                          function showCancelForm(itemId) {
-                              var cancelForm = document.getElementById('cancelForm-' + itemId);
-                              console.log(itemId);
-                              if (cancelForm) {
-                                  cancelForm.style.display = 'block';
-                              } else {
-                                  console.error('Cancel form not found for item ID:', itemId);
-                              }
-                          }
-                      
-                          async function submitCancel(itemId) {
-                              const cancelReasonSelect = document.getElementById(`cancelReason-${itemId}`);
-                              const cancelReason = cancelReasonSelect.value;
-                      
-                              if (!cancelReason) {
-                                  Swal.fire({
-                                      icon: 'warning',
-                                      title: 'Warning',
-                                      text: 'Please select a cancellation reason',
-                                  });
-                                  return;
-                              }
-                      
-                              try {
-                                  const response = await fetch('/cancelOrders', {
-                                      method: 'POST',
-                                      headers: {
-                                          'Content-Type': 'application/json'
-                                      },
-                                      body: JSON.stringify({ itemId: itemId, cancelReason: cancelReason })
-                                  });
-                      
-                                  if (response.ok) {
-                                      // Immediately update the UI to reflect the cancellation
-                                      document.getElementById(`order-status-${itemId}`).innerText = 'Cancelled';
-                                      const cancelBtn = document.querySelector(`#order-row-${itemId} .btn-danger`);
-                                      cancelBtn.innerText = 'Cancelled';
-                                      cancelBtn.classList.remove('btn-danger');
-                                      cancelBtn.classList.add('btn-secondary');
-                                      cancelBtn.disabled = true;
-                      
-                                      Swal.fire({
-                                          icon: 'success',
-                                          title: 'Success',
-                                          text: 'Cancellation request submitted successfully',
-                                      });
-                                  } else {
-                                      throw new Error('Failed to submit cancellation request');
-                                  }
-                              } catch (error) {
-                                  console.error('Error processing cancellation request:', error);
-                                  Swal.fire({
-                                      icon: 'error',
-                                      title: 'Error',
-                                      text: 'Error processing cancellation request: ' + error.message,
-                                  });
-                              }
-                          }
-                      </script>
-                      
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                        function showReturnForm(itemId) {
+                            var returnForm = document.getElementById('returnForm-' + itemId);
+                            if (returnForm) {
+                                returnForm.style.display = 'block';
+                            } else {
+                                console.error('Return form not found for item ID:', itemId);
+                            }
+                        }
+                        
+                        async function submitReturn(itemId) {
+                            const returnReasonSelect = document.getElementById(`returnReason-${itemId}`);
+                            const returnReason = returnReasonSelect.value;
+                        
+                            if (!returnReason) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Warning',
+                                    text: 'Please select a return reason',
+                                });
+                                return;
+                            }
+                        
+                            try {
+                                const response = await fetch('/returnOrder', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ orderId: itemId, returnReason })
+                                });
+                        
+                                if (response.ok) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Return request submitted successfully',
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    throw new Error('Failed to submit return request');
+                                }
+                            } catch (error) {
+                                console.error('Error processing return request:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error processing return request: ' + error.message,
+                                });
+                            }
+                        }
+                        
+                        function showCancelForm(itemId) {
+                            var cancelForm = document.getElementById('cancelForm-' + itemId);
+                            console.log(itemId);
+                            if (cancelForm) {
+                                cancelForm.style.display = 'block';
+                            } else {
+                                console.error('Cancel form not found for item ID:', itemId);
+                            }
+                        }
+                        
+                        async function submitCancel(itemId) {
+                            const cancelReasonSelect = document.getElementById(`cancelReason-${itemId}`);
+                            const cancelReason = cancelReasonSelect.value;
+                        
+                            if (!cancelReason) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Warning',
+                                    text: 'Please select a cancellation reason',
+                                });
+                                return;
+                            }
+                        
+                            try {
+                                const response = await fetch('/cancelOrders', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ itemId: itemId, cancelReason: cancelReason })
+                                    
+                                });
+                        console.log(itemId, cancelReason);
+                                if (response.ok) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Cancellation request submitted successfully',
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    throw new Error('Failed to submit cancellation request');
+                                }
+                            } catch (error) {
+                                console.error('Error processing cancellation request:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error processing cancellation request: ' + error.message,
+                                });
+                            }
+                        }
+                        </script>
+                        

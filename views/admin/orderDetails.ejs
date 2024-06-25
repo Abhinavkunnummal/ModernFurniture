@@ -145,62 +145,62 @@
             <h3>Order Dashboard</h3>
         </header>
     
-        <section class="content-main">
-            <% orderData.reverse().forEach((order, index) => { %>
-                <div class="order-container">
-                    <div class="order-index"><%= orderData.length - index %></div>
-                    <div class="order-content">
-                        <div class="order-header">
-                            <div>
-                                <strong>Order #<%= order._id %></strong> <span>(<%= orderData.length - index %>)</span><br>
-                                <span>Total Amount: $<%= order.orderAmount %></span>
-                            </div>
-                        </div>
-                        <% if (order.deliveryAddress) { %>
-                            <div class="user-address">
-                                <strong>Shipping Address:</strong><br>
-                                <%= order.deliveryAddress.street %>, <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %> <%= order.deliveryAddress.zip %><br>
-                                <%= order.deliveryAddress.country %>
-                            </div>
-                        <% } else { %>
-                            <div class="user-address">
-                                <strong>Shipping Address:</strong><br>
-                                <em>Address not available</em>
-                            </div>
-                        <% } %>
-                        <div class="order-details">
-                            <% order.orderedItem.forEach((item, itemIndex) => { %>
-                                <div class="order-item">
-                                    <div class="order-item-left">
-                                        <img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>">
-                                        <div>
-                                            <div><strong><%= item.productId.name %></strong></div>
-                                            <div>Quantity: <%= item.quantity %></div>
-                                            <div>Price: $<%= item.totalProductAmount %></div>
-                                            <div class="status-<%= item.orderStatus %>">Status: <%= item.orderStatus %></div>
-                                        </div>
-                                    </div>
-                                    <div class="order-actions" data-status="<%= item.orderStatus %>" data-item-id="<%= item._id %>">
-                                        <% if (item.orderStatus === 'returned') { %>
-                                            <button class="btn btn-success approveReturnBtn" data-item-id="<%= item._id %>">Approve</button>
-                                            <button class="btn btn-danger rejectReturnBtn" data-item-id="<%= item._id %>">Reject</button>
-                                        <% } else if (item.orderStatus === 'Cancellation Request Sent') { %>
-                                            <button class="btn btn-success approveCancellationBtn" data-item-id="<%= item._id %>">Approve Cancellation</button>
-                                        <% } else if (item.orderStatus === 'approved') { %>
-                                            <button class="btn btn-success approveBtn" data-item-id="<%= item._id %>" disabled>Approved</button>
-                                            <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" disabled>Change Status</button>
-                                        <% } else { %>
-                                            <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" <% if (item.orderStatus === 'cancelled') { %> disabled <% } %>>Change Status</button>
-                                        <% } %>
-                                    </div>
-                                    
-                                </div>
-                            <% }) %>
-                        </div>
+       <section class="content-main">
+    <% orderData.reverse().forEach((order, index) => { %>
+        <div class="order-container">
+            <div class="order-index"><%= orderData.length - index %></div>
+            <div class="order-content">
+                <div class="order-header">
+                    <div>
+                        <strong>Order #<%= order._id %></strong> <span>(<%= orderData.length - index %>)</span><br>
+                        <span>Total Amount: $<%= order.orderAmount %></span>
                     </div>
                 </div>
-            <% }) %>
-        </section>
+                <% if (order.deliveryAddress) { %>
+                    <div class="user-address">
+                        <strong>Shipping Address:</strong><br>
+                        <%= order.deliveryAddress.street %>, <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %> <%= order.deliveryAddress.zip %><br>
+                        <%= order.deliveryAddress.country %>
+                    </div>
+                <% } else { %>
+                    <div class="user-address">
+                        <strong>Shipping Address:</strong><br>
+                        <em>Address not available</em>
+                    </div>
+                <% } %>
+                <div class="order-details">
+                    <% order.orderedItem.forEach((item, itemIndex) => { %>
+                        <div class="order-item">
+                            <div class="order-item-left">
+                                <img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>">
+                                <div>
+                                    <div><strong><%= item.productId.name %></strong></div>
+                                    <div>Quantity: <%= item.quantity %></div>
+                                    <div>Price: $<%= item.totalProductAmount %></div>
+                                    <div class="status-<%= item.orderStatus %>">Status: <%= item.orderStatus %></div>
+                                </div>
+                            </div>
+                            <div class="order-actions" data-status="<%= item.orderStatus %>" data-item-id="<%= item._id %>">
+                                <% if (item.orderStatus === 'returned') { %>
+                                    <button class="btn btn-success approveReturnBtn" data-item-id="<%= item._id %>">Approve</button>
+                                    <button class="btn btn-danger rejectReturnBtn" data-item-id="<%= item._id %>">Reject</button>
+                                <% } else if (item.orderStatus === 'Cancelled' || item.orderStatus === 'cancelled') { %>
+                                    <button class="btn btn-success approveCancellationBtn" data-item-id="<%= item._id %>" disabled>Cancelled</button>
+                                <% } else if (item.orderStatus === 'approved') { %>
+                                    <button class="btn btn-success approveBtn" data-item-id="<%= item._id %>" disabled>Approved</button>
+                                    <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" disabled>Change Status</button>
+                                <% } else { %>
+                                    <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" <% if (item.orderStatus === 'Cancelled' || item.orderStatus === 'cancelled') { %> disabled <% } %>>Change Status</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    <% }) %>
+</section>
+
         
         <!-- Status Change Modal -->
         <div class="modal fade" id="statusChangeModal" tabindex="-1" role="dialog" aria-labelledby="statusChangeModalLabel" aria-hidden="true">
@@ -230,138 +230,98 @@
                 </div>
             </div>
         </div>
-        
         <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script>
-            $(document).ready(function(){
-                let currentOrderId;
-                let currentItemId;
-        
-                $('.changeStatusBtn').on('click', function(e){
-                    e.preventDefault();
-                    currentOrderId = $(this).data('order-id');
-                    currentItemId = $(this).data('item-id');
-                    $('#modalOrderStatus').val('');
-                    $('#statusChangeModal').modal('show');
-                });
-        
-                $('#saveStatus').on('click', function(e){
-                    e.preventDefault();
-                    var selectedStatus = $('#modalOrderStatus').val();
-                    if (!selectedStatus) {
-                        swal("Error", "Please choose a status.", "error");
-                        return;
-                    }
-        
-                    $.post('/admin/updatestatus', { orderId: currentOrderId, itemId: currentItemId, status: selectedStatus }, function(response){
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    $(document).ready(function(){
+        let currentOrderId;
+        let currentItemId;
+
+        $('.changeStatusBtn').on('click', function(e){
+            e.preventDefault();
+            currentOrderId = $(this).data('order-id');
+            currentItemId = $(this).data('item-id');
+            $('#modalOrderStatus').val('');
+            $('#statusChangeModal').modal('show');
+        });
+
+        $('#saveStatus').on('click', function(e){
+            e.preventDefault();
+            var selectedStatus = $('#modalOrderStatus').val();
+            if (!selectedStatus) {
+                swal("Error", "Please choose a status.", "error");
+                return;
+            }
+
+            $.post('/admin/updatestatus', { orderId: currentOrderId, itemId: currentItemId, status: selectedStatus }, function(response){
+                if(response.success){
+                    swal("Success", "Order status updated successfully.", "success").then(() => {
+                        location.reload();
+                    });
+                } else {
+                    swal("Error", "Failed to update order status.", "error");
+                }
+            });
+        });
+
+        $(document).on('click', '.approveReturnBtn', function(e){
+            e.preventDefault();
+            const itemId = $(this).data('item-id');
+            const button = $(this);
+
+            swal({
+                title: "Are you sure?",
+                text: "Do you want to approve this return?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willApprove) => {
+                if (willApprove) {
+                    $.post('/admin/approveReturn', { itemId: itemId }, function(response){
                         if(response.success){
-                            swal("Success", "Order status updated successfully.", "success").then(() => {
-                                location.reload();
+                            swal("Success", "Return approved successfully.", "success").then(() => {
+                                button.text('Approved').prop('disabled', true).removeClass('approveReturnBtn').addClass('btn-success');
+                                button.closest('.order-actions').find('.rejectReturnBtn').remove();
+                                button.closest('.order-actions').data('status', 'approved');
                             });
                         } else {
-                            swal("Error", "Failed to update order status.", "error");
+                            swal("Error", "Failed to approve return.", "error");
                         }
                     });
-                });
-        
-               
-                $(document).on('click', '.approveReturnBtn', function(e){
-                    e.preventDefault();
-                    const itemId = $(this).data('item-id');
-                    const button = $(this);
-        
-                    swal({
-                        title: "Are you sure?",
-                        text: "Do you want to approve this return?",
-                        icon: "warning",
-                        buttons: true,
-                        dangerMode: true,
-                    }).then((willApprove) => {
-                        if (willApprove) {
-                            $.post('/admin/approveReturn', { itemId: itemId }, function(response){
-                                if(response.success){
-                                    swal("Success", "Return approved successfully.", "success").then(() => {
-                                     
-                                        button.text('Approved').prop('disabled', true).removeClass('approveReturnBtn').addClass('btn-success');
-                                        
-                                        button.closest('.order-actions').find('.rejectReturnBtn').remove();
-                                        
-                                        button.closest('.order-actions').data('status', 'approved');
-                                    });
-                                } else {
-                                    swal("Error", "Failed to approve return.", "error");
-                                }
-                            });
-                        }
-                    });
-                });
-        
-                
-                $(document).on('click', '.rejectReturnBtn', function(e){
-                    e.preventDefault();
-                    const itemId = $(this).data('item-id');
-                    const button = $(this);
-        
-                    swal({
-                        title: "Are you sure?",
-                        text: "Do you want to reject this return?",
-                        icon: "warning",
-                        buttons: true,
-                        dangerMode: true,
-                    }).then((willReject) => {
-                        if (willReject) {
-                            $.post('/admin/rejectReturn', { itemId: itemId }, function(response){
-                                if(response.success){
-                                    swal("Success", "Return rejected successfully.", "success").then(() => {
-                                     
-                                        button.text('Rejected').prop('disabled', true).removeClass('rejectReturnBtn').addClass('btn-danger');
-                                     
-                                        button.closest('.order-actions').find('.approveReturnBtn').remove();
-                                     
-                                        button.closest('.order-actions').data('status', 'rejected');
-                                    });
-                                } else {
-                                    swal("Error", "Failed to reject return.", "error");
-                                }
-                            });
-                        }
-                    });
-                });
-        
-                
-                $(document).on('click', '.approveCancellationBtn', function(e){
-                    e.preventDefault();
-                    const itemId = $(this).data('item-id');
-                    const button = $(this);
-        
-                    swal({
-                        title: "Are you sure?",
-                        text: "Do you want to approve this cancellation request?",
-                        icon: "warning",
-                        buttons: true,
-                        dangerMode: true,
-                    }).then((willApprove) => {
-                        if (willApprove) {
-                            $.post('/admin/approveCancellation', { itemId: itemId }, function(response){
-                                if(response.success){
-                                    swal("Success", "Cancellation request approved successfully.", "success").then(() => {
-                                      
-                                        button.text('Cancellation Approved').prop('disabled', true).removeClass('approveCancellationBtn').addClass('btn-success');
-                                      
-                                        button.closest('.order-actions').data('status', 'cancelled');
-                                    });
-                                } else {
-                                    swal("Error", "Failed to approve cancellation request.", "error");
-                                }
-                            });
-                        }
-                    });
-                });
-        
+                }
             });
-        </script>
+        });
+
+        $(document).on('click', '.rejectReturnBtn', function(e){
+            e.preventDefault();
+            const itemId = $(this).data('item-id');
+            const button = $(this);
+
+            swal({
+                title: "Are you sure?",
+                text: "Do you want to reject this return?",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willReject) => {
+                if (willReject) {
+                    $.post('/admin/rejectReturn', { itemId: itemId }, function(response){
+                        if(response.success){
+                            swal("Success", "Return rejected successfully.", "success").then(() => {
+                                button.text('Rejected').prop('disabled', true).removeClass('rejectReturnBtn').addClass('btn-danger');
+                                button.closest('.order-actions').find('.approveReturnBtn').remove();
+                                button.closest('.order-actions').data('status', 'rejected');
+                            });
+                        } else {
+                            swal("Error", "Failed to reject return.", "error");
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
     </main>
 </body>
 </html>
