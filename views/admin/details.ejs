@@ -1,5 +1,5 @@
-<%- include('../admin_layouts/header.ejs') %>
-<%- include('../admin_layouts/sidenav.ejs') %>
+<%- include('/home/ubuntu/ModernFurniture/views/admin_layouts/header.ejs') %>
+<%- include('/home/ubuntu/ModernFurniture/views/admin_layouts/sidenav.ejs') %>
 <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container">
@@ -491,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append(`productImage`, croppedImages[key],originalFileName);
         });
         console.log(formData);
-        console.log("hello .....,...>>>>>>");
+        console.log("hello ..>>>>>>");
         axios.post('/admin/editProducts', formData, {
             headers: {
                 'Content-type': "multipart/form-data"
@@ -522,4 +522,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 
-<%- include('../admin_layouts/footer.ejs') %>
+<%- include('/home/ubuntu/ModernFurniture/views/admin_layouts/footer.ejs') %>
