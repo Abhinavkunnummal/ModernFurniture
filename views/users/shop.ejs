@@ -1,85 +1,112 @@
 <%- include('../layouts/header.ejs') %>
 <%- include('../layouts/navbar.ejs') %>
 
-
-<!-- Sorting Options -->
 <div class="container mt-3">
-    <div class="row">
-        <div class="col-md-6">
-           <!-- Sorting Options -->
-           <select class="form-select" id="sortingOptions">
-               <option value="">Sort By:</option>
-               <option value="nameAZ">Name: A-Z</option>
-               <option value="nameZA">Name: Z-A</option>
-               <option value="newArrivals">New Arrivals</option>
-               <option value="priceLowToHigh">Price: Low to High</option>
-               <option value="priceHighToLow">Price: High to Low</option>
-           </select>
-        </div>
-    </div>
+  <div class="row">
+      <!-- Search Field -->
+      <div class="col-md-6 mb-3">
+          <div class="input-group">
+              <input type="text" id="searchField" class="form-control" placeholder="Search for products...">
+              <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                  Search
+              </button>
+          </div>
+      </div>
+
+      <!-- Sorting Options -->
+      <div class="col-md-3 mb-3">
+          <select class="form-select" id="sortingOptions">
+              <option value="">Sort By:</option>
+              <option value="nameAZ">Name: A-Z</option>
+              <option value="nameZA">Name: Z-A</option>
+              <option value="newArrivals">New Arrivals</option>
+              <option value="priceLowToHigh">Price: Low to High</option>
+              <option value="priceHighToLow">Price: High to Low</option>
+          </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="col-md-3 mb-3">
+          <select class="form-select" id="categoryFilter">
+              <option value="">All Categories</option>
+              <% categories.forEach(element => { %>
+              <option value="<%= element._id %>"><%= element.name %></option>
+              <% }) %>
+          </select>
+      </div>
+  </div>
 </div>
 
-<!-- Category Filter -->
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-md-6">
-           <!-- Category Filter -->
-           <select class="form-select" id="categoryFilter">
-               <option value="">All Categories</option>
-               <% categories.forEach(element => { %>
-               <option value="<%= element._id %>"><%= element.name %></option>
-               <% }) %>
-           </select>
-        </div>
-    </div>
-</div>
 
 <div class="untree_co-section product-section before-footer-section">
     <div class="container">
-      <div class="row" id="productList">
-        <% products.forEach(product => { %>
-          <div class="col-12 col-md-6 col-lg-4 mb-5">
-            <a class="product-item" href='/productFull?id=<%= product._id %>'>
-              <div class="product-item-inner" >
-                <% if (product.discount > 0) { %>
-                  <span class="badge bg-danger p-3 big-offer-badge "><%= product.discount %>% OFF</span>
-                <% } %>
-                <img src="/productimage/<%= product.image[0] %>" class="img-fluid product-thumbnail" alt="<%= product.name %>">
-                <div class="product-item-details">
-                  <% if (product.isNew) { %>
-                    <span class="badge bg-success">New</span>
-                  <% } %>
-                  <% if (product.stock === 0) { %>
-                    <span class="badge bg-danger">Out of Stock</span>
-                  <% } %>
-                  <h3 class="product-title"><%= product.name %></h3>
-                  <% if (product.discount > 0) { %>
-                    <strong class="product-price text-decoration-line-through">$<%= product.price.toFixed(2) %></strong>
-                    <strong class="product-price">$<%= product.discountedPrice.toFixed(2) %></strong>
-                  <% } else { %>
-                    <strong class="product-price">$<%= product.price.toFixed(2) %></strong>
-                  <% } %>
-                  <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= product._id %>">
-                    <i class="fas fa-heart"></i>
-                  </button>
-                  <% if (product.stock > 0) { %>
-                    <a href="/addToCart?productId=<%= product._id %>" class="btn btn-success">Add To Cart</a>
-                  <% } else { %>
-                    <button class="btn btn-secondary" disabled>Out of Stock</button>
-                  <% } %>
-                </div>
-              </div>
-              <span class="icon-cross">
-                <img src="assets/images/cross.svg" class="img-fluid" alt="cross icon">
-              </span>
-            </a>
-          </div>
-        <% }) %>
-      </div>
-    </div>
-  </div>
+        <div class="row" id="productList">
+            <% products.forEach(product => { %>
+            <div class="col-12 col-md-6 col-lg-4 mb-5">
+                <a class="product-item" href='/productFull?id=<%= product._id %>'>
+                    <div class="product-item-inner">
+                        <% if (product.discount > 0) { %>
+                        <span class="badge bg-danger p-3 big-offer-badge "><%= product.discount %>% OFF</span>
+                        <% } %>
+                        <img src="/productimage/<%= product.image[0] %>" class="img-fluid product-thumbnail" alt="<%= product.name %>">
+                        <div class="product-item-details">
+                            <% if (product.isNew) { %>
+                            <span class="badge bg-success">New</span>
+                            <% } %>
+                            <% if (product.stock === 0) { %>
+                            <span class="badge bg-danger">Out of Stock</span>
+                            <% } %>
+                            <h3 class="product-title"><%= product.name %></h3>
+                            <% if (product.discount > 0) { %>
+                            <strong class="product-price text-decoration-line-through">$<%= product.price.toFixed(2) %></strong>
+                            <strong class="product-price">$<%= product.discountedPrice.toFixed(2) %></strong>
+                            <% } else { %>
+                            <strong class="product-price">$<%= product.price.toFixed(2) %></strong>
+                            <% } %>
+                            <button class="btn btn-outline-danger wishlist-icon" data-product-id="<%= product._id %>">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <% if (product.stock > 0) { %>
+                            <a href="/addToCart?productId=<%= product._id %>" class="btn btn-success">Add To Cart</a>
+                            <% } else { %>
+                            <button class="btn btn-secondary" disabled>Out of Stock</button>
+                            <% } %>
+                        </div>
+                    </div>
+                    <span class="icon-cross">
+                        <img src="assets/images/cross.svg" class="img-fluid" alt="cross icon">
+                    </span>
+                </a>
+            </div>
+            <% }) %>
+        </div>
 
-  
+        <!-- Pagination Controls -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="#" aria-label="Previous" data-page="<%= currentPage - 1 %>">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="#" data-page="<%= i %>"><%= i %></a>
+                        </li>
+                        <% } %>
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="#" aria-label="Next" data-page="<%= currentPage + 1 %>">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
 
 <%- include('../layouts/footer.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -87,27 +114,45 @@
     document.getElementById('sortingOptions').addEventListener('change', function () {
         fetchProducts();
     });
-    
+
     document.getElementById('categoryFilter').addEventListener('change', function () {
         fetchProducts();
     });
-    
-    function fetchProducts() {
+
+    document.getElementById('searchField').addEventListener('input', function () {
+        fetchProducts();
+    });
+
+    document.getElementById('searchButton').addEventListener('click', function () {
+        fetchProducts();
+    });
+
+    document.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            fetchProducts(page);
+        });
+    });
+
+    function fetchProducts(page = 1) {
         var sortingCriteria = document.getElementById('sortingOptions').value;
         var category = document.getElementById('categoryFilter').value;
-    
-        fetch(`/sortProducts?sort=${sortingCriteria}&category=${category}`)
+        var searchQuery = document.getElementById('searchField').value;
+
+        fetch(`/sortProducts?sort=${sortingCriteria}&category=${category}&search=${searchQuery}&page=${page}`)
             .then(response => response.json())
             .then(data => {
                 renderProducts(data.products);
+                renderPagination(data.currentPage, data.totalPages);
             })
             .catch(error => console.error('Error fetching and sorting products:', error));
     }
-    
+
     function renderProducts(products) {
         var productList = document.getElementById('productList');
-        productList.innerHTML = ''; 
-    
+        productList.innerHTML = '';
+
         products.forEach(product => {
             var productItem = `
                 <div class="col-12 col-md-4 col-lg-4 mb-5">
@@ -117,18 +162,18 @@
                         ${product.isNew ? '<span class="badge bg-success">New</span>' : ''}
                         ${product.stock === 0 ? '<span class="badge bg-danger">Out of Stock</span>' : ''}
                         <h3 class="product-title">${product.name}</h3>
-                        ${product.discount > 0 
-                            ? `<strong class="product-price text-decoration-line-through">${product.price}</strong>
+                        ${product.discount > 0
+                ? `<strong class="product-price text-decoration-line-through">${product.price}</strong>
                                <strong class="product-price">${product.discountedPrice}</strong>`
-                            : `<strong class="product-price">${product.price}</strong>`
-                        }
+                : `<strong class="product-price">${product.price}</strong>`
+            }
                         <button class="btn btn-outline-danger wishlist-icon" data-product-id="${product._id}">
                             <i class="fas fa-heart"></i>
                         </button>
-                        ${product.stock > 0 
-                            ? `<a href="/addToCart?productId=${product._id}" class="btn btn-success">Add To Cart</a>`
-                            : '<button class="btn btn-secondary" disabled>Out of Stock</button>'
-                        }
+                        ${product.stock > 0
+                ? `<a href="/addToCart?productId=${product._id}" class="btn btn-success">Add To Cart</a>`
+                : '<button class="btn btn-secondary" disabled>Out of Stock</button>'
+            }
                         <span class="icon-cross">
                             <img src="assets/images/cross.svg" class="img-fluid">
                         </span>
@@ -137,14 +182,55 @@
             `;
             productList.insertAdjacentHTML('beforeend', productItem);
         });
-    
+
         attachEventListeners();
     }
-    
+
+    function renderPagination(currentPage, totalPages) {
+        const paginationContainer = document.querySelector('.pagination');
+        paginationContainer.innerHTML = '';
+
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+
+        paginationContainer.innerHTML = `
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link" href="#" aria-label="Previous" data-page="${currentPage - 1}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        `;
+
+        for (let i = 1; i <= totalPages; i++) {
+            const active = currentPage === i ? 'active' : '';
+            paginationContainer.innerHTML += `
+                <li class="page-item ${active}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+
+        paginationContainer.innerHTML += `
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link" href="#" aria-label="Next" data-page="${currentPage + 1}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        `;
+
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                fetchProducts(page);
+            });
+        });
+    }
+
     function attachEventListeners() {
         const wishlistIcons = document.querySelectorAll('.wishlist-icon');
         wishlistIcons.forEach(icon => {
-            icon.addEventListener('click', function() {
+            icon.addEventListener('click', function () {
                 const productId = this.dataset.productId;
                 fetch(`/wishlist/add/${productId}`, {
                     method: 'POST',
@@ -152,42 +238,43 @@
                         'Content-Type': 'application/json'
                     }
                 }).then(response => response.json())
-                  .then(data => {
-                      if (data.success) {
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Added to Wishlist',
-                              showConfirmButton: false,
-                              timer: 1500
-                          });
-                      } else {
-                          Swal.fire({
-                              icon: 'error',
-                              title: 'Error',
-                              text: data.message || 'Could not add to wishlist. Try again later.',
-                          });
-                      }
-                  })
-                  .catch(error => {
-                      Swal.fire({
-                          icon: 'error',
-                          title: 'Error',
-                          text: 'Could not add to wishlist. Try again later.',
-                      });
-                      console.error('Error adding to wishlist:', error);
-                  });
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Added to Wishlist',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Could not add to wishlist. Try again later.',
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Could not add to wishlist. Try again later.',
+                        });
+                        console.error('Error adding to wishlist:', error);
+                    });
             });
-    
-            icon.closest('.product-item').addEventListener('mouseenter', function() {
+
+            icon.closest('.product-item').addEventListener('mouseenter', function () {
                 icon.style.display = 'block';
             });
-    
-            icon.closest('.product-item').addEventListener('mouseleave', function() {
+
+            icon.closest('.product-item').addEventListener('mouseleave', function () {
                 icon.style.display = 'none';
             });
         });
     }
-    
-    
+
     fetchProducts();
-    </script>
+</script>
+
+<%- include('../layouts/footer.ejs') %>

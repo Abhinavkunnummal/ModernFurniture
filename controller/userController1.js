@@ -448,7 +448,8 @@ const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
-    const products = await Product.find({}).populate('category').populate('productOfferId');
+    const currentPage = parseInt(req.query.page) || 1;
+    const limit = 10;
     const currentDate = new Date();
 
     const categoryOffers = await CategoryOffer.find({
@@ -462,6 +463,15 @@ const loadShop = async (req, res) => {
       startDate: { $lte: currentDate },
       endDate: { $gte: currentDate }
     });
+
+    const products = await Product.find({})
+      .populate('category')
+      .populate('productOfferId')
+      .skip((currentPage - 1) * limit)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
 
     const processedProducts = products.map(product => {
       let bestDiscount = 0;
@@ -489,13 +499,16 @@ const loadShop = async (req, res) => {
     res.render("shop", {
       products: processedProducts,
       user: userData,
-      categories
+      categories,
+      currentPage,
+      totalPages
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 
@@ -794,13 +807,17 @@ const editedAddressPost = async (req, res) => {
 
 const sortProducts = async (req, res) => {
   try {
-    const { sort, category } = req.query;
+    const { sort, category, search, page = 1, limit = 9 } = req.query;
     const currentDate = new Date();
 
     let productsQuery = Product.find().populate('category').populate('productOfferId');
 
     if (category) {
       productsQuery = productsQuery.where('category').equals(category);
+    }
+
+    if (search) {
+      productsQuery = productsQuery.where('name', new RegExp(search, 'i'));
     }
 
     let products = await productsQuery.exec();
@@ -860,12 +877,22 @@ const sortProducts = async (req, res) => {
         break;
     }
 
-    res.json({ products: processedProducts });
+    const totalProducts = processedProducts.length;
+    const totalPages = Math.ceil(totalProducts / limit);
+    const paginatedProducts = processedProducts.slice((page - 1) * limit, page * limit);
+
+    res.json({ 
+      products: paginatedProducts, 
+      currentPage: parseInt(page), 
+      totalPages 
+    });
   } catch (error) {
     console.error('Error fetching sorted products:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
+
 
 
 
