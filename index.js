@@ -2,10 +2,17 @@ const nocache = require('nocache');
 const express=require('express');
 const mongoose=require('mongoose')
 const User=require('./model/userModel')
-mongoose.connect('mongodb://127.0.0.1:27017/Ecommerce');
 require('dotenv').config();
-const flash = require ('express-flash')
 
+mongoose.connect(process.env.MONGODB_URI, {
+}).then(() => {
+    console.log('Successfully connected to MongoDB');
+}).catch((error) => {
+    console.error('Error connecting to MongoDB', error);
+});
+
+
+const flash = require ('express-flash')
 
 
 const app=express()
