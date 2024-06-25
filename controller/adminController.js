@@ -1313,6 +1313,13 @@ const getBestSellingCategories = async (req, res) => {
   }
 };
 
+const rendererror=async(req,res)=>{
+  try{
+    res.render('error')
+  }catch(error){
+    console.log(error.message);
+  }
+}
 
 
 module.exports = {
@@ -1383,5 +1390,6 @@ module.exports = {
   DummyAddCategoryOfferPage,
   DummyCategoryAddOfferPost,
   DummyCategoryOfferList,
-  DummyCategoryupdateOffer
+  DummyCategoryupdateOffer,
+  rendererror
 };

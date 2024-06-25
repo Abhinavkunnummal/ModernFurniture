@@ -316,5 +316,8 @@ async function getYearlyReport() {
     };
 }
 
+adminRoute.get('/err',adminController.rendererror)
+
+
 module.exports = adminRoute;
 
