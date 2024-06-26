@@ -57,41 +57,6 @@ const userController = {
       }
   },
 
-  // resendOtp: async (req, res) => {
-  //     try {
-  //         const tempUser = req.session.tempUser;
-
-  //         if (!tempUser ||!tempUser.userId ||!tempUser.email) {
-  //             req.flash("error", "User session data missing");
-  //             return res.redirect("/otp");
-  //         }
-
-  //         const userId = tempUser.userId;
-  //         const user = await User.findById(userId);
-
-  //         if (!user) {
-  //             req.flash("error", "User not found");
-  //             return res.redirect("/otp");
-  //         }
-
-  //         const newOtp = generateOTP(); 
-  //         await sendVerifyMail(user.name, tempUser.email, user._id, newOtp);
-
-  //         req.session.tempUser.otp = newOtp;
-  //         const otpDoc = new Otp({
-  //             user_id: user._id,
-  //             otp: newOtp,
-  //         });
-  //         await otpDoc.save();
-
-  //         req.flash("success", "New OTP has been sent to your email");
-  //         res.redirect("/otp");
-  //     } catch (error) {
-  //         console.error(error.message);
-  //         res.status(500).send({ error: "Internal server error" });
-  //     }
-  // },
-
   verifyResetOtp: async (req, res) => {
       try {
           const { otp } = req.body;
@@ -157,7 +122,6 @@ const userController = {
       }
   }
 };
-//******************************************************************************************************************************** */
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -188,6 +152,8 @@ const loadSignIn = async (req, res) => {
   res.render("login");
 };
 
+//--------------------------------------------------------INSERT USER IN DATABASE------------------------------------------------------//
+
 const insertUser = async (req, res) => {
   try {
       const exist = await User.findOne({ email: req.body.email });
@@ -196,8 +162,7 @@ const insertUser = async (req, res) => {
       }
 
       const spassword = await securePassword(req.body.password);
-      
-      // Generate a unique referral code for the new user
+      // Refferal Code create chyyunnu
       function generateReferralCode(length) {
           const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
           let code = '';
@@ -265,7 +230,7 @@ const insertUser = async (req, res) => {
 
       const otp = generateOTP();
       req.session.otp = otp;
-      req.session.timer = 20; // Set timer to 20 seconds
+      req.session.timer = 60; // Set timer to 20 seconds
       req.session.timerStart = Date.now();
       console.log(`Generated OTP: ${otp}`);
       await saveOTP(newUser.email, otp);
@@ -319,18 +284,18 @@ const verifyOTPAndSaveUser = async (req, res) => {
           } else {
               const currentTime = Date.now();
               req.session.timer -= Math.floor((currentTime - req.session.timerStart) / 1000);
-              req.session.timerStart = currentTime; // Reset the timer start time
+              req.session.timerStart = currentTime;
               return res.render("otp", {
                   message: "Invalid OTP. Please try again.",
                   email: req.body.email,
-                  timer: Math.max(0, req.session.timer) // Ensure timer does not go negative
+                  timer: Math.max(0, req.session.timer) 
               });
           }
       } else {
           return res.render("otp", {
               message: "OTP expired or has not been generated. Please request a new OTP.",
               email: req.body.email,
-              timer: 0 // Timer expired
+              timer: 0 
           });
       }
   } catch (error) {
@@ -344,16 +309,16 @@ const verifyOTPAndSaveUser = async (req, res) => {
 const resendOtp = async (req, res) => {
   try {
     const email = req.body.email;
-    const newOTP = generateOTP(); // Generate a new OTP
-    req.session.otp = newOTP; // Update session with new OTP
-    req.session.timer = 20; // Reset the timer to 20 seconds
-    req.session.timerStart = Date.now(); // Reset the timer start time
-    await sendOtpToEmail(email, newOTP); // Send the new OTP to the email
+    const newOTP = generateOTP(); 
+    req.session.otp = newOTP; 
+    req.session.timer = 60; 
+    req.session.timerStart = Date.now(); 
+    await sendOtpToEmail(email, newOTP); 
     console.log(`Generated Resended OTP : ${newOTP}`);
-    res.json({ message: 'OTP resent successfully' }); // Send response indicating success
+    res.json({ message: 'OTP resent successfully' }); 
   } catch (error) {
     console.error('Error resending OTP:', error);
-    res.status(500).json({ error: 'Internal Server Error' }); // Send response indicating failure
+    res.status(500).json({ error: 'Internal Server Error' }); 
   }
 };
 
@@ -370,12 +335,12 @@ const sendOtpToEmail = async (email, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
+//---------------------------------------------------- LOAD HOME PAGE -----------------------------------------------------------//
 
 const loadHome = async (req, res) => {
   try {
     if (req.session.user_id) {
       const userData = await User.findById(req.session.user_id);
-
       if (userData.is_blocked) {
         req.session.destroy();
         return res.render("login", {
@@ -444,6 +409,8 @@ const verifyLogin = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- LOAD SHOP PAGE -----------------------------------------------------------//
+
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
@@ -510,7 +477,7 @@ const loadShop = async (req, res) => {
 };
 
 
-
+//---------------------------------------------------- LOAD FULL PRODUCT DETAILS PAGE -----------------------------------------------------------//
 
 const loadFullPage = async (req, res) => {
   try {
@@ -563,6 +530,7 @@ const loadFullPage = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- LOGOUT USER -----------------------------------------------------------//
 
 const logoutUser = async (req, res) => {
   try {
@@ -574,21 +542,7 @@ const logoutUser = async (req, res) => {
   }
 };
 
-// const resendOtp = async (req, res) => {
-//   try {
-//     const email = req.body.email;
-//     const otp = generateOTP();
-//     req.session.otp = otp;
-//     await saveOTP(email, otp);
-//     await sendOTPVerifyMail(email, otp);
-//     res.json({ message: "OTP resent successfully" });
-//   } catch (error) {
-//     console.error("Error resending OTP:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-//User profile -9th
+//---------------------------------------------------- USER PROFILE -----------------------------------------------------------//
 
 const renderUserProfile = async (req, res) => {
   try {
@@ -606,6 +560,8 @@ const renderUserProfile = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- EDIT USER PROFILE -----------------------------------------------------------//
+
 const editProfile = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
@@ -622,6 +578,8 @@ const editProfile = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- USER ADDRESS -----------------------------------------------------------//
+
 const renderAddress = async (req, res) => {
   try {
    const userId = req.session.user_id
@@ -634,6 +592,8 @@ const renderAddress = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- ADD NEW ADDRESS -----------------------------------------------------------//
+
 const addAddress = async (req, res) => {
   try {
     const address = await Address.find({});
@@ -642,6 +602,8 @@ const addAddress = async (req, res) => {
     console.log(error.message);
   }
 };
+
+//---------------------------------------------------- SAVE ADDRESS -----------------------------------------------------------//
 
 const postAddress = async (req, res) => {
   try {
@@ -677,6 +639,8 @@ const postAddress = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- EDIT ADDRESS -----------------------------------------------------------//
+
 const postSaveAddress = async (req, res) => {
   try {
     const selectedAddressId = req.body.selectedAddress;
@@ -691,6 +655,8 @@ const postSaveAddress = async (req, res) => {
    
   }
 };
+
+//---------------------------------------------------- EDIT FULL ADDRESS -----------------------------------------------------------//
 
 const renderEditAddress = async (req, res) => {
   try {
@@ -709,6 +675,7 @@ const renderEditAddress = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- SAVE EDITED ADDRESS -----------------------------------------------------------//
 
 const postProfile = async (req, res) => {
   try {
@@ -747,7 +714,7 @@ const postProfile = async (req, res) => {
   }
 };
 
-
+//---------------------------------------------------- DELETE ADDRESS -----------------------------------------------------------//
 
 const deleteAddress = async (req, res) => {
   try {
@@ -761,6 +728,8 @@ const deleteAddress = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+//---------------------------------------------------- EDIT ADDRESS POST -----------------------------------------------------------//
 
 const editedAddressPost = async (req, res) => {
   try {
@@ -780,7 +749,6 @@ const editedAddressPost = async (req, res) => {
     const { address, state, city, zipcode, country, language, gender } = req.body;
     // console.log('Received data:', { address, state, city, zipcode, country, language, gender });
 
-    // Find the address document by userId and addressId
     const addressDoc = await Address.findOne({ userId, _id: addressId });
 
     if (!addressDoc) {
@@ -804,6 +772,8 @@ const editedAddressPost = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+//---------------------------------------------------- SORT PRODUCTS -----------------------------------------------------------//
 
 const sortProducts = async (req, res) => {
   try {
@@ -891,10 +861,6 @@ const sortProducts = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
-
-
-
-
 
 
 // ***********************************************************FORGET PASSWORD******************************************************\\
@@ -1015,6 +981,7 @@ const changedPass = async (req, res) => {
   }
 };
 
+//------------------------------------------------- CHKECKOUT ADDRESS DETAILS --------------------------------------------------//
 
 const checkoutAddress=async(req,res)=>{
   try{
@@ -1039,6 +1006,8 @@ const checkoutAddress=async(req,res)=>{
   }
 }
 
+//------------------------------------------------- RENDER CHKECKOUT ADDRESS DETAILS --------------------------------------------------//
+
 const loadCheckoutAddAddress=async(req,res)=>{
   try {
     res.render('checkoutAddAddress')
@@ -1046,6 +1015,8 @@ const loadCheckoutAddAddress=async(req,res)=>{
     console.log(error.message);
   }
 }
+
+//------------------------------------------------- RENDER COUPON PAGE ---------------------------------------------------------//
 
 const renderCouponPage = async (req, res) => {
   try {
@@ -1078,8 +1049,6 @@ module.exports = {
   logoutUser,
   loadFullPage,
   resendOtp,
-
-
   renderUserProfile,
   editProfile,
   renderAddress,
@@ -1098,5 +1067,4 @@ module.exports = {
   checkoutAddress,
   loadCheckoutAddAddress,
   renderCouponPage,
-  
 };

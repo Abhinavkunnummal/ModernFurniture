@@ -573,7 +573,7 @@
 		
 			  if (data.success) {
 				const couponsContainer = document.getElementById('couponsContainer');
-				couponsContainer.innerHTML = ''; // Clear existing content
+				couponsContainer.innerHTML = ''; 
 		
 				const ul = document.createElement('ul');
 				ul.className = 'list-group';
@@ -590,7 +590,7 @@
 		
 				couponsContainer.appendChild(ul);
 		
-				// Re-attach event listeners for copy buttons
+				
 				attachCopyButtonListeners();
 			  } else {
 				throw new Error(data.message || 'Failed to fetch coupons');

@@ -1,8 +1,6 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/header.ejs') %>
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/sidenav.ejs') %>
 
-
-
 <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
     <div class="alert alert-danger" role="alert">
         <%= errorMessage %>
@@ -79,7 +77,6 @@
         const productSelect = document.getElementById('productSelect');
         const categorySelect = document.getElementById('categorySelect');
         
-        // Function to show/hide product or category select based on offer type
         function toggleSelects() {
             const selectedOfferType = offerTypeSelect.value;
             if (selectedOfferType === 'Product') {
@@ -93,11 +90,8 @@
                 categorySelect.style.display = 'none';
             }
         }
-
-        // Initial call to toggleSelects
         toggleSelects();
 
-        // Event listener for offerType select change
         offerTypeSelect.addEventListener('change', toggleSelects);
     });
 </script>

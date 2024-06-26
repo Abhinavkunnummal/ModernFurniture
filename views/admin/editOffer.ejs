@@ -3,7 +3,7 @@
 
 <div class="container" style="margin-left: 300px;">  
     <h1>Edit Offer !!!</h1>
- 
+  
     <form action="editOffer" method="POST">
         
         <div class="row">
@@ -76,8 +76,7 @@
         const offerTypeSelect = document.getElementById('offerType');
         const productSelect = document.getElementById('productSelect');
         const categorySelect = document.getElementById('categorySelect');
-        
-        // Function to show/hide product or category select based on offer type
+
         function toggleSelects() {
             const selectedOfferType = offerTypeSelect.value;
             if (selectedOfferType === 'product') {
@@ -92,10 +91,9 @@
             }
         }
 
-        // Initial call to toggleSelects
+
         toggleSelects();
 
-        // Event listener for offerType select change
         offerTypeSelect.addEventListener('change', toggleSelects);
     });
 </script>

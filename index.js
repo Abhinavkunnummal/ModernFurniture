@@ -37,8 +37,6 @@ app.use(passport.session());
 app.use(nocache())
 app.use(flash())
 
-
-   // Passport setup for Google authentication
    passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
@@ -46,10 +44,8 @@ app.use(flash())
 },
     async function (accessToken, refreshToken, profile, cb) {
         try {
-            // Search for the user in the database based on Google profile ID
             let user = await User.findOne({ email: profile.emails[0].value });
             if (!user) {
-                // Create a new user if not found in the database
                 user = new User({
                     password: profile.id,
                     name: profile.displayName,
@@ -71,7 +67,6 @@ app.use(flash())
     }
 ));
 
-// Serialize and deserialize user functions
 passport.serializeUser(function (user, done) {
     done(null, user);
 });

@@ -55,7 +55,7 @@
 </main>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
-    // Tooltips initialization
+  
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -72,7 +72,6 @@
       });
 
       if (response.ok) {
-        // Update UI if blocking was successful
         const statusSpan = document.querySelector(`#status-${userId}`);
         const blockButton = document.querySelector(`#blockButton-${userId}`);
         if (statusSpan && blockButton) {
@@ -109,7 +108,6 @@ async function handleUnblock(userId) {
       });
 
       if (response.ok) {
-        // Update UI if unblocking was successful
         const statusSpan = document.querySelector(`#status-${userId}`);
         const unblockButton = document.querySelector(`#unblockButton-${userId}`);
         if (statusSpan && unblockButton) {

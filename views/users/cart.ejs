@@ -197,12 +197,12 @@
     });
   }
 
-  // Attach event listener to all elements with the class 'remove-cart-link'
+ 
   const removeCartLinks = document.querySelectorAll('.remove-cart-link');
   removeCartLinks.forEach(link => {
     link.addEventListener('click', function(event) {
-      event.preventDefault(); // Prevent the default action of the link
-      const productId = this.getAttribute('href').split('?')[1].split('=')[1]; // Extract productId from the href attribute
+      event.preventDefault(); 
+      const productId = this.getAttribute('href').split('?')[1].split('=')[1]; 
 
       Swal.fire({
         title: "Are you sure?",
@@ -214,11 +214,11 @@
         confirmButtonText: "Yes, delete it!"
       }).then((result) => {
         if (result.isConfirmed) {
-          // Proceed with the deletion
-          window.location.href = this.getAttribute('href'); // Navigate to the original URL
+         
+          window.location.href = this.getAttribute('href'); 
         } else {
-          // Cancel the deletion
-          Swal.close(); // Close the SweetAlert dialog
+
+          Swal.close(); 
         }
       });
     });

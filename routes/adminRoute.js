@@ -26,8 +26,8 @@ adminRoute.get('/dashboard', isLogin, adminController.loadDashboard);
 
 // Customer Routes
 adminRoute.get('/customerDetails', isLogin, adminController.customerDetails);
-adminRoute.post('/block',adminController.blockUser)
-adminRoute.post('/unblock',adminController.unblockUser)
+adminRoute.post('/block',isLogin,adminController.blockUser)
+adminRoute.post('/unblock',isLogin,adminController.unblockUser)
 
 // User Routes
 adminRoute.get('/new_user', isLogin, adminController.newUserLoadHome);
@@ -53,55 +53,55 @@ adminRoute.get('/blockproduct', isLogin, adminController.blockProduct);
 // Image Deleting Route
 adminRoute.post('/admin/deleteImage/:productId/:imageIndex', adminController.deleteImage);
 
-adminRoute.get('/orderDetails',adminController.renderOrders)
-adminRoute.get('/viewsingle',adminController.renderSingleView)
-adminRoute.post('/updatestatus',adminController.updateStatus)
-adminRoute.post('/approveReturn',adminController.approveReturn)
-adminRoute.post('/rejectReturn',adminController.rejectReturn)
-adminRoute.post('/approveCancellation',adminController.approveCancelOrder)
+adminRoute.get('/orderDetails',isLogin,adminController.renderOrders)
+adminRoute.get('/viewsingle',isLogin,adminController.renderSingleView)
+adminRoute.post('/updatestatus',isLogin,adminController.updateStatus)
+adminRoute.post('/approveReturn',isLogin,adminController.approveReturn)
+adminRoute.post('/rejectReturn',isLogin,adminController.rejectReturn)
+adminRoute.post('/approveCancellation',isLogin,adminController.approveCancelOrder)
 
-adminRoute.get('/coupon',adminController.renderCoupon)
-adminRoute.get('/addCoupon',adminController.addCoupon)
-adminRoute.post('/addCoupon',adminController.submitAddCoupon)
-adminRoute.get('/editcoupon',adminController.renderEditCoupon)
-adminRoute.post('/deletecoupon',adminController.deleteCoupon)
-
-
-adminRoute.get('/offer',adminController.renderOffer)
-adminRoute.get('/addOffer',adminController.loadAddOffer)
-adminRoute.post('/addoffer',adminController.addOffer)
-adminRoute.get('/editOffer',adminController.loadEditOffer)
-adminRoute.post('/editOffer',adminController.editOffer)
-adminRoute.post('/deleteoffer',adminController.deleteOffer)
+adminRoute.get('/coupon',isLogin,adminController.renderCoupon)
+adminRoute.get('/addCoupon',isLogin,adminController.addCoupon)
+adminRoute.post('/addCoupon',isLogin,adminController.submitAddCoupon)
+adminRoute.get('/editcoupon',isLogin,adminController.renderEditCoupon)
+adminRoute.post('/deletecoupon',isLogin,adminController.deleteCoupon)
 
 
-adminRoute.get('/salesreport',adminController.loadSalesReport)
-adminRoute.get('/salesDaily',adminController.dailySalesReport)
-adminRoute.get('/salesWeekly',adminController.generateWeeklyReport)
-adminRoute.get('/salesMonthly',adminController.generateMonthlyReport)
-adminRoute.get('/salesYearly',adminController.generateYearlyReport)
-adminRoute.get('/customDateReport',adminController.generateCustomDateReport)
+adminRoute.get('/offer',isLogin,adminController.renderOffer)
+adminRoute.get('/addOffer',isLogin,adminController.loadAddOffer)
+adminRoute.post('/addoffer',isLogin,adminController.addOffer)
+adminRoute.get('/editOffer',isLogin,adminController.loadEditOffer)
+adminRoute.post('/editOffer',isLogin,adminController.editOffer)
+adminRoute.post('/deleteoffer',isLogin,adminController.deleteOffer)
 
-adminRoute.get('/best-selling-products',adminController.getBestSellingProducts);
-adminRoute.get('/best-selling-categories',adminController.getBestSellingCategories);
+
+adminRoute.get('/salesreport',isLogin,adminController.loadSalesReport)
+adminRoute.get('/salesDaily',isLogin,adminController.dailySalesReport)
+adminRoute.get('/salesWeekly',isLogin,adminController.generateWeeklyReport)
+adminRoute.get('/salesMonthly',isLogin,adminController.generateMonthlyReport)
+adminRoute.get('/salesYearly',isLogin,adminController.generateYearlyReport)
+adminRoute.get('/customDateReport',isLogin,adminController.generateCustomDateReport)
+
+adminRoute.get('/best-selling-products',isLogin,adminController.getBestSellingProducts);
+adminRoute.get('/best-selling-categories',isLogin,adminController.getBestSellingCategories);
 
 //offer Dummy
 
-adminRoute.get('/offerPage', adminController.OfferPage);
-adminRoute.get('/DummyAddOffer', adminController.DummyAddOfferPage);
-adminRoute.post('/DummyOffer', adminController.DummyOffer);
-adminRoute.get('/DummyOfferList', adminController.DummyOfferList);
-adminRoute.get('/DummyEditOffer/:id', adminController.editOfferPage);
-adminRoute.post('/updateOffer/:id', adminController.updateOffer);
-adminRoute.get('/deleteOffer/:id', adminController.deleteDummyOffer);
+adminRoute.get('/offerPage', isLogin,adminController.OfferPage);
+adminRoute.get('/DummyAddOffer', isLogin,adminController.DummyAddOfferPage);
+adminRoute.post('/DummyOffer', isLogin,adminController.DummyOffer);
+adminRoute.get('/DummyOfferList', isLogin,adminController.DummyOfferList);
+adminRoute.get('/DummyEditOffer/:id', isLogin,adminController.editOfferPage);
+adminRoute.post('/updateOffer/:id', isLogin,adminController.updateOffer);
+adminRoute.get('/deleteOffer/:id', isLogin,adminController.deleteDummyOffer);
 
-adminRoute.get('/CategoryofferPage', adminController.DummyCategoryOfferPage);
-adminRoute.get('/DummyCategoryOffer', adminController.DummyCategoryOfferPage);
-adminRoute.get('/DummyCategoryAddOffer', adminController.DummyAddCategoryOfferPage);
-adminRoute.post('/CategoryAddPost', adminController.DummyCategoryAddOfferPost);
-adminRoute.get('/DummyEditCategoryOffer/:id', adminController.DummyEditCategoryOfferPage);
-adminRoute.post('/DummyCategoryUpdateOffer/:id', adminController.DummyCategoryupdateOffer);
-adminRoute.get('/deleteCategoryOffer/:id', adminController.deleteCategoryOffer);
+adminRoute.get('/CategoryofferPage', isLogin,adminController.DummyCategoryOfferPage);
+adminRoute.get('/DummyCategoryOffer', isLogin,adminController.DummyCategoryOfferPage);
+adminRoute.get('/DummyCategoryAddOffer', isLogin,adminController.DummyAddCategoryOfferPage);
+adminRoute.post('/CategoryAddPost', isLogin,adminController.DummyCategoryAddOfferPost);
+adminRoute.get('/DummyEditCategoryOffer/:id', isLogin,adminController.DummyEditCategoryOfferPage);
+adminRoute.post('/DummyCategoryUpdateOffer/:id', isLogin,adminController.DummyCategoryupdateOffer);
+adminRoute.get('/deleteCategoryOffer/:id', isLogin,adminController.deleteCategoryOffer);
 
 
 const Order=require('../model/order')

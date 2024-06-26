@@ -69,81 +69,77 @@ userRoute.get("/auth/google/callback", passport.authenticate("google", { failure
 //user profile
 
 userRoute.get('/userProfile',isLogin,userController.renderUserProfile)
-userRoute.get('/editProfile',userController.editProfile)
-userRoute.post('/editedProfile',userController.postProfile)
-userRoute.get('/manageAddress',userController.renderAddress)
-userRoute.get('/addAddress',userController.addAddress)
-userRoute.post('/postAddress',userController.postAddress)
-userRoute.post('/saveAddress',userController.postSaveAddress)
-userRoute.get('/addressEdit',userController.renderEditAddress)
-userRoute.get('/addressDelete',userController.deleteAddress)
-userRoute.post('/addressEdited',userController.editedAddressPost)
-userRoute.post('/checkoutPostAddress',userController.checkoutAddress)
-userRoute.post('/apply-coupon', cartController.applyCoupon);
-userRoute.post('/remove-coupon', cartController.removeCoupon);
+userRoute.get('/editProfile',isLogin,userController.editProfile)
+userRoute.post('/editedProfile',isLogin,userController.postProfile)
+userRoute.get('/manageAddress',isLogin,userController.renderAddress)
+userRoute.get('/addAddress',isLogin,userController.addAddress)
+userRoute.post('/postAddress',isLogin,userController.postAddress)
+userRoute.post('/saveAddress',isLogin,userController.postSaveAddress)
+userRoute.get('/addressEdit',isLogin,userController.renderEditAddress)
+userRoute.get('/addressDelete',isLogin,userController.deleteAddress)
+userRoute.post('/addressEdited',isLogin,userController.editedAddressPost)
+userRoute.post('/checkoutPostAddress',isLogin,userController.checkoutAddress)
+userRoute.post('/apply-coupon', isLogin,cartController.applyCoupon);
+userRoute.post('/remove-coupon', isLogin,cartController.removeCoupon);
 //Cart
 
 userRoute.get('/cart',isLogin,cartController.renderCart)
-userRoute.get('/addToCart',cartController.addToCart)
+userRoute.get('/addToCart',isLogin,cartController.addToCart)
 // userRoute.post('/updateCartQuantity', cartController.updateCartItemQuantity);
 
 
 
-userRoute.get('/checkout',cartController.checkoutPage)
+userRoute.get('/checkout',isLogin,cartController.checkoutPage)
 // userRoute.post('/placeOrder',cartController.placeOrder)
-userRoute.post('/checkoutAddress',cartController.renderPlaceOrder)
-userRoute.post('/verify-payment',cartController.verifyPayment)
-userRoute.get('/coupon',userController.renderCouponPage)
-userRoute.post('/returnOrder',cartController.returnOrder)
+userRoute.post('/checkoutAddress',isLogin,cartController.renderPlaceOrder)
+userRoute.post('/verify-payment',isLogin,cartController.verifyPayment)
+userRoute.get('/coupon',isLogin,userController.renderCouponPage)
+userRoute.post('/returnOrder',isLogin,cartController.returnOrder)
 
 
 
-userRoute.post('/removeCart',cartController.removeFromCart)
-userRoute.get('/admin/removeCart',cartController.removeFromCart)
+userRoute.post('/removeCart',isLogin,cartController.removeFromCart)
+userRoute.get('/admin/removeCart',isLogin,cartController.removeFromCart)
 // userRoute.delete('/cart/:productId',cartController.removeFromCart)
-userRoute.post('/updateCartItem',cartController.updateCartItem)
+userRoute.post('/updateCartItem',isLogin,cartController.updateCartItem)
 
-// Implement sorting route
-userRoute.get('/sortProducts', userController.sortProducts);
+userRoute.get('/sortProducts',isLogin, userController.sortProducts);
 userRoute.get('/forgetPassword',userController.renderForgetPassword)
 userRoute.post('/forgetPassword',userController.passwordChange)
 userRoute.post('/changedPass',userController.changedPass)
 userRoute.post('/forget',userController.forgetPassword)
-userRoute.get('/checkoutAddAddress',userController.loadCheckoutAddAddress)
-userRoute.get('/thankyou',cartController.renderThankyou)
-// userRoute.post('/checkoutAddress',cartController.postCheckoutAddress)
+userRoute.get('/checkoutAddAddress',isLogin,userController.loadCheckoutAddAddress)
+userRoute.get('/thankyou',isLogin,cartController.renderThankyou)
+userRoute.get('/orders',isLogin,cartController.renderOrders)
 
-//***************************************************ORDER DETAILS*****************************************************************/
-userRoute.get('/orders',cartController.renderOrders)
-// userRoute.get('/createOrder',cartController.rend)
 
-userRoute.get('/coupons',cartController.showAllCoupons)
+userRoute.get('/coupons',isLogin,cartController.showAllCoupons)
 
-userRoute.get('/orderDetails',cartController.renderFullDetails)
+userRoute.get('/orderDetails',isLogin,cartController.renderFullDetails)
 
-userRoute.post('/cancelOrders',cartController.cancelOrder)
+userRoute.post('/cancelOrders',isLogin,cartController.cancelOrder)
 
 
 
-userRoute.get('/wishlist', cartController.renderWishlist);
+userRoute.get('/wishlist',isLogin, cartController.renderWishlist);
 
-// Add to wishlist
-userRoute.post('/wishlist/add/:productId', cartController.addToWishList);
 
-// Remove from wishlist
-userRoute.post('/wishlist/remove', cartController.removeFromWishList);
+userRoute.post('/wishlist/add/:productId',isLogin, cartController.addToWishList);
 
-userRoute.get('/wallet',cartController.renderWallet)
-userRoute.post('/addfunds',cartController.addFunds)
-userRoute.post('/fundVerification',cartController.fundVerification)
-userRoute.post('/addwallet',cartController.addToWallet)
-userRoute.post('/placeorderwallet',cartController.placeOrderWallet)
+
+userRoute.post('/wishlist/remove',isLogin, cartController.removeFromWishList);
+
+userRoute.get('/wallet',isLogin,cartController.renderWallet)
+userRoute.post('/addfunds',isLogin,cartController.addFunds)
+userRoute.post('/fundVerification',isLogin,cartController.fundVerification)
+userRoute.post('/addwallet',isLogin,cartController.addToWallet)
+userRoute.post('/placeorderwallet',isLogin,cartController.placeOrderWallet)
 
 // userRoute.get('/downloadInvoice',cartController.downloadInvoice)
-userRoute.get('/invoice',cartController.loadInvoice)
-userRoute.post('/handle-failed-razorpay',cartController.handleFailedRazorpayPayment)
+userRoute.get('/invoice',isLogin,cartController.loadInvoice)
+userRoute.post('/handle-failed-razorpay',isLogin,cartController.handleFailedRazorpayPayment)
 
-userRoute.post('/retry-payment',cartController.razorPayRetryPayment)
-userRoute.post('/verifyretry-payment',cartController.verifyRetryPayment)
+userRoute.post('/retry-payment',isLogin,cartController.razorPayRetryPayment)
+userRoute.post('/verifyretry-payment',isLogin,cartController.verifyRetryPayment)
 
 module.exports = userRoute;

@@ -9,11 +9,10 @@ const Coupon=require('../model/coupon')
 const moment = require('moment');
 const Offer = require('../model/offerModel'); 
 const CategoryOffer=require('../model/categoryOffer')
-
 const ProductOffer=require('../model/productOffer')
 
 
-
+//-------------------------------------------------------- RENDER ADMIN LOGIN PAGE ------------------------------------------------//
 const renderLogin = async (req, res) => {
   try {
     res.render("login");
@@ -50,6 +49,8 @@ const verifyLogin = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+//-------------------------------------------------------- RENDER ADMIN DASHBOARD ------------------------------------------------//
 
 const loadDashboard = async (req, res) => {
   try {
@@ -90,7 +91,7 @@ const loadDashboard = async (req, res) => {
   }
 };
 
-
+//-------------------------------------------------------- CUSTOMER DETAILS -----------------------------------------------------//
 
 const customerDetails = async (req, res) => {
   try {
@@ -111,6 +112,8 @@ const newUserLoadHome = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- BLOCK USERS ----------------------------------------------------------//
+
 const blockUser = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -121,6 +124,8 @@ const blockUser = async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 };
+
+//-------------------------------------------------------- UNBLOCK USERS ----------------------------------------------------------//
 
 const unblockUser = async (req, res) => {
   try {
@@ -133,6 +138,8 @@ const unblockUser = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- CATEGORY DETAILS -----------------------------------------------------//
+
 const renderCategoryDetails = async (req, res) => {
   try {
     const categories = await Category.find();
@@ -142,6 +149,8 @@ const renderCategoryDetails = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+//-------------------------------------------------------- ADD CATEGORY ---------------------------------------------------------//
 
 const categoryCreation = async (req, res) => {
   try {
@@ -183,6 +192,8 @@ const addCategory = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- EDIT CATEGORY ---------------------------------------------------------//
+
 const getEditCategory = async (req, res) => {
   try {
     const id = req.query.id; 
@@ -213,7 +224,7 @@ const getEditCategory = async (req, res) => {
   }
 };
 
-
+//-------------------------------------------------------- BLOCK CATEGORY ---------------------------------------------------------//
 
 const blockCategory = async (req, res) => {
   try {
@@ -229,6 +240,8 @@ const blockCategory = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- UNBLOCK CATEGORY -------------------------------------------------------//
+
 const unblockCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
@@ -242,6 +255,8 @@ const unblockCategory = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+//-------------------------------------------------------- UPDATE CATEGORY -------------------------------------------------------//
 
 const updateCategory = async (req, res) => {
   try {
@@ -265,7 +280,7 @@ const updateCategory = async (req, res) => {
   }
 };
 
-
+//-------------------------------------------------------- PRODUCT DETAILS -------------------------------------------------------//
 
 const renderProduct = async (req, res) => {
   try {
@@ -295,6 +310,7 @@ const renderProduct = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- ADD PRODUCT ---------------------------------------------------------//
 
 const addProduct = async (req, res) => {
   try {
@@ -305,6 +321,8 @@ const addProduct = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+//-------------------------------------------------------- ADDING NEW PRODUCT ---------------------------------------------------------//
 
 const addingNewProduct = async (req, res) => {
   try {
@@ -339,6 +357,8 @@ const addingNewProduct = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- DELETE IMAGE ---------------------------------------------------------//
+
 const deleteImage = async (req, res) => {
   try {
     const { productId, imageIndex } = req.params;
@@ -358,6 +378,8 @@ const deleteImage = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------- EDIT PRODUCT LOAD---------------------------------------------------------//
+
 const editproductsLoad = async (req, res) => {
   try {
     const id = req.query.id;
@@ -369,7 +391,6 @@ const editproductsLoad = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 const updateProduct = async (req, res) => {
   try {
@@ -427,8 +448,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
-
-
+//-------------------------------------------------------- BLOCK PRODUCT ---------------------------------------------------------//
 
 const blockProduct = async (req, res) => {
   try {
@@ -458,6 +478,8 @@ const renderOrders = async (req, res) => {
   }
 };
 
+//------------------------------------------------------ SINGLE VIEW ---------------------------------------------------------//
+
 const renderSingleView=async(req,res)=>{
   try{
     res.render('singleOrder')
@@ -465,6 +487,8 @@ const renderSingleView=async(req,res)=>{
     console.log(error.message);
   }
 }
+
+//------------------------------------------------------ UPDATE STATUS ---------------------------------------------------------//
 
 const updateStatus = async (req, res) => {
   const { orderId, itemId, status } = req.body;
@@ -484,6 +508,7 @@ const updateStatus = async (req, res) => {
   }
 };
 
+//------------------------------------------------------ APPROVE RETURN ---------------------------------------------------------//
 
 const approveReturn= async (req, res) => {
   const { itemId } = req.body;
@@ -503,6 +528,7 @@ const approveReturn= async (req, res) => {
   }
 };
 
+//------------------------------------------------------ REJECT RETURN ---------------------------------------------------------//
 
 const rejectReturn= async (req, res) => {
   const { itemId } = req.body;
@@ -522,8 +548,7 @@ const rejectReturn= async (req, res) => {
   }
 };
 
-
-
+//------------------------------------------------------ COUPON -----------------------------------------------------------------//
 
 const renderCoupon = async (req, res) => {
   try {
@@ -537,6 +562,8 @@ const renderCoupon = async (req, res) => {
   }
 };
 
+//------------------------------------------------------ ADD COUPON -------------------------------------------------------------//
+
 const addCoupon = async (req, res) => {
   try {
     res.render('addCoupon');
@@ -544,6 +571,8 @@ const addCoupon = async (req, res) => {
     console.error(error.message);
   }
 };
+
+//------------------------------------------------------ SUBMIT ADD COUPON -------------------------------------------------------------//
 
 const submitAddCoupon = async (req, res) => {
   try {
@@ -562,6 +591,7 @@ const submitAddCoupon = async (req, res) => {
   }
 };
 
+//------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
 const renderEditCoupon = async (req, res) => {
   try {
@@ -576,6 +606,8 @@ const renderEditCoupon = async (req, res) => {
   }
 };
 
+//------------------------------------------------------ DELETE COUPON -------------------------------------------------------------//
+
 const deleteCoupon = async (req, res) => {
   try {
     const couponId = req.body.couponId; 
@@ -587,12 +619,11 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- RENDER OFFERS ----------------------------------------------------------//
 
-
-//offer
 const renderOffer = async (req, res) => {
   try {
-      console.log('entered offer page');
+      // console.log('entered offer page');
       const offers = await Offer.find(); 
       res.render('offer', { offers }); 
   } catch (error) {
@@ -600,6 +631,8 @@ const renderOffer = async (req, res) => {
       res.status(500).send('Internal Server Error');
   }
 };
+
+//---------------------------------------------------- ADD OFFER ----------------------------------------------------------//
 
 const loadAddOffer = async (req, res) => {
   try {
@@ -616,10 +649,12 @@ const loadAddOffer = async (req, res) => {
   }
 }
 
+//---------------------------------------------------- SUBMIT ADD OFFER ----------------------------------------------------------//
+
 const addOffer = async (req, res) => {
   try {
-    console.log('adding offer started');
-    console.log(req.body);
+    // console.log('adding offer started');
+    // console.log(req.body);
 
     const details = req.body;
     const { offerName, discount, startDate, endDate, offerType, productId, categoryId } = details;
@@ -637,7 +672,7 @@ const addOffer = async (req, res) => {
     });
 
     if (offerType === 'Product') {
-      console.log('going with product offer');
+      // console.log('going with product offer');
       newOffer.productId = productId;
       const proData = await Product.findOne({ _id: productId });
       await Product.findByIdAndUpdate(
@@ -651,10 +686,10 @@ const addOffer = async (req, res) => {
         }
       );
     } else if (offerType === 'Category') {
-      console.log('going with category offer');
+      // console.log('going with category offer');
       newOffer.categoryId = categoryId;
       const catProducts = await Product.find({ category: categoryId });
-      console.log('catProducts', catProducts);
+      // console.log('catProducts', catProducts);
       for (const product of catProducts) {
         await Product.findByIdAndUpdate(
           { _id: product._id },
@@ -677,11 +712,11 @@ const addOffer = async (req, res) => {
   }
 };
 
-
+//---------------------------------------------------- EDIT OFFER ----------------------------------------------------------//
 
 const loadEditOffer = async (req, res) => {
   try {
-      console.log('starting to laod the edit offer page');
+      // console.log('starting to laod the edit offer page');
 
       const id = req.query.id
       console.log("id", id);
@@ -701,22 +736,23 @@ const loadEditOffer = async (req, res) => {
   }
 }
 
+//---------------------------------------------------- SUBMIT EDIT OFFER ----------------------------------------------------------//
 
 const editOffer = async (req, res) => {
   try {
 
-      console.log('starting to edit coupon');
+      // console.log('starting to edit coupon');
 
       const details = req.body;
-      console.log('details', details);
+      // console.log('details', details);
 
       const id = details.id;
-      console.log('id', id);
+      // console.log('id', id);
 
       const startDate = new Date(details.startDate)
-      console.log('startDate', startDate);
+      // console.log('startDate', startDate);
       const endDate = new Date(details.endDate);
-      console.log('endDate', endDate);
+      // console.log('endDate', endDate);
       if (startDate >= endDate) {
           return res.status(400).json({ error: 'Start date must be less than end date' });
       }
@@ -725,7 +761,7 @@ const editOffer = async (req, res) => {
           { $set: details },
           { new: true }
       )
-      console.log('updateOffer', updateOffer)
+      // console.log('updateOffer', updateOffer)
 
       if (updateOffer) {
           res.redirect('/admin/offer');
@@ -739,18 +775,18 @@ const editOffer = async (req, res) => {
   }
 }
 
-
+//---------------------------------------------------- DELETE OFFER ----------------------------------------------------------//
 
 const deleteOffer = async (req, res) => {
   try {
-      console.log('Started deleting offer');
+      // console.log('Started deleting offer');
 
       const { offerId } = req.body;
 
       const offer = await Offer.findById(offerId);
 
       if (!offer) {
-          console.log(`Offer with ID ${offerId} not found`);
+          // console.log(`Offer with ID ${offerId} not found`);
           return res.status(404).json({ success: false, message: "Offer not found" });
       }
 
@@ -766,7 +802,7 @@ const deleteOffer = async (req, res) => {
                   $inc: { price: offer.discount } 
               }
           );
-          console.log(`Updated product with ID ${offer.productId}`);
+          // console.log(`Updated product with ID ${offer.productId}`);
       } else if (offer.offerType === 'Category') {
           
           const catProducts = await Product.find({ categoryId: offer.categoryId });
@@ -781,13 +817,13 @@ const deleteOffer = async (req, res) => {
                       $inc: { price: offer.discount } 
                   }
               );
-              console.log(`Updated product with ID ${product._id} in category ${offer.categoryId}`);
+              // console.log(`Updated product with ID ${product._id} in category ${offer.categoryId}`);
           }
       }
 
    
       await Offer.deleteOne({ _id: offerId });
-      console.log(`Deleted offer with ID ${offerId}`);
+      // console.log(`Deleted offer with ID ${offerId}`);
 
       res.status(200).json({ success: true, message: "Offer deleted successfully" });
   } catch (error) {
@@ -796,6 +832,8 @@ const deleteOffer = async (req, res) => {
   }
 }
 
+//---------------------------------------------------- SALES REPORT ----------------------------------------------------------//
+
 const loadSalesReport = async (req, res) => {
   try {
       const orders = await Order.find({})
@@ -803,7 +841,7 @@ const loadSalesReport = async (req, res) => {
           .populate('deliveryAddress')
           .populate({ path: 'orderedItem.productId', model: 'Product' }) 
           .sort({ _id: -1 });
-      console.log('orders', orders);
+      // console.log('orders', orders);
 
       const formattedOrders = orders.map(order => {
           const date = new Date(order.createdAt)
@@ -818,6 +856,8 @@ const loadSalesReport = async (req, res) => {
       console.log('error loading sales report page', error);
   }
 }
+
+//---------------------------------------------------- DAILY SALES REPORT ----------------------------------------------------------//
 
 const dailySalesReport = async (req, res) => {
   try {
@@ -845,7 +885,7 @@ const dailySalesReport = async (req, res) => {
       const totalAmount = dailyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
       const totalCouponAmount = dailyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
 
-      console.log('dailyReport', dailyReport);
+      // console.log('dailyReport', dailyReport);
 
       res.render('reports', { report: dailyReport, totalOrders, totalAmount, totalCouponAmount });
 
@@ -855,6 +895,7 @@ const dailySalesReport = async (req, res) => {
   }
 }
 
+//---------------------------------------------------- WEEKLY SALES REPORT ----------------------------------------------------------//
 
 const generateWeeklyReport = async (req, res) => {
   try {
@@ -882,7 +923,7 @@ const generateWeeklyReport = async (req, res) => {
       const totalAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
       const totalCouponAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
 
-      console.log('weeklyReport', weeklyReport);
+      // console.log('weeklyReport', weeklyReport);
 
       res.render('reports', { report: weeklyReport, totalOrders, totalAmount, totalCouponAmount });
   } catch (error) {
@@ -891,6 +932,7 @@ const generateWeeklyReport = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- MONTHLY SALES REPORT ----------------------------------------------------------//
 
 const generateMonthlyReport = async (req, res) => {
   try {
@@ -911,7 +953,7 @@ const generateMonthlyReport = async (req, res) => {
           totalAmount: report.totalAmount
       }));
 
-      console.log('monthlyReport', formattedReport);
+      // console.log('monthlyReport', formattedReport);
 
       const totalOrders = formattedReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
       const totalAmount = formattedReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
@@ -923,6 +965,7 @@ const generateMonthlyReport = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- YEARLY SALES REPORT ----------------------------------------------------------//
 
 const generateYearlyReport = async (req, res) => {
   try {
@@ -942,7 +985,7 @@ const generateYearlyReport = async (req, res) => {
       const totalAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
       const totalCouponAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
 
-      console.log('yearlyReport', yearlyReport);
+      // console.log('yearlyReport', yearlyReport);
 
       res.render('reports', { report: yearlyReport, totalOrders, totalAmount, totalCouponAmount });
   } catch (error) {
@@ -951,6 +994,7 @@ const generateYearlyReport = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- CUSTOM DATE SALES REPORT ----------------------------------------------------------//
 
 const generateCustomDateReport = async (req, res) => {
   try {
@@ -980,8 +1024,8 @@ const generateCustomDateReport = async (req, res) => {
           console.warn('No orders found within the specified date range.');
       }
 
-      console.log('Total Amount:', totalAmount);
-      console.log('Total Orders:', totalOrders);
+      // console.log('Total Amount:', totalAmount);
+      // console.log('Total Orders:', totalOrders);
 
       res.render('customReport', {
           report: customDateReport,
@@ -996,6 +1040,7 @@ const generateCustomDateReport = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- CANCEL ORDER ----------------------------------------------------------//
 
 const approveCancelOrder=async(req,res)=>{
   try {
@@ -1026,6 +1071,7 @@ const approveCancelOrder=async(req,res)=>{
   }
 }
 
+//---------------------------------------- OFFERS -------------------------------------------------------------------------------//
 
 const OfferPage = async (req, res) => {
   try {
@@ -1050,12 +1096,10 @@ const DummyOffer = async (req, res) => {
     const { offerName, discount, startDate, endDate, productId } = req.body;
     console.log(req.body);
 
-    // Validate required fields
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
     }
 
-    // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
       return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
     }
@@ -1085,6 +1129,8 @@ const DummyOfferList = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- EDIT OFFER -----------------------------------------------------------------------//
+
 const editOfferPage = async (req, res) => {
   try {
     const offerId = req.params.id;
@@ -1100,13 +1146,10 @@ const updateOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
-
-    // Validate required fields
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
     }
 
-    // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
       return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
     }
@@ -1124,6 +1167,8 @@ const updateOffer = async (req, res) => {
     console.error('Error in updating offer:', error);
   }
 };
+
+//---------------------------------------------------- DELETE OFFER ---------------------------------------------------------------//
 
 const deleteDummyOffer = async (req, res) => {
   try {
@@ -1155,6 +1200,8 @@ const DummyEditCategoryOfferPage = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- DELETE OFFER ---------------------------------------------------------------//
+
 const deleteCategoryOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
@@ -1164,6 +1211,8 @@ const deleteCategoryOffer = async (req, res) => {
     console.error('Error deleting category offer:', error);
   }
 };
+
+//---------------------------------------------------- ADD OFFER ---------------------------------------------------------------//
 
 const DummyAddCategoryOfferPage = async (req, res) => {
   try {
@@ -1199,6 +1248,8 @@ const DummyCategoryAddOfferPost = async (req, res) => {
   }
 };
 
+//---------------------------------------------------- CATEGORY OFFER ---------------------------------------------------------------//
+
 const DummyCategoryOfferList = async (req, res) => {
   try {
     const offers = await CategoryOffer.find({}).populate('categoryId');
@@ -1225,7 +1276,7 @@ const DummyCategoryupdateOffer=async(req,res)=>{
   }
 }
 
-
+//---------------------------------------------------- BEST SELLING PRODUCTS ---------------------------------------------------------------//
 
 const getBestSellingProducts = async (req, res) => {
   try {
@@ -1252,13 +1303,9 @@ const getBestSellingProducts = async (req, res) => {
       { $limit: 10 }
     ]);
 
-    // Prepend the public path to the product image filenames
     bestSellingProducts.forEach(product => {
       product.productImage = `/productimage/${product.productImage}`;
     });
-
-    // Log the bestSellingProducts to debug
-    console.log(bestSellingProducts);
 
     res.json(bestSellingProducts);
   } catch (error) {
@@ -1266,7 +1313,7 @@ const getBestSellingProducts = async (req, res) => {
   }
 };
 
-
+//---------------------------------------------------- BEST SELLING CATEGORIES ---------------------------------------------------------------//
 
 const getBestSellingCategories = async (req, res) => {
   try {

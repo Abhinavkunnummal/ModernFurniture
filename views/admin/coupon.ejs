@@ -60,9 +60,9 @@
 
     deleteButtons.forEach(deleteButton => {
       deleteButton.addEventListener('click', function (event) {
-        event.preventDefault(); // Prevent default form submission behavior
+        event.preventDefault(); 
 
-        const couponId = this.dataset.id; // Correctly get the value from data-id attribute
+        const couponId = this.dataset.id; 
 
         Swal.fire({
           title: "Are you sure?",

@@ -12,13 +12,10 @@ const Payment=require('../model/payment')
 const Coupon=require('../model/coupon')
 const ProductOffer=require('../model/productOffer')
 const CategoryOffer=require('../model/categoryOffer')
-
-// controllers/walletController.js
 const Wallet=require('../model/wallet')
-
-
 const Razorpay = require("razorpay");
 
+//------------------------------------------------- CART --------------------------------------------------------------------------//
 
 const renderCart = async (req, res) => {
   try {
@@ -56,6 +53,8 @@ const calculateDiscountedPrice = async (product) => {
   return product.price - (product.price * (discount / 100));
 };
 
+//--------------------------------------------------- ADD TO CART ---------------------------------------------------------------//
+
 const addToCart = async (req, res) => {
   try {
     const userId = req.session.user_id;
@@ -90,6 +89,8 @@ const addToCart = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+//--------------------------------------------------- UPDATE CART ---------------------------------------------------------------//
 
 const updateCartItem = async (req, res) => {
   try {
@@ -159,8 +160,7 @@ const updateCartItem = async (req, res) => {
   }
 };
 
-
-
+//--------------------------------------------------- REMOVE FROM CART ---------------------------------------------------------------//
 
 const removeFromCart = async (req, res) => {
   try {
@@ -178,7 +178,7 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-
+//--------------------------------------------------- CHECKOUT PAGE ---------------------------------------------------------------//
 
 const checkoutPage = async (req, res) => {
   try {
@@ -201,6 +201,8 @@ const checkoutPage = async (req, res) => {
     console.log(error.message);
   }
 };
+
+//--------------------------------------------------- PLACE ORDER ---------------------------------------------------------------//
 
 const renderPlaceOrder = async (req, res) => {
   try {
@@ -330,7 +332,6 @@ const renderPlaceOrder = async (req, res) => {
   }
 };
 
-
 function calculateOrderAmount(cartItems) {
   let totalAmount = 0;
   cartItems.forEach(item => {
@@ -338,6 +339,8 @@ function calculateOrderAmount(cartItems) {
   });
   return totalAmount;
 }
+
+//------------------------------------------------------- VERIFY PAYMENT --------------------------------------------------------//
 
 const verifyPayment = async (req, res) => {
   try {
@@ -423,6 +426,7 @@ function calculateOrderAmount(cartItems) {
   return totalAmount;
 }
 
+//------------------------------------------------------- FAILED PAYMENT --------------------------------------------------------//
 
 const handleFailedRazorpayPayment = async (req, res) => {
   try {
@@ -465,36 +469,23 @@ const handleFailedRazorpayPayment = async (req, res) => {
     return res.status(500).send('Server Error');
   }
 };
-
-
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
 const razorPayRetryPayment = async (req, res) => {
   try {
     const { orderId, amount } = req.body;
 
-const order=await Order.findById(orderId)
-
-
-    // console.log(req.body);
-
-    // const order = await razorpay.orders.create({
-    //   amount: amount * 100, // Razorpay expects amount in paise
-    //   currency: "INR",
-    //   receipt: orderId,
-    //   payment_capture: 1,
-    // });
-    // console.log(orderId+'    is the razorpay order id');
-    // console.log('Razorpay order created:', JSON.stringify(order, null, 2));
+  const order=await Order.findById(orderId)
     res.json({ success: true, orderId: order.id, amount: order.orderAmount });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Failed to create Razorpay order' });
   }
 };
+
+//------------------------------------------------------- VERIFY RETRY PAYMENT --------------------------------------------------------//
 
 const verifyRetryPayment = async (req, res) => {  
   try{
@@ -511,70 +502,6 @@ const verifyRetryPayment = async (req, res) => {
     console.log(error.message);
   }
 }
-
-
-// const verifyRetryPayment = async (req, res) => {
-//   // console.log('Entering verifyRetryPayment function');
-
-//   // try {
-//   //     const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-//   //     console.log(orderId+'    is the order id');
-//   //     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-//   //         console.error('Missing required payment verification parameters');
-//   //         return res.status(400).json({ success: false, error: 'Missing required parameters' });
-//   //     }
-
-//   //     const body = razorpay_order_id + "|" + razorpay_payment_id;
-//   //     const generated_signature = crypto
-//   //         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-//   //         .update(body.toString())
-//   //         .digest('hex');
-      
-//   //     console.log('Generated signature:', generated_signature);
-//   //     console.log('Received signature:', razorpay_signature);
-
-//   //     if (generated_signature === razorpay_signature) {
-//   //         console.log('Signature verified successfully');
-
-//   //         // Convert orderId to ObjectId if it's not already in that format
-//   //         let objectId;
-//   //         try {
-//   //             objectId = mongoose.Types.ObjectId(orderId);
-//   //         } catch (error) {
-//   //             console.error('Invalid orderId format:', orderId);
-//   //             return res.status(400).json({ success: false, error: 'Invalid orderId format' });
-//   //         }
-
-//           // Update the order status in your database
-//           const updatedOrder = await Order.findByIdAndUpdate(
-//               objectId,
-//               {
-//                   $set: {
-//                       paymentStatus: true,
-//                       'orderedItem.$[].orderStatus': 'Paid',
-//                       razorpay_order_id: razorpay_order_id,
-//                       razorpay_payment_id: razorpay_payment_id
-//                   }
-//               },
-//               { new: true }
-//           );
-
-//           if (!updatedOrder) {
-//               console.error('Order not found:', orderId);
-//               return res.status(404).json({ success: false, error: 'Order not found' });
-//           }
-
-//           console.log('Order updated successfully:', updatedOrder);
-//           res.json({ success: true, order: updatedOrder });
-//       } else {
-//           console.error('Signature verification failed');
-//           res.status(400).json({ success: false, error: 'Payment verification failed' });
-//       }
-//   } catch (error) {
-//       console.error('Error in payment verification:', error);
-//       res.status(500).json({ success: false, error: 'Server error during payment verification' });
-//   }
-// };
 
 //***************************************************ORDER DETAILS***************************************************************/
 const renderOrders = async (req, res) => {
@@ -602,6 +529,8 @@ const renderOrders = async (req, res) => {
     });
   }
 };
+
+//-------------------------------------------------------RETURN ORDER --------------------------------------------------------//
 
 const returnOrder = async (req, res) => {
   try {
@@ -665,6 +594,7 @@ const returnOrder = async (req, res) => {
   }
 }
 
+//-------------------------------------------------------ORDER FULL DETAILS --------------------------------------------------------//
 
 const renderFullDetails = async (req, res) => {
   try {
@@ -686,8 +616,7 @@ const renderFullDetails = async (req, res) => {
   }
 };
 
-
-
+//-------------------------------------------------------CANCEL ORDER --------------------------------------------------------//
 
 const cancelOrder = async (req, res) => {
   try {
@@ -753,12 +682,7 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-
-
-
-
-//*******************************************- Razor Pay -************************************************************************/
-
+//-------------------------------------------------------WISHLIST --------------------------------------------------------//
 
 const renderWishlist = async (req, res) => {
   try {
@@ -780,6 +704,8 @@ const renderWishlist = async (req, res) => {
     console.log(error.message);
   }
 };
+
+//-------------------------------------------------------ADD TO WISHLIST --------------------------------------------------------//
 
 const addToWishList = async (req, res) => {
   try {
@@ -809,6 +735,7 @@ const addToWishList = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------REMOVE FROM WISHLIST --------------------------------------------------------//
 
 const removeFromWishList = async (req, res) => {
   try {
@@ -867,6 +794,7 @@ const renderWallet = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------Add MONEY TO WALLET --------------------------------------------------------//
 
   const addFunds = async (req, res) => {
     const razorpay = new Razorpay({
@@ -908,15 +836,7 @@ const renderWallet = async (req, res) => {
 const moment = require('moment');
 const fundVerification = async (req, res) => {
   try {
-    // console.log('Verification process started');
-    // console.log('Session:', req.session); 
-    // console.log('User ID:', req.session.user_id);
-
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body.response;
-    // console.log('Razorpay Order ID:', razorpay_order_id);
-    // console.log('Razorpay Payment ID:', razorpay_payment_id);
-    // console.log('Razorpay Signature:', razorpay_signature);
-
     const isValid = true; 
 
     if (isValid) {
@@ -954,10 +874,6 @@ const fundVerification = async (req, res) => {
   }
 };
 
-
-
-
-
 const addToWallet = async (req, res) => {
   try {
     const { Amount } = req.body;
@@ -989,6 +905,8 @@ const addToWallet = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+//-------------------------------------------------------PLACE ORDER TO WALLET --------------------------------------------------------//
 
 const placeOrderWallet = async (req, res) => {
   try {
@@ -1051,6 +969,8 @@ const placeOrderWallet = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error adding order details' });
   }
 };
+
+//-------------------------------------------------------RETRY ORDER --------------------------------------------------------//
 
 const retry = async (req, res) => {
   try {
@@ -1117,7 +1037,8 @@ const retryPayment = async (req, res) => {
   }
 };
 
-// User Dashboard
+//-------------------------------------------------------USER DASHBOARD --------------------------------------------------------//
+
 const renderUserDashboard = async (req, res) => {
   try {
     const userId = req.session.user_id;
@@ -1138,6 +1059,8 @@ const renderUserDashboard = async (req, res) => {
   }
 };
 
+//-------------------------------------------------------THANKYOU --------------------------------------------------------//
+
 const renderThankyou=async(req,res)=>{
   try{
     const userData = await User.findById(req.session.user_id)
@@ -1146,12 +1069,9 @@ const renderThankyou=async(req,res)=>{
     console.log(error.message);
   }
 }
-
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-
-
 const loadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query; 
@@ -1176,8 +1096,6 @@ const loadInvoice = async (req, res) => {
 
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
-
-    // Header
     doc
       .fontSize(20)
       .font('Helvetica-Bold')
@@ -1188,8 +1106,6 @@ const loadInvoice = async (req, res) => {
       .text(`Invoice Number: ${generateInvoiceNumber()}`, { align: 'right' })
       .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
       .moveDown();
-
-    // Delivery Address
     doc
       .fontSize(12)
       .font('Helvetica-Bold')
@@ -1203,8 +1119,6 @@ const loadInvoice = async (req, res) => {
       .text(`State: ${order.deliveryAddress.state}`)
       .text(`Pincode: ${order.deliveryAddress.zipcode}`)
       .moveDown();
-
-    // Table Header
     const tableTop = doc.y;
     const itemLineHeight = 20;
 
@@ -1224,7 +1138,7 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown(0.5);
 
-    // Table Rows
+
     let totalAmount = 0;
     order.orderedItem.forEach(item => {
       const itemPosition = doc.y + 20;
@@ -1241,7 +1155,6 @@ const loadInvoice = async (req, res) => {
       totalAmount += totalPrice;
     });
 
-    // Calculate Discount and Final Amount
     const discountAmount = totalAmount - order.orderAmount;
     const finalAmount = order.orderAmount;
     const summaryTop = doc.y + itemLineHeight + 15;
@@ -1267,7 +1180,6 @@ const loadInvoice = async (req, res) => {
       .text(`₹${finalAmount.toFixed(2)}`, 450, summaryTop + 45)
       .moveDown(2);
 
-    // Footer
     doc
       .fontSize(10)
       .font('Helvetica')
@@ -1296,16 +1208,13 @@ const loadInvoice = async (req, res) => {
   }
 };
 
-
-
+//---------------------------------------------------------- APPLY COUPON -----------------------------------------------------------//
 
 const applyCoupon = async (req, res) => {
   try {
     const { couponCode, originalTotal } = req.body;
     // console.log(`Received coupon code: ${couponCode}`);
     // console.log(`Original total: ${originalTotal}`);
-
- 
     const coupon = await Coupon.findOne({ couponCode });
     // console.log(`Coupon found: ${coupon}`);
 
@@ -1322,10 +1231,6 @@ const applyCoupon = async (req, res) => {
     req.session.coupon = couponCode;
     const discountAmount = coupon.discountAmount;
     const newTotal = originalTotal - discountAmount;
-
-    // console.log(`Discount amount: ${discountAmount}`);
-    // console.log(`New total after applying coupon: ${newTotal}`);
-
     res.json({ success: true, discountAmount, newTotal });
 
   } catch (error) {
@@ -1334,6 +1239,7 @@ const applyCoupon = async (req, res) => {
   }
 };
 
+//---------------------------------------------------------- REMOVE COUPON -----------------------------------------------------------//
 
 const removeCoupon = (req, res) => {
   try {
@@ -1348,6 +1254,7 @@ const removeCoupon = (req, res) => {
   }
 };
 
+//---------------------------------------------------------- SHOW COUPONS -----------------------------------------------------------//
 
 const showCoupons = async (req, res) => {
   // console.log('Fetching coupons from database...');
@@ -1374,13 +1281,11 @@ const showAllCoupons= async (req, res) => {
 module.exports = {
   renderCart,
   addToCart,
-  // updateCartItemQuantity,
   removeFromCart,
   updateCartItem,
 
   checkoutPage,
   renderPlaceOrder,
-  // placeOrder,
   renderOrders,
   renderFullDetails,
   renderThankyou,
@@ -1401,7 +1306,6 @@ module.exports = {
     renderUserDashboard,
     verifyPayment,
     returnOrder,
-    // downloadInvoice
     loadInvoice,
     applyCoupon,
     handleFailedRazorpayPayment,
