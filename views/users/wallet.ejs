@@ -52,8 +52,17 @@
   <div class="page-content">
       <div class="dashboard">
           <div class="container-fluid">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="/userProfile"><strong>Profile</strong></a></li>
+                  <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Wallet</li>
+              </ol>
+          </nav>
               <div class="row mt-5">
+                
                   <div class="col-md-8 col-lg-11">
+                    
                       <div class="tab-content">
                           <div class="p-5 shadow rounded bg-white">
                               <h2 class="mb-5 text-center" style="color:#717fe0;">Wallet Details</h2>
@@ -167,6 +176,34 @@
       margin: 0 auto;
       width: 80%;
   }
+ 
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .breadcrumb-item {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .breadcrumb-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+            margin: 0 10px;
+        }
 </style>
 
 <br><br>

@@ -35,6 +35,36 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/user_profile/js/config.js"></script>
   </head>
+  <style>
+     
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .breadcrumb-item {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .breadcrumb-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+            margin: 0 10px;
+        }
+  </style>
 
   <body>
     <!-- Layout wrapper -->
@@ -50,7 +80,13 @@
           <!-- Navbar -->
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/userProfile"><strong>Profile</strong></a></li>
+                    <li class="breadcrumb-item"><a href="/wallet">Wallet</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Orders</li>
+                </ol>
+            </nav>
               <h2>Your Orders</h2>
               <% if (orders && orders.length > 0) { %>
                 <% if (typeof messages !== 'undefined' && messages.error) { %>

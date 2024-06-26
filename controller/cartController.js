@@ -641,7 +641,7 @@ const returnOrder = async (req, res) => {
             wallet.balance += refundAmount;
             wallet.transaction.push(refundTransaction);
             await wallet.save();
-            console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
+            // console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
           } else {
             req.flash('error', 'Wallet not found');
             return res.status(404).json({ error: 'Wallet not found' });

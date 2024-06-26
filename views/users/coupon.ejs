@@ -38,9 +38,17 @@
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
+        
         <!-- Menu -->
         <%- include('../layouts/sidenav.ejs') %>
       <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/userProfile"><strong>Profile</strong></a></li>
+                <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Coupon</li>
+            </ol>
+        </nav>
     <h2 class="text-center mb-4">Coupons</h2>
     <div class="row">
         <% coupons.forEach(coupon => { %>
@@ -64,7 +72,35 @@
         <% }) %>
     </div>
 </div>
-
+<style>
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.breadcrumb-item {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+.breadcrumb-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: #6c757d;
+    margin: 0 10px;
+}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
     function copyToClipboard(code) {
