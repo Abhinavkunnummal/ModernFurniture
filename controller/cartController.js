@@ -26,16 +26,21 @@ const renderCart = async (req, res) => {
 
     const userData = await User.findById(userId);
     const cartItems = await CartItem.find({ userId: userId }).populate("product.productId");
+    
+    const isEmptyCart = cartItems.length === 0;
+
     res.render("cart", {
       cartItems: cartItems,
       userData: userData,
       user: userData,
+      isEmptyCart: isEmptyCart
     });
   } catch (error) {
     console.log(error.message);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const calculateDiscountedPrice = async (product) => {
   let discount = 0;

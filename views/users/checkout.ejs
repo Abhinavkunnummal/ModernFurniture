@@ -103,19 +103,20 @@
 
 					<div class="row mb-5">
 						<div class="col-md-12">
-							<h2 class="h3 mb-3 text-black">Coupon Code</h2>
-							<div class="p-3 p-lg-5 border bg-white rounded shadow-sm">
-								<div class="mb-3">
-									<label for="c_code" class="form-label">Enter your coupon code if you have one</label>
-									<div class="input-group">
-										<input type="text" class="form-control" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code">
-										<button class="btn btn-outline-dark" type="button" id="applyCouponButton">Apply</button>
-										<button class="btn btn-outline-dark" type="button" id="removeCouponButton">Remove</button>
-									</div>
-								</div>
+						  <h2 class="h3 mb-3 text-black">Coupon Code</h2>
+						  <div class="p-3 p-lg-5 border bg-white rounded shadow-sm">
+							<div class="mb-3">
+							  <label for="c_code" class="form-label">Enter your coupon code if you have one</label>
+							  <div class="input-group">
+								<input type="text" class="form-control" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code">
+								<button class="btn btn-outline-dark" type="button" id="applyCouponButton">Apply</button>
+								<button class="btn btn-outline-dark" type="button" id="removeCouponButton" style="display: none;">Remove</button>
+							  </div>
 							</div>
+						  </div>
 						</div>
-					</div>
+					  </div>
+					  
 					<h2 class="h3 mb-3 text-black">Available Coupons</h2>
 <div id="couponsContainer" class="p-3 p-lg-5 border bg-white rounded shadow-sm">
   <!-- Coupons will be dynamically inserted here -->
@@ -356,6 +357,7 @@
 				updateOrderTotal(currentTotal);
 				displayDiscountAmount(couponData.discountAmount);
 				Swal.fire("Success", "Coupon applied successfully!", "success");
+				removeCouponButton.style.display = "inline-block"; // Show the remove button
 			  } else {
 				Swal.fire("Error", couponData.message || 'Invalid coupon code.', "error");
 			  }
@@ -389,6 +391,7 @@
 				  updateOrderTotal(currentTotal);
 				  displayDiscountAmount(0); // Clear discount amount
 				  Swal.fire("Success", "Coupon removed successfully!", "success");
+				  removeCouponButton.style.display = "none"; // Hide the remove button
 				} else {
 				  Swal.fire("Error", couponData.message || 'Failed to remove coupon.', "error");
 				}

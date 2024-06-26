@@ -134,10 +134,20 @@
 
 <script>
  document.addEventListener('DOMContentLoaded', function() {
-  const plusButton = document.querySelectorAll('.plus-btn');
-  const minusButton = document.querySelectorAll('.minus-btn');
+  const plusButtons = document.querySelectorAll('.plus-btn');
+  const minusButtons = document.querySelectorAll('.minus-btn');
+  const proceedToCheckoutButton = document.getElementById('proceedToCheckout');
+  const isEmptyCart = <%= JSON.stringify(isEmptyCart) %>; // Pass the server-side flag to the client-side
 
-  plusButton.forEach(button => {
+  if (isEmptyCart) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Oops...',
+      text: 'Your cart is empty. Please add some products to your cart.',
+    });
+  }
+
+  plusButtons.forEach(button => {
     button.addEventListener('click', function() {
       const quantityElement = this.closest('.quantity-wrapper').querySelector('.quantity');
       let quantity = parseInt(quantityElement.textContent);
@@ -146,15 +156,15 @@
         updateCart(productId, 1);
       } else {
         Swal.fire({
-            icon: 'warning',
-            title: 'Oops...',
-            text: 'Cannot add more than 5',
+          icon: 'warning',
+          title: 'Oops...',
+          text: 'Cannot add more than 5',
         });
       }
     });
   });
 
-  minusButton.forEach(button => {
+  minusButtons.forEach(button => {
     button.addEventListener('click', function() {
       const quantityElement = this.closest('.quantity-wrapper').querySelector('.quantity');
       let quantity = parseInt(quantityElement.textContent);
@@ -163,6 +173,18 @@
         updateCart(productId, -1);
       }
     });
+  });
+
+  proceedToCheckoutButton.addEventListener('click', function(event) {
+    const cartItems = document.querySelectorAll('tbody tr[data-productid]');
+    if (cartItems.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Oops...',
+        text: 'No products in the cart to proceed to checkout.',
+      });
+      event.preventDefault(); // Prevent the form submission
+    }
   });
 
   function updateCart(productId, quantityChange) {
@@ -185,19 +207,17 @@
         window.location.reload();
         $('#subtotal').text('₹' + response.subtotal.toFixed(2));
         $('#total').text('₹' + response.total.toFixed(2));
-        const productRow = $('tr[data-productid="' + productId + '"]');
+        const productRow = document.querySelector('tr[data-productid="' + productId + '"]');
         const newQuantity = response.cartItems.find(item => item.product[0].productId.toString() === productId).product[0].quantity;
-        const productTotal = parseFloat(productRow.find('.cart_price.price').data('price')) * newQuantity;
-        productRow.find('.cart_total.total').text('₹' + productTotal.toFixed(2));
+        const productTotal = parseFloat(productRow.querySelector('.cart_price').textContent.replace('₹', '')) * newQuantity;
+        productRow.querySelector('.cart_total').textContent = '₹' + productTotal.toFixed(2);
       }
     })
     .catch(error => {
       console.error('Error updating quantity:', error);
-    
     });
   }
 
- 
   const removeCartLinks = document.querySelectorAll('.remove-cart-link');
   removeCartLinks.forEach(link => {
     link.addEventListener('click', function(event) {
@@ -214,15 +234,12 @@
         confirmButtonText: "Yes, delete it!"
       }).then((result) => {
         if (result.isConfirmed) {
-         
           window.location.href = this.getAttribute('href'); 
         } else {
-
           Swal.close(); 
         }
       });
     });
   });
 });
-
 </script>
