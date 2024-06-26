@@ -124,6 +124,7 @@ userRoute.get('/orderDetails',cartController.renderFullDetails)
 userRoute.post('/cancelOrders',cartController.cancelOrder)
 
 
+
 userRoute.get('/wishlist', cartController.renderWishlist);
 
 // Add to wishlist

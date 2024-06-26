@@ -222,6 +222,7 @@
                                   <th>Quantity</th>
                                   <th>Order Status</th>
                                   <th>Price</th>
+                                  <th>Total Price</th>
                                   <th>Action</th>
                                 </tr>
                               </thead>
@@ -234,6 +235,7 @@
                                     <td><%= item.quantity %></td>
                                     <td><%= item.orderStatus %></td>
                                     <td><%= item.totalProductAmount %></td>
+                                    <td><%= orders.orderAmount %> %></td>
                                     <td>
                                       <% if (item.orderStatus === 'delivered') { %>
                                         <button class="btn btn-warning" onclick="showReturnForm('<%= item._id %>')">Return</button>

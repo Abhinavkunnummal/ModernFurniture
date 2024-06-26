@@ -1226,21 +1226,27 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown(0.5);
 
-    // Table Row (only one product)
-    const item = order.orderedItem[0]; // Get only the first item
-    const itemPosition = tableTop + 30;
-    const totalPrice = item.quantity * item.productId.price;
+    // Table Rows
+    let totalAmount = 0;
+    order.orderedItem.forEach(item => {
+      const itemPosition = doc.y + 20;
+      const totalPrice = item.quantity * item.productId.price;
 
-    doc
-      .fontSize(12)
-      .font('Helvetica')
-      .text(item.productId.name, 50, itemPosition, { width: 150 })
-      .text(item.quantity.toString(), 250, itemPosition)
-      .text(`₹${item.productId.price.toFixed(2)}`, 350, itemPosition)
-      .text(`₹${totalPrice.toFixed(2)}`, 450, itemPosition);
+      doc
+        .fontSize(12)
+        .font('Helvetica')
+        .text(item.productId.name, 50, itemPosition, { width: 150 })
+        .text(item.quantity.toString(), 250, itemPosition)
+        .text(`₹${item.productId.price.toFixed(2)}`, 350, itemPosition)
+        .text(`₹${totalPrice.toFixed(2)}`, 450, itemPosition);
 
-    // Summary
-    const summaryTop = itemPosition + itemLineHeight + 15;
+      totalAmount += totalPrice;
+    });
+
+    // Calculate Discount and Final Amount
+    const discountAmount = totalAmount - order.orderAmount;
+    const finalAmount = order.orderAmount;
+    const summaryTop = doc.y + itemLineHeight + 15;
 
     doc
       .strokeColor('#aaaaaa')
@@ -1254,10 +1260,13 @@ const loadInvoice = async (req, res) => {
       .fontSize(12)
       .font('Helvetica-Bold')
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`₹${totalPrice.toFixed(2)}`, 450, summaryTop + 15)
+      .text(`₹${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
       .moveDown(0.5)
-      .text('Grand Total', 350, summaryTop + 30)
-      .text(`₹${totalPrice.toFixed(2)}`, 450, summaryTop + 30)
+      .text('Discount', 350, summaryTop + 30)
+      .text(`₹${discountAmount.toFixed(2)}`, 450, summaryTop + 30)
+      .moveDown(0.5)
+      .text('Grand Total', 350, summaryTop + 45)
+      .text(`₹${finalAmount.toFixed(2)}`, 450, summaryTop + 45)
       .moveDown(2);
 
     // Footer
@@ -1288,6 +1297,8 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
+
+
 
 
 const applyCoupon = async (req, res) => {
