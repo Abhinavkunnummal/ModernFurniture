@@ -203,10 +203,9 @@
         
                             <!-- Order Details -->
                             <div class="order-summary bg-info text-white p-3 rounded shadow-sm" style="flex: 1; min-width: 250px;">
-                                <p><strong>Order ID:</strong> <%= orders._id %></p>
-                                <p><strong>Ordered Date:</strong> <%= orders.createdAt ? orders.createdAt.toLocaleString() : 'N/A' %></p>
-                                <p><strong>Shipping Date:</strong> <%= orders.shippingDate %></p>
-                                <p><strong>Delivery Date:</strong> <%= orders.deliveryDate %></p>
+                              <p><strong>Order ID:</strong> <%= orders._id %></p>
+                              <p><strong>Ordered Date:</strong> <%= orders.createdAt ? new Date(orders.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' %></p>
+                              
                             </div>
                         </div>
         

@@ -112,14 +112,9 @@
                           <td><strong>Order ID:</strong></td>
                           <td><span style="color: #333;"><%= order._id %></span></td>
                           <td><strong>Ordered Date:</strong></td>
-                          <td><span style="color: #333;"><%= order.createdAt.toLocaleString() %></span></td>
+                          <td><span style="color: #333;"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span></td>
                         </tr>
-                        <tr>
-                          <td><strong>Shipping Date:</strong></td>
-                          <td><span style="color: #333;"><%= order.shippingDate %></span></td>
-                          <td><strong>Delivery Date:</strong></td>
-                          <td><span style="color: #333;"><%= order.deliveryDate %></span></td>
-                        </tr>
+                        
                       </thead>
                       <tbody>
                         <tr>
