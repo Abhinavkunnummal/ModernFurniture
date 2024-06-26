@@ -614,8 +614,6 @@ const returnOrder = async (req, res) => {
     });
 
     if (order) {
-
-
       const orderedItem = order.orderedItem.find(item => item._id.toString() === orderId);
 
       if (orderedItem) {
@@ -623,15 +621,18 @@ const returnOrder = async (req, res) => {
           orderedItem.orderStatus = 'returned';
           order.returnReason = returnReason;
 
+          // Calculate refund amount based on order total amount
+          const refundAmount = order.orderAmount;
+
+          // Increase product stock
           const product = await Product.findById(orderedItem.productId);
           if (product) {
             product.stock += orderedItem.quantity; 
             await product.save();
           }
-      
+
+          // Refund wallet balance
           const wallet = await Wallet.findOne({ userId: userId });
-          const refundAmount = +orderedItem.totalProductAmount;
-      
           if (wallet) {
             const refundTransaction = {
               amount: refundAmount,
@@ -641,25 +642,21 @@ const returnOrder = async (req, res) => {
             wallet.balance += refundAmount;
             wallet.transaction.push(refundTransaction);
             await wallet.save();
-            // console.log('Updated wallet:', await Wallet.findOne({ userId: userId }));
           } else {
             req.flash('error', 'Wallet not found');
             return res.status(404).json({ error: 'Wallet not found' });
           }
-      
+
           await order.save();
 
-          res.status(200).json({ success: true, message: 'Return request processed successfully' });
+          res.status(200).json({ success: true, message: 'Return request processed successfully', refundAmount });
         } else {
-          // console.log('Order status is not "delivered":', orderedItem.orderStatus);
           res.status(400).json({ success: false, message: 'Order status is not eligible for return' });
         }
       } else {
-        // console.log('Ordered item not found for orderId:', orderId);
         res.status(404).json({ success: false, message: 'Ordered item not found' });
       }
     } else {
-      // console.log('Order not found for orderId:', orderId);
       res.status(404).json({ success: false, message: 'Order not found' });
     }
   } catch (error) {
@@ -667,6 +664,7 @@ const returnOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
+
 
 const renderFullDetails = async (req, res) => {
   try {
