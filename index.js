@@ -18,7 +18,7 @@ const flash = require ('express-flash')
 const app=express()
 const path=require('path')
 const session=require('express-session')
-
+const Wallet = require('../model/wallet');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
