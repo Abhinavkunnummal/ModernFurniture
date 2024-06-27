@@ -628,7 +628,7 @@ const cancelOrder = async (req, res) => {
     const userId = req.session.user_id;
     const { itemId, cancelReason } = req.body;
 
-    console.log(`Cancel order request received for userId: ${userId}, itemId: ${itemId}, cancelReason: ${cancelReason}`);
+    // console.log(`Cancel order request received for userId: ${userId}, itemId: ${itemId}, cancelReason: ${cancelReason}`);
 
     const order = await Order.findOne({
       userId: userId,
@@ -637,14 +637,14 @@ const cancelOrder = async (req, res) => {
 
     if (!order) {
       req.flash('error', 'Order not found');
-      console.error('Order not found for userId:', userId, 'itemId:', itemId);
+      // console.error('Order not found for userId:', userId, 'itemId:', itemId);
       return res.status(404).json({ error: 'Order not found' });
     }
 
     const item = order.orderedItem.id(itemId);
 
     if (item.orderStatus !== 'pending' && item.orderStatus !== 'approved') {
-      console.error('Order status not eligible for cancellation for itemId:', itemId);
+      // console.error('Order status not eligible for cancellation for itemId:', itemId);
       return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
     }
 
@@ -668,7 +668,7 @@ const cancelOrder = async (req, res) => {
     const refundAmount = +item.totalProductAmount;
 
     // Log the current wallet balance and refund amount
-    console.log('Current wallet balance:', wallet.balance, 'Refund amount:', refundAmount);
+    // console.log('Current wallet balance:', wallet.balance, 'Refund amount:', refundAmount);
 
     // Ensure wallet balance update handles zero balance correctly
     wallet.balance = (wallet.balance || 0) + refundAmount;
@@ -681,10 +681,10 @@ const cancelOrder = async (req, res) => {
 
     wallet.transaction.push(refundTransaction);
     await wallet.save();
-    console.log('Wallet updated successfully for userId:', userId, 'New balance:', wallet.balance);
+    // console.log('Wallet updated successfully for userId:', userId, 'New balance:', wallet.balance);
 
     await order.save();
-    console.log('Order updated successfully for orderId:', order._id);
+    // console.log('Order updated successfully for orderId:', order._id);
 
     req.flash('success', 'Cancellation request sent successfully');
     return res.status(200).json({ success: true, message: 'Cancellation request sent successfully' });
