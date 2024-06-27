@@ -34,11 +34,11 @@
                 <div>
                     <% if (products.stock > 0) { %>
                         <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success" style="margin-top: 40px;">Add To Cart</a>
+                        <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success" style="margin-top: 40px;">Buy Now</a>
                     <% } else { %>
                         <button class="btn btn-secondary" disabled>Out of Stock</button>
                     <% } %>
-
-                    <a href="/addToCart?productId=<%= products._id %>" class="btn btn-success" style="margin-top: 40px;">Buy Now</a>
+                    
                 </div>
             </div>
         </div>
@@ -47,6 +47,7 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/igorlino/elevatezoom-plus/1.1.6/src/jquery.ez-plus.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> <!-- Include SweetAlert2 library -->
 
 <script>
     $(document).ready(function() {
@@ -78,25 +79,30 @@
                 }
             }).then(response => {
                 if (response.ok) {
+                    // Add the product to the cart after successfully adding to wishlist
+                    return fetch(`/addToCart?productId=${productId}`, {
+                        method: 'GET'
+                    });
+                } else {
+                    throw new Error('Could not add to wishlist.');
+                }
+            }).then(response => {
+                if (response.ok) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Added to Wishlist',
+                        title: 'Added to Wishlist and Cart',
                         showConfirmButton: false,
                         timer: 1500
                     });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Could not add to wishlist. Try again later.',
-                    });
+                    throw new Error('Could not add to cart.');
                 }
             }).catch(error => {
-                console.error('Error adding to wishlist:', error);
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Could not add to wishlist. Try again later.',
+                    text: 'Could not add to wishlist or cart. Try again later.',
                 });
             });
         });
@@ -124,5 +130,6 @@
         });
     });
 </script>
+
 
 <%- include('../layouts/footer.ejs') %>
