@@ -577,6 +577,33 @@ const addCoupon = async (req, res) => {
 const submitAddCoupon = async (req, res) => {
   try {
     const { couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
+    
+    let errors = [];
+
+    if (!couponCode || /^\d/.test(couponCode)) {
+      errors.push("Coupon code must not be empty and must not start with a number.");
+    }
+
+    if (new Date(expiryDate) <= new Date()) {
+      errors.push("Expiry date cannot be today or a past date.");
+    }
+
+    if (parseFloat(minimumAmount) <= 0) {
+      errors.push("Minimum amount must be greater than 0.");
+    }
+
+    if (parseFloat(discountAmount) <= 0) {
+      errors.push("Discount amount must be greater than 0.");
+    }
+
+    if (parseFloat(discountAmount) > parseFloat(minimumAmount)) {
+      errors.push("Discount amount cannot be more than the minimum amount.");
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
     const newCoupon = new Coupon({
       couponCode,
       discountAmount,
@@ -588,9 +615,9 @@ const submitAddCoupon = async (req, res) => {
     res.redirect('/admin/coupon');
   } catch (error) {
     console.error(error.message);
+    res.status(500).json({ error: "Server error" });
   }
 };
-
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
 const renderEditCoupon = async (req, res) => {
