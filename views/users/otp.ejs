@@ -32,13 +32,12 @@
                             </div>
                         </form>
                         <div class="form-group text-center">
-                            <p id="timerMessage">Resend OTP in <span id="timer">20</span> seconds</p>
+                            <p id="timerMessage">Resend OTP in <span id="timer">60</span> seconds</p>
                         </div>
                         <div class="form-group text-center" id="resendLink" style="display: none;">
                             <button id="resendOTP" class="btn btn-link">Resend OTP</button>
                             <p id="resendMessage" style="color: green;"></p> <!-- New element for success message -->
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -49,7 +48,7 @@
 <%- include('../form_layouts/footer.ejs') %>
 
 <script>
-    var timeLeft = <%= typeof timer !== 'undefined' ? Math.floor(timer) : 20 %>;
+    var timeLeft = <%= typeof timer !== 'undefined' ? Math.floor(timer) : 60 %>; // Set default time to 60 seconds
     var timerElement = document.getElementById('timer');
     var timerMessage = document.getElementById('timerMessage');
     var resendLink = document.getElementById('resendLink');
@@ -57,36 +56,32 @@
     var timer;
 
     function countdown() {
-    console.log('Countdown function called');
-    if (timeLeft <= 0) {
-        clearTimeout(timer);
-        resendLink.style.display = 'block';
-        timerMessage.innerHTML = "Resend OTP now";
-        return;
+        if (timeLeft <= 0) {
+            clearTimeout(timer);
+            resendLink.style.display = 'block';
+            timerMessage.innerHTML = "Resend OTP now";
+            return;
+        }
+        timerElement.innerHTML = timeLeft;
+        timeLeft--;
+        timer = setTimeout(countdown, 1000);
     }
-    timerElement.innerHTML = timeLeft; // Move this line inside the countdown function
-    timeLeft--;
-    timer = setTimeout(countdown, 1000);
-}
     countdown();
 
     resendOTPButton.addEventListener('click', function(e) {
         e.preventDefault();
-        console.log('Resend OTP button clicked');
         resendOTP();
     });
 
     function resetTimer() {
-    console.log('Timer reset');
-    timeLeft = 20;
-    clearTimeout(timer);
-    timerMessage.innerHTML = "Resend OTP in <span id='timer'>" + timeLeft + "</span> seconds";
-    countdown(); // Call countdown after updating timerMessage
-    resendLink.style.display = 'none';
-}
+        timeLeft = 60; // Reset timer to 60 seconds
+        clearTimeout(timer);
+        timerMessage.innerHTML = "Resend OTP in <span id='timer'>" + timeLeft + "</span> seconds";
+        countdown(); 
+        resendLink.style.display = 'none';
+    }
 
     function resendOTP() {
-        console.log('Resending OTP');
         fetch('/resendOtp', {
             method: 'POST',
             headers: {
