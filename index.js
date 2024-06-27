@@ -42,29 +42,34 @@ app.use(flash())
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "https://abhinavkunnummal.online/auth/google/callback"
 },
-    async function (accessToken, refreshToken, profile, cb) {
-        try {
-            let user = await User.findOne({ email: profile.emails[0].value });
-            if (!user) {
-                user = new User({
-                    password: profile.id,
-                    name: profile.displayName,
-                    email: profile.emails[0].value,
-                    is_admin:0,
-                    is_verified:1
+async function (accessToken, refreshToken, profile, cb) {
+    try {
+        let user = await User.findOne({ email: profile.emails[0].value });
+        if (!user) {
+            user = new User({
+                password: profile.id,
+                name: profile.displayName,
+                email: profile.emails[0].value,
+                is_admin: 0,
+                is_verified: 1
+            });
+            await user.save();
 
-                });
-                await user.save();
-               
-             
-            }
-
-            
-            return cb(null, user);
-        } catch (error) {
-            return cb(error);
+            // Create wallet for the new user
+            const newUserWallet = new Wallet({
+                userId: user._id,
+                balance: 0,
+                transaction: []
+            });
+            await newUserWallet.save();
         }
+
+        return cb(null, user);
+    } catch (error) {
+        return cb(error);
     }
+}
+
 ));
 
 passport.serializeUser(function (user, done) {
