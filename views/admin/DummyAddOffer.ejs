@@ -53,72 +53,8 @@
         <button type="submit" class="btn btn-primary">Add Offer</button>
     </form>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<% include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs ')%> 
-<script>
-document.querySelector('#offerForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent form submission
 
-    const offerName = document.querySelector('#offerName').value;
-    const discount = document.querySelector('#discount').value;
-    const startDate = document.querySelector('#startDate').value;
-    const endDate = document.querySelector('#endDate').value;
-    const productId = document.querySelector('#productId').value;
+<%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 
-    if (!offerName || !discount || !startDate || !endDate || !productId) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Please fill in all fields!'
-        });
-        return;
-    }
-
-    if (new Date(startDate) >= new Date(endDate)) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'End Date must be after Start Date!'
-        });
-        return;
-    }
-
-    // Use AJAX to submit the form
-    $.ajax({
-        type: 'POST',
-        url: '/admin/DummyOffer',
-        data: {
-            offerName: offerName,
-            discount: discount,
-            startDate: startDate,
-            endDate: endDate,
-            productId: productId
-        },
-        success: function (response) {
-            if (response.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Offer added successfully!'
-                }).then(() => {
-                    window.location.reload(); // Reload the page or redirect as needed
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: response.errorMessage
-                });
-            }
-        },
-        error: function (xhr, status, error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Something went wrong!'
-            });
-        }
-    });
-});
-</script>
+ 
