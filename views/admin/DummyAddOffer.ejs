@@ -9,18 +9,18 @@
 
 <div class="container" style="margin-left: 300px; margin-top: 50px;">   
     <h1>Product Add Offer !!!</h1>
-    <form action="/admin/DummyOffer" method="POST">
+    <form id="offerForm" action="/admin/DummyOffer" method="POST">
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="offerName" class="form-label">Offer Name</label>
-                    <input type="text" class="form-control" name="offerName" required>
+                    <input type="text" class="form-control" id="offerName" name="offerName" >
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="discount" class="form-label">Discount</label>
-                    <input type="number" class="form-control" name="discount" style="width: 75%;" required>
+                    <input type="number" class="form-control" id="discount" name="discount" style="width: 75%;" >
                 </div>
             </div>
         </div>
@@ -28,13 +28,13 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" name="startDate" required>
+                    <input type="date" class="form-control" id="startDate" name="startDate" >
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" class="form-control" name="endDate" style="width: 75%;" required>
+                    <input type="date" class="form-control" id="endDate" name="endDate" style="width: 75%;" >
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="productId" class="form-label">Product</label>
-                    <select class="form-select" name="productId" required>
+                    <select class="form-select" id="productId" name="productId" required>
                         <% products.forEach((item) => { %>
                             <option value="<%= item._id %>"><%= item.name %></option>
                         <% }); %>
@@ -54,5 +54,40 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
+<script>
+    document.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent form submission
+    
+        const offerName = document.querySelector('input[name="offerName"]').value;
+        const discount = document.querySelector('input[name="discount"]').value;
+        const startDate = document.querySelector('input[name="startDate"]').value;
+        const endDate = document.querySelector('input[name="endDate"]').value;
+        const productId = document.querySelector('select[name="productId"]').value;
+    
+        if (!offerName || !discount || !startDate || !endDate || !productId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please fill in all fields!'
+            });
+            return;
+        }
+    
+        if (new Date(startDate) >= new Date(endDate)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'End Date must be after Start Date!'
+            });
+            return;
+        }
+    
+        // If all validations pass, submit the form
+        this.submit();
+    });
+    </script>
+    
  
