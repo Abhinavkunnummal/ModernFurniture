@@ -585,7 +585,7 @@ const submitAddCoupon = async (req, res) => {
     }
 
     if (new Date(expiryDate) <= new Date()) {
-      errors.push("Expiry date cannot be today or a past date.");
+      errors.push("Expiry date cannot be  a past date.");
     }
 
     if (parseFloat(minimumAmount) <= 0) {

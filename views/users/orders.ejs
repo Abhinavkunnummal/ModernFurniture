@@ -124,8 +124,10 @@
                           <th>Product Name</th>
                           <th>Image</th>
                           <th>Quantity</th>
-                          <th>Payment Method</th>
                           <th>Order Status</th>
+                          <th>Payment Method</th>
+                          <th>Payment Status</th>
+                       
                           <th>Price</th>
                           <th><strong>Total Amount</strong></th>
                         </tr>
@@ -134,12 +136,13 @@
                             <td><span style="color: #333;"><%= item.productId.name %></span></td>
                             <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
                             <td><span style="color: #333;"><%= item.quantity %></span></td>
+                            <td><span style="color: #333;"><%= item.orderStatus %></span></td>
                             <td><span style="color: #333;"><%= order.paymentMethod %></span></td>
                             <td>
                               <% if (!order.paymentStatus) { %>
                                 <span style="color: #ca0000; background-color: #e7eb1e; padding: 2px 5px; border-radius: 3px;"> <strong>Payment Pending</strong> </span>
                               <% } else { %>
-                                <span style="color: #333;">Pending</span>
+                                <span style="color: #333;">Done</span>
                               <% } %>
                             </td>
                             <td><span style="color: #333;"><%= item.totalProductAmount %></span></td>
