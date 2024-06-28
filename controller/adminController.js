@@ -1266,15 +1266,15 @@ const updateCategoryOffer = async (req, res) => {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
 
-    if (!offerName || !discount || !startDate || !endDate || !categoryId) {
-      req.flash('error', 'Missing required fields');
-      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
-    }
+    // if (!offerName || !discount || !startDate || !endDate || !categoryId) {
+    //   req.flash('error', 'Missing required fields');
+    //   return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    // }
 
-    if (new Date(startDate) >= new Date(endDate)) {
-      req.flash('error', 'Start date must be before end date');
-      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
-    }
+    // if (new Date(startDate) >= new Date(endDate)) {
+    //   req.flash('error', 'Start date must be before end date');
+    //   return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    // }
 
     await CategoryOffer.findByIdAndUpdate(offerId, {
       offerName,
