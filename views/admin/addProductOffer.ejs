@@ -1,15 +1,30 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/header.ejs') %>
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/sidenav.ejs') %>
 
-<% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= errorMessage %>
-    </div>
-<% } %>
+<!-- Include SweetAlert library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-<div class="container" style="margin-left: 300px; margin-top: 50px;">   
+<!-- Display flash messages using SweetAlert -->
+<script>
+  <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: '<%= errorMessage %>',
+    });
+  <% } %>
+  <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: '<%= successMessage %>',
+    });
+  <% } %>
+</script>
+
+<div class="container" style="margin-left: 300px; margin-top: 50px;">
     <h1>Product Add Offer !!!</h1>
-    <form id="offerForm" action="/admin/productOffer" method="POST">
+    <form id="offerForm" action="/admin/productOffer" method="POST" onsubmit="return validateForm()">
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -54,7 +69,34 @@
     </form>
 </div>
 
-
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 
- 
+<script>
+  function validateForm() {
+    const offerName = document.getElementById('offerName').value;
+    const discount = document.getElementById('discount').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const productId = document.getElementById('productId').value;
+
+    if (!offerName || !discount || !startDate || !endDate || !productId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'All fields are required.'
+      });
+      return false;
+    }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Start date must be before end date.'
+      });
+      return false;
+    }
+
+    return true;
+  }
+</script>

@@ -1114,6 +1114,8 @@ const addProductOfferPage = async (req, res) => {
     res.render('addProductOffer', { products, errorMessage: req.flash('error') });
   } catch (error) {
     console.error('Error in addProductOfferPage:', error.message);
+    req.flash('error', 'Unable to load the page. Please try again later.');
+    res.redirect('/admin/productOffer');
   }
 };
 
@@ -1123,12 +1125,12 @@ const addProductOfferPost = async (req, res) => {
     console.log(req.body);
 
     if (!offerName || !discount || !startDate || !endDate || !productId) {
-      req.flash('error', 'Missing required fields');
+      req.flash('error', 'All fields are required.');
       return res.redirect('/admin/addProductOffer');
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      req.flash('error', 'Start date must be before end date');
+      req.flash('error', 'Start date must be before end date.');
       return res.redirect('/admin/addProductOffer');
     }
 
@@ -1142,11 +1144,15 @@ const addProductOfferPost = async (req, res) => {
     });
 
     await newOffer.save();
+    req.flash('success', 'Product offer added successfully.');
     res.redirect('/admin/productOffer');
   } catch (error) {
-    console.error('Error in the offer page:', error);
+    console.error('Error in addProductOfferPost:', error);
+    req.flash('error', 'An error occurred while adding the offer. Please try again.');
+    res.redirect('/admin/addProductOffer');
   }
 };
+
 
 const editProductOffer = async (req, res) => {
   try {
@@ -1165,15 +1171,6 @@ const updateProductOffer = async (req, res) => {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
-    // if (!offerName || !discount || !startDate || !endDate || !productId) {
-    //   req.flash('error', 'Missing required fields');
-    //   return res.redirect(`/admin/editProductOffer/${offerId}`);
-    // }
-
-    // if (new Date(startDate) >= new Date(endDate)) {
-    //   req.flash('error', 'Start date must be before end date');
-    //   return res.redirect(`/admin/editProductOffer/${offerId}`);
-    // }
 
     await ProductOffer.findByIdAndUpdate(offerId, {
       offerName,
