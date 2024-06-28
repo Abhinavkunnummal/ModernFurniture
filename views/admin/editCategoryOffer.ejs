@@ -1,11 +1,23 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/header.ejs') %>
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/sidenav.ejs') %>
 
-<% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= errorMessage %>
-    </div>
-<% } %>
+<!-- Include SweetAlert library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<!-- Display flash messages using SweetAlert -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const errorMessage = '<%= errorMessage %>';
+
+    if (errorMessage) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage,
+      });
+    }
+  });
+</script>
 
 <div class="container" style="margin-left: 300px; margin-top: 50px;">
     <h1>Edit Category Offer</h1>

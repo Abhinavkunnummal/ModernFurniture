@@ -1327,6 +1327,8 @@ const editCategoryOffer = async (req, res) => {
     res.render('editCategoryOffer', { offer, categories, errorMessage: req.flash('error') });
   } catch (error) {
     console.error('Error in edit offer page:', error);
+    req.flash('error', 'Failed to load the edit category offer page');
+    res.redirect('/admin/categoryOffer');
   }
 };
 
@@ -1335,15 +1337,39 @@ const updateCategoryOffer = async (req, res) => {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
 
-    // if (!offerName || !discount || !startDate || !endDate || !categoryId) {
-    //   req.flash('error', 'Missing required fields');
-    //   return res.redirect(`/admin/editCategoryOffer/${offerId}`);
-    // }
+    // Regular expression to check for numbers, spaces, or special characters
+    const invalidOfferNameRegex = /[^a-zA-Z]/;
 
-    // if (new Date(startDate) >= new Date(endDate)) {
-    //   req.flash('error', 'Start date must be before end date');
-    //   return res.redirect(`/admin/editCategoryOffer/${offerId}`);
-    // }
+    // Check if any required field is missing
+    if (!offerName || !discount || !startDate || !endDate || !categoryId) {
+      req.flash('error', 'All fields are required.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    // Validate offer name
+    if (invalidOfferNameRegex.test(offerName)) {
+      req.flash('error', 'Offer name cannot contain numbers, spaces, or special characters.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    // Validate discount value
+    if (discount <= 0) {
+      req.flash('error', 'Discount cannot be less than or equal to 0.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    // Validate date range
+    if (new Date(startDate) >= new Date(endDate)) {
+      req.flash('error', 'Start date must be before end date.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    // Check if the offer name is unique
+    const existingOffer = await CategoryOffer.findOne({ offerName, _id: { $ne: offerId } });
+    if (existingOffer) {
+      req.flash('error', 'An offer with this name already exists.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
 
     await CategoryOffer.findByIdAndUpdate(offerId, {
       offerName,
@@ -1356,12 +1382,9 @@ const updateCategoryOffer = async (req, res) => {
     res.redirect('/admin/categoryOffer');
   } catch (error) {
     console.error('Error in updating offer:', error);
+    req.flash('error', 'Failed to update the category offer');
+    res.redirect(`/admin/editCategoryOffer/${offerId}`);
   }
-};
-
-module.exports = {
-  // other controllers,
-  updateCategoryOffer,
 };
 
 
