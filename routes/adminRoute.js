@@ -88,12 +88,12 @@ adminRoute.get('/best-selling-categories',isLogin,adminController.getBestSelling
 //offer Dummy
 
 adminRoute.get('/offerPage', isLogin,adminController.productOfferPage);
-adminRoute.get('/DummyAddOffer', isLogin,adminController.addProductOfferPage);
-adminRoute.post('/DummyOffer', isLogin,adminController.addProductOfferPost);
+adminRoute.get('/addProductOffer', isLogin,adminController.addProductOfferPage);
+adminRoute.post('/prodctOfferPost', isLogin,adminController.addProductOfferPost);
 
-adminRoute.get('/DummyEditOffer/:id', isLogin,adminController.editProductOffer);
-adminRoute.post('/updateOffer/:id', isLogin,adminController.updateProductOffer);
-adminRoute.get('/deleteOffer/:id', isLogin,adminController.deleteProductOffer);
+adminRoute.get('/editProductOffer/:id', isLogin,adminController.editProductOffer);
+adminRoute.post('/editProductPost/:id', isLogin,adminController.updateProductOffer);
+adminRoute.get('/deleteProductOffer/:id', isLogin,adminController.deleteProductOffer);
 
 adminRoute.get('/CategoryofferPage', isLogin,adminController.DummyCategoryOfferPage);
 adminRoute.get('/DummyCategoryOffer', isLogin,adminController.DummyCategoryOfferPage);
