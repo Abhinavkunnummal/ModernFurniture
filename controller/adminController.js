@@ -1099,36 +1099,37 @@ const approveCancelOrder=async(req,res)=>{
 }
 
 //---------------------------------------- OFFERS -------------------------------------------------------------------------------//
-
-const OfferPage = async (req, res) => {
+const productOfferPage = async (req, res) => {
   try {
     const offers = await ProductOffer.find({ is_active: true }).populate('productId');
-    res.render('DummyOffer', { offers });
+    res.render('productOffer', { offers });
   } catch (error) {
     console.error('Error in the offer page:', error);
   }
 };
 
-const DummyAddOfferPage = async (req, res) => {
+const addProductOfferPage = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.render('DummyAddOffer', { products });
+    res.render('addProductOffer', { products, errorMessage: req.flash('error') });
   } catch (error) {
-    console.error('Error in DummyAddOfferPage:', error.message);
+    console.error('Error in addProductOfferPage:', error.message);
   }
 };
 
-const DummyOffer = async (req, res) => {
+const addProductOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, productId } = req.body;
     console.log(req.body);
 
     if (!offerName || !discount || !startDate || !endDate || !productId) {
-      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+      req.flash('error', 'Missing required fields');
+      return res.redirect('/admin/addProductOffer');
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+      req.flash('error', 'Start date must be before end date');
+      return res.redirect('/admin/addProductOffer');
     }
 
     const newOffer = new ProductOffer({
@@ -1141,44 +1142,36 @@ const DummyOffer = async (req, res) => {
     });
 
     await newOffer.save();
-    res.redirect('/admin/DummyOfferList');
+    res.redirect('/admin/productOffer');
   } catch (error) {
     console.error('Error in the offer page:', error);
   }
 };
 
-const DummyOfferList = async (req, res) => {
-  try {
-    const offers = await ProductOffer.find({}).populate('productId');
-    res.render('DummyOffer', { offers });
-  } catch (error) {
-    console.error('Error in the offer page:', error);
-  }
-};
-
-//---------------------------------------------------- EDIT OFFER -----------------------------------------------------------------------//
-
-const editOfferPage = async (req, res) => {
+const editProductOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
     const offer = await ProductOffer.findById(offerId).populate('productId');
     const products = await Product.find({});
-    res.render('DummyEditOffer', { offer, products });
+    res.render('editProductOffer', { offer, products, errorMessage: req.flash('error') });
   } catch (error) {
     console.error('Error in edit offer page:', error);
   }
 };
 
-const updateOffer = async (req, res) => {
+const updateProductOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
+
     if (!offerName || !discount || !startDate || !endDate || !productId) {
-      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+      req.flash('error', 'Missing required fields');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+      req.flash('error', 'Start date must be before end date');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
     await ProductOffer.findByIdAndUpdate(offerId, {
@@ -1189,23 +1182,23 @@ const updateOffer = async (req, res) => {
       productId,
     });
 
-    res.redirect('/admin/DummyOffer');
+    res.redirect('/admin/productOffer');
   } catch (error) {
     console.error('Error in updating offer:', error);
   }
 };
 
-//---------------------------------------------------- DELETE OFFER ---------------------------------------------------------------//
-
-const deleteDummyOffer = async (req, res) => {
+const deleteProductOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
     await ProductOffer.findByIdAndDelete(offerId);
-    res.redirect('/admin/DummyOfferList');
+    res.redirect('/admin/productOffer');
   } catch (error) {
     console.error('Error in deleting offer:', error);
   }
 };
+
+//---------------------------------------------------- CATEGORY OFFER ---------------------------------------------------------------//
 
 const DummyCategoryOfferPage = async (req, res) => {
   try {
@@ -1451,13 +1444,13 @@ module.exports = {
   // monthly,
   // yearly
 
-  OfferPage,
-  DummyAddOfferPage,
-  DummyOffer,
-  DummyOfferList,
-  editOfferPage,
-  updateOffer,
-  deleteDummyOffer,
+  productOfferPage,
+  addProductOfferPage,
+  addProductOfferPost,
+  // DummyOfferList,
+  editProductOffer,
+  updateProductOffer,
+  deleteProductOffer,
   DummyCategoryOfferPage,
   DummyEditCategoryOfferPage,
   deleteCategoryOffer,
