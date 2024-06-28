@@ -92,7 +92,7 @@ adminRoute.get('/addProductOffer', isLogin,adminController.addProductOfferPage);
 adminRoute.post('/productOffer', isLogin,adminController.addProductOfferPost);
 
 adminRoute.get('/editProductOffer/:id', isLogin,adminController.editProductOffer);
-adminRoute.post('/editProductPost/:id',adminController.updateProductOffer);
+adminRoute.post('/editOfferProductPost/:id',adminController.updateProductOffer);
 adminRoute.get('/deleteProductOffer/:id', isLogin,adminController.deleteProductOffer);
 
 adminRoute.get('/CategoryofferPage', isLogin,adminController.DummyCategoryOfferPage);

@@ -1167,12 +1167,12 @@ const updateProductOffer = async (req, res) => {
 
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       req.flash('error', 'Missing required fields');
-      return res.redirect(`/admin/editProductOffer/${offerId}`);
+      return res.redirect(`/admin/editOfferProductPost/${offerId}`);
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date');
-      return res.redirect(`/admin/editProductOffer/${offerId}`);
+      return res.redirect(`/admin/editOfferProductPost/${offerId}`);
     }
 
     await ProductOffer.findByIdAndUpdate(offerId, {
