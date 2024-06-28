@@ -1173,7 +1173,43 @@ const updateProductOffer = async (req, res) => {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
+    // Regular expression to check for numbers, spaces, or special characters
+    const invalidOfferNameRegex = /[^a-zA-Z]/;
 
+    // Find the current offer details
+    const currentOffer = await ProductOffer.findById(offerId);
+
+    // Check if any required field is missing
+    if (!offerName || !discount || !startDate || !endDate || !productId) {
+      req.flash('error', 'All fields are required.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
+    // Validate offer name
+    if (invalidOfferNameRegex.test(offerName)) {
+      req.flash('error', 'Offer name cannot contain numbers, spaces, or special characters.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
+    // Ensure the new offer name is not the same as the current one
+    if (offerName === currentOffer.offerName) {
+      req.flash('error', 'Offer name cannot be the same as the previous offer name.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
+    // Validate discount value
+    if (discount <= 0) {
+      req.flash('error', 'Discount cannot be less than or equal to 0.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
+    // Validate date range
+    if (new Date(startDate) >= new Date(endDate)) {
+      req.flash('error', 'Start date must be before end date.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
+    // Update the offer
     await ProductOffer.findByIdAndUpdate(offerId, {
       offerName,
       discount,
@@ -1187,6 +1223,9 @@ const updateProductOffer = async (req, res) => {
     console.error('Error in updating offer:', error);
   }
 };
+
+// Route
+adminRoute.post('/editProductOfferPost/:id', isLogin, adminController.updateProductOffer);
 
 
 const deleteProductOffer = async (req, res) => {

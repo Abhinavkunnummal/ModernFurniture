@@ -115,6 +115,15 @@
       return false;
     }
 
+    if (discount > 100) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Discount cannot be greater than 100.'
+      });
+      return false;
+    }
+
     if (new Date(startDate) >= new Date(endDate)) {
       Swal.fire({
         icon: 'error',
