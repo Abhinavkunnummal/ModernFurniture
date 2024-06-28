@@ -1259,26 +1259,49 @@ const addCategoryOfferPage = async (req, res) => {
     res.render('addCategoryOffer', { categories, errorMessage: req.flash('error') });
   } catch (error) {
     console.error('Error in addCategoryOfferPage:', error.message);
+    req.flash('error', 'Failed to load the add category offer page');
+    res.redirect('/admin/categoryOffer');
   }
 };
 
 const addCategoryOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
-    console.log(req.body);
 
+    // Regular expression to check for numbers, spaces, or special characters
+    const invalidOfferNameRegex = /[^a-zA-Z]/;
+
+    // Check if any required field is missing
     if (!offerName || !discount || !startDate || !endDate || !categoryId) {
-      req.flash('error', 'Missing required fields');
+      req.flash('error', 'All fields are required.');
       return res.redirect('/admin/addCategoryOffer');
     }
 
+    // Validate offer name
+    if (invalidOfferNameRegex.test(offerName)) {
+      req.flash('error', 'Offer name cannot contain numbers, spaces, or special characters.');
+      return res.redirect('/admin/addCategoryOffer');
+    }
+
+    if (discount >= 100) {
+      req.flash('error', 'Discount cannot be greater than or equal to 100.');
+      return res.redirect('/admin/addCategoryOffer');
+    }
+
+    // Validate discount value
+    if (discount <= 0) {
+      req.flash('error', 'Discount cannot be less than or equal to 0.');
+      return res.redirect('/admin/addCategoryOffer');
+    }
+
+    // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
-      req.flash('error', 'Start date must be before end date');
+      req.flash('error', 'Start date must be before end date.');
       return res.redirect('/admin/addCategoryOffer');
     }
 
     const newOffer = new CategoryOffer({
-      offerName,  
+      offerName,
       discount,
       startDate,
       endDate,
@@ -1290,8 +1313,11 @@ const addCategoryOfferPost = async (req, res) => {
     res.redirect('/admin/categoryOffer');
   } catch (error) {
     console.error('Error in the offer page:', error);
+    req.flash('error', 'Failed to add the category offer');
+    res.redirect('/admin/addCategoryOffer');
   }
-}
+};
+
 
 const editCategoryOffer = async (req, res) => {
   try {
