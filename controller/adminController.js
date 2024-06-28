@@ -1203,8 +1203,8 @@ const deleteProductOffer = async (req, res) => {
 //---------------------------------------------------- CATEGORY OFFER ---------------------------------------------------------------//
 const categoryOfferPage = async (req, res) => {
   try {
-    const offers = await CategoryOffer.find({ is_active: true }).populate('categoryId');
-    res.render('categoryOffer', { offers });
+    const categoryOffers = await CategoryOffer.find({ is_active: true }).populate('categoryId');
+    res.render('categoryOffer', { categoryOffers });
   } catch (error) {
     console.error('Error in the offer page:', error);
   }
