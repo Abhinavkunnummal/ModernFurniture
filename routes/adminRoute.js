@@ -100,7 +100,7 @@ adminRoute.get('/categoryOffer', isLogin,adminController.categoryOfferPage);
 adminRoute.get('/addCategoryOffer', isLogin,adminController.addCategoryOfferPage);
 adminRoute.post('/addCategoryOfferPost', isLogin,adminController.addCategoryOfferPost);
 adminRoute.get('/editCategoryOffer/:id', isLogin,adminController.editCategoryOffer);
-adminRoute.post('/editCategoryOfferPost:id', isLogin,adminController.updateCategoryOffer);
+adminRoute.post('/editCategoryOffer/:id', isLogin, adminController.updateCategoryOffer);
 adminRoute.get('/deleteCategoryOffer/:id', isLogin,adminController.deleteCategoryOffer);
 
 const Order=require('../model/order')
