@@ -89,7 +89,7 @@ adminRoute.get('/best-selling-categories',isLogin,adminController.getBestSelling
 
 adminRoute.get('/offerPage', isLogin,adminController.productOfferPage);
 adminRoute.get('/addProductOffer', isLogin,adminController.addProductOfferPage);
-adminRoute.post('/prodctOfferPost', isLogin,adminController.addProductOfferPost);
+adminRoute.post('/productOffer', isLogin,adminController.addProductOfferPost);
 
 adminRoute.get('/editProductOffer/:id', isLogin,adminController.editProductOffer);
 adminRoute.post('/editProductPost/:id', isLogin,adminController.updateProductOffer);
