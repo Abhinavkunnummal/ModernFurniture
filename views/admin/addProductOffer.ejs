@@ -103,6 +103,15 @@
       return false;
     }
 
+    if (discount > 100) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Discount cannot be greater than 100.'
+      });
+      return false;
+    }
+
     return true;
   }
 </script>
