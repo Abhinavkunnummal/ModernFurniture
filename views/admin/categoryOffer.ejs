@@ -24,7 +24,7 @@
                     <td><%= new Date(offer.endDate).toLocaleDateString() %></td>
                     <td><%= offer.categoryId.name %></td>
                     <td>
-                        <a href="/admin/DummyEditCategoryOffer/<%= offer._id %>" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="/admin/editCategoryOffer/<%= offer._id %>" class="btn btn-warning btn-sm">Edit</a>
                         <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= offer._id %>')">Delete</button>
                     </td>
                 </tr>
