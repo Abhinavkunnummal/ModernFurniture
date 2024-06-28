@@ -1263,8 +1263,9 @@ const editCategoryOffer = async (req, res) => {
 
 const updateCategoryOffer = async (req, res) => {
   try {
+    const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
-console.log("ethis ----"+req.body);
+console.log("ethis ----"+req.body.offerName);
     if (!offerName || !discount || !startDate || !endDate || !categoryId) {
       req.flash('error', 'Missing required fields');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
