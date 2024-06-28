@@ -92,17 +92,16 @@ adminRoute.get('/addProductOffer', isLogin,adminController.addProductOfferPage);
 adminRoute.post('/productOffer', isLogin,adminController.addProductOfferPost);
 
 adminRoute.get('/editProductOffer/:id', isLogin,adminController.editProductOffer);
-adminRoute.post('/editProductOffer/:id', isLogin, adminController.updateProductOffer);
+adminRoute.post('/editProductOfferPost/:id', isLogin, adminController.updateProductOffer);
 adminRoute.get('/deleteProductOffer/:id', isLogin,adminController.deleteProductOffer);
 
-adminRoute.get('/CategoryofferPage', isLogin,adminController.DummyCategoryOfferPage);
-adminRoute.get('/DummyCategoryOffer', isLogin,adminController.DummyCategoryOfferPage);
-adminRoute.get('/DummyCategoryAddOffer', isLogin,adminController.DummyAddCategoryOfferPage);
-adminRoute.post('/CategoryAddPost', isLogin,adminController.DummyCategoryAddOfferPost);
-adminRoute.get('/DummyEditCategoryOffer/:id', isLogin,adminController.DummyEditCategoryOfferPage);
-adminRoute.post('/DummyCategoryUpdateOffer/:id', isLogin,adminController.DummyCategoryupdateOffer);
+//category
+adminRoute.get('/categoryOffer', isLogin,adminController.categoryOfferPage);
+adminRoute.get('/addCategoryOffer', isLogin,adminController.addCategoryOfferPage);
+adminRoute.post('/addCategoryOfferPost', isLogin,adminController.addCategoryOfferPost);
+adminRoute.get('/editCategoryOffer/:id', isLogin,adminController.editCategoryOffer);
+adminRoute.post('/editCategoryOfferPost/', isLogin,adminController.updateCategoryOffer);
 adminRoute.get('/deleteCategoryOffer/:id', isLogin,adminController.deleteCategoryOffer);
-
 
 const Order=require('../model/order')
 

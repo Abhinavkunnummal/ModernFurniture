@@ -1201,102 +1201,104 @@ const deleteProductOffer = async (req, res) => {
 };
 
 //---------------------------------------------------- CATEGORY OFFER ---------------------------------------------------------------//
-
-const DummyCategoryOfferPage = async (req, res) => {
+const categoryOfferPage = async (req, res) => {
   try {
-    const categoryOffers = await CategoryOffer.find({ is_active: true }).populate('categoryId');
-    res.render('DummyCategoryOffer', { categoryOffers });
+    const offers = await CategoryOffer.find({ is_active: true }).populate('categoryId');
+    res.render('categoryOffer', { offers });
   } catch (error) {
-    console.error('Error in the category offer page:', error);
+    console.error('Error in the offer page:', error);
   }
 };
 
-const DummyEditCategoryOfferPage = async (req, res) => {
-  try {
-    const offerId = req.params.id;
-    const offer = await CategoryOffer.findById(offerId).populate('categoryId');
-    const categories = await Category.find({});
-    res.render('DummyEditCategoryOffer', { offer, categories });
-  } catch (error) {
-    console.error('Error in edit category offer page:', error);
-  }
-};
-
-//---------------------------------------------------- DELETE OFFER ---------------------------------------------------------------//
-
-const deleteCategoryOffer = async (req, res) => {
-  try {
-    const offerId = req.params.id;
-    await CategoryOffer.findByIdAndDelete(offerId);
-    res.redirect('/admin/DummyCategoryOffer');
-  } catch (error) {
-    console.error('Error deleting category offer:', error);
-  }
-};
-
-//---------------------------------------------------- ADD OFFER ---------------------------------------------------------------//
-
-const DummyAddCategoryOfferPage = async (req, res) => {
+const addCategoryOfferPage = async (req, res) => {
   try {
     const categories = await Category.find({});
-    res.render('DummyAddCategoryOffer', { categories });
+    res.render('addCategoryOffer', { categories, errorMessage: req.flash('error') });
   } catch (error) {
-    console.error('Error in DummyAddCategoryOfferPage:', error.message);
+    console.error('Error in addCategoryOfferPage:', error.message);
   }
 };
 
-const DummyCategoryAddOfferPost = async (req, res) => {
+const addCategoryOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
     console.log(req.body);
+
     if (!offerName || !discount || !startDate || !endDate || !categoryId) {
-      return res.status(400).json({ success: false, errorMessage: 'Missing required fields' });
+      req.flash('error', 'Missing required fields');
+      return res.redirect('/admin/addCategoryOffer');
     }
+
     if (new Date(startDate) >= new Date(endDate)) {
-      return res.status(400).json({ success: false, errorMessage: 'Start date must be before end date' });
+      req.flash('error', 'Start date must be before end date');
+      return res.redirect('/admin/addCategoryOffer');
     }
+
     const newOffer = new CategoryOffer({
-      offerName,
+      offerName,  
       discount,
       startDate,
       endDate,
       categoryId,
       is_active: true
     });
+
     await newOffer.save();
-    res.redirect('/admin/DummyCategoryOffer');
+    res.redirect('/admin/categoryOffer');
   } catch (error) {
-    console.error('Error in DummyCategoryAddOfferPost:', error);
+    console.error('Error in the offer page:', error);
   }
-};
+}
 
-//---------------------------------------------------- CATEGORY OFFER ---------------------------------------------------------------//
-
-const DummyCategoryOfferList = async (req, res) => {
+const editCategoryOffer = async (req, res) => {
   try {
-    const offers = await CategoryOffer.find({}).populate('categoryId');
-    res.render('DummyCategoryOffer', { offers });
+    const offerId = req.params.id;
+    const offer = await CategoryOffer.findById(offerId).populate('categoryId');
+    const categories = await Category.find({});
+    res.render('editCategoryOffer', { offer, categories, errorMessage: req.flash('error') });
   } catch (error) {
-    console.error('Error in DummyCategoryOfferList:', error);
+    console.error('Error in edit offer page:', error);
   }
 };
 
-const DummyCategoryupdateOffer=async(req,res)=>{
-  try{
+const updateCategoryOffer = async (req, res) => {
+  try {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
+
+    if (!offerName || !discount || !startDate || !endDate || !categoryId) {
+      req.flash('error', 'Missing required fields');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      req.flash('error', 'Start date must be before end date');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
     await CategoryOffer.findByIdAndUpdate(offerId, {
       offerName,
       discount,
       startDate,
       endDate,
-      categoryId
+      categoryId,
     });
-    res.redirect('/admin/DummyCategoryOffer');
-  }catch(error){
-    console.error('Error in DummyCategoryupdateOffer:', error);
+
+    res.redirect('/admin/categoryOffer');
+  } catch (error) {
+    console.error('Error in updating offer:', error);
   }
-}
+};
+
+const deleteCategoryOffer = async (req, res) => {
+  try {
+    const offerId = req.params.id;
+    await CategoryOffer.findByIdAndDelete(offerId);
+    res.redirect('/admin/categoryOffer');
+  } catch (error) {
+    console.error('Error in deleting offer:', error);
+  }
+};
 
 //---------------------------------------------------- BEST SELLING PRODUCTS ---------------------------------------------------------------//
 
@@ -1453,12 +1455,11 @@ module.exports = {
   editProductOffer,
   updateProductOffer,
   deleteProductOffer,
-  DummyCategoryOfferPage,
-  DummyEditCategoryOfferPage,
+  categoryOfferPage,
+  addCategoryOfferPage,
+  addCategoryOfferPost,
+  editCategoryOffer,
+  updateCategoryOffer,
   deleteCategoryOffer,
-  DummyAddCategoryOfferPage,
-  DummyCategoryAddOfferPost,
-  DummyCategoryOfferList,
-  DummyCategoryupdateOffer,
   rendererror
 };
