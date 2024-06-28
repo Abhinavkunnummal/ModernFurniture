@@ -1159,20 +1159,20 @@ const editProductOffer = async (req, res) => {
   }
 };
 
+
 const updateProductOffer = async (req, res) => {
   try {
-    console.log('edit porduct');
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       req.flash('error', 'Missing required fields');
-      return res.redirect(`/admin/editOfferProductPost/${offerId}`);
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date');
-      return res.redirect(`/admin/editOfferProductPost/${offerId}`);
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
     await ProductOffer.findByIdAndUpdate(offerId, {
@@ -1188,6 +1188,7 @@ const updateProductOffer = async (req, res) => {
     console.error('Error in updating offer:', error);
   }
 };
+
 
 const deleteProductOffer = async (req, res) => {
   try {
