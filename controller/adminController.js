@@ -1161,6 +1161,7 @@ const editProductOffer = async (req, res) => {
 
 const updateProductOffer = async (req, res) => {
   try {
+    console.log('edit porduct');
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
