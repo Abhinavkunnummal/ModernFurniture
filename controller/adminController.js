@@ -1164,9 +1164,10 @@ const editProductOffer = async (req, res) => {
     res.render('editProductOffer', { offer, products, errorMessage: req.flash('error') });
   } catch (error) {
     console.error('Error in edit offer page:', error);
+    req.flash('error', 'Failed to load the edit offer page');
+    res.redirect('/admin/productOffer');
   }
 };
-
 
 const updateProductOffer = async (req, res) => {
   try {
@@ -1221,11 +1222,10 @@ const updateProductOffer = async (req, res) => {
     res.redirect('/admin/productOffer');
   } catch (error) {
     console.error('Error in updating offer:', error);
+    req.flash('error', 'Failed to update the offer');
+    res.redirect(`/admin/editProductOffer/${offerId}`);
   }
 };
-
-// Route
-adminRoute.post('/editProductOfferPost/:id', isLogin, adminController.updateProductOffer);
 
 
 const deleteProductOffer = async (req, res) => {
