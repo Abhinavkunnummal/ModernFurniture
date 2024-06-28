@@ -6,20 +6,26 @@
 
 <!-- Display flash messages using SweetAlert -->
 <script>
-  <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: '<%= errorMessage %>',
-    });
-  <% } %>
-  <% if (typeof successMessage !== 'undefined' && successMessage) { %>
-    Swal.fire({
-      icon: 'success',
-      title: 'Success',
-      text: '<%= successMessage %>',
-    });
-  <% } %>
+  document.addEventListener('DOMContentLoaded', function() {
+    const errorMessage = '<%= errorMessage %>';
+    const successMessage = '<%= successMessage %>';
+
+    if (errorMessage) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage,
+      });
+    }
+
+    if (successMessage) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: successMessage,
+      });
+    }
+  });
 </script>
 
 <div class="container" style="margin-left: 300px; margin-top: 50px;">

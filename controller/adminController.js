@@ -1111,7 +1111,11 @@ const productOfferPage = async (req, res) => {
 const addProductOfferPage = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.render('addProductOffer', { products, errorMessage: req.flash('error') });
+    res.render('addProductOffer', { 
+      products, 
+      errorMessage: req.flash('error'), 
+      successMessage: req.flash('success') 
+    });
   } catch (error) {
     console.error('Error in addProductOfferPage:', error.message);
     req.flash('error', 'Unable to load the page. Please try again later.');
@@ -1122,7 +1126,6 @@ const addProductOfferPage = async (req, res) => {
 const addProductOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, productId } = req.body;
-    console.log(req.body);
 
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       req.flash('error', 'All fields are required.');
@@ -1140,7 +1143,6 @@ const addProductOfferPost = async (req, res) => {
       startDate,
       endDate,
       productId,
-      is_active: true
     });
 
     await newOffer.save();
