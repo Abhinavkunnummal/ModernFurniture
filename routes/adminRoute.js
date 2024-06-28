@@ -87,7 +87,7 @@ adminRoute.get('/best-selling-categories',isLogin,adminController.getBestSelling
 
 //offer Dummy
 
-adminRoute.get('/offerPage', isLogin,adminController.productOfferPage);
+adminRoute.get('/productOffer', isLogin,adminController.productOfferPage);
 adminRoute.get('/addProductOffer', isLogin,adminController.addProductOfferPage);
 adminRoute.post('/productOffer', isLogin,adminController.addProductOfferPost);
 
