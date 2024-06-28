@@ -1204,6 +1204,11 @@ const updateProductOffer = async (req, res) => {
       return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
+    if (discount >= 100) {
+      req.flash('error', 'Discount cannot be greater than or equal to 100.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+
     // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
