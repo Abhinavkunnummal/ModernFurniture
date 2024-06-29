@@ -231,14 +231,12 @@ const renderPlaceOrder = async (req, res) => {
 
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
-    let appliedCoupon = null;
 
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
-      if (coupon && !coupon.usedUser.includes(userId)) {
+      if (coupon) {
         const discountAmount = coupon.discountAmount;
         finalOrderAmount = orderAmount - discountAmount;
-        appliedCoupon = coupon;
       }
     }
 
@@ -255,7 +253,7 @@ const renderPlaceOrder = async (req, res) => {
       };
 
       const razorpayOrder = await razorpay.orders.create(options);
-
+// console.log(razorpayOrder.id + 'purchase id');
       return res.json({
         orderId: razorpayOrder.id,
         amount: finalOrderAmount,
@@ -303,10 +301,6 @@ const renderPlaceOrder = async (req, res) => {
 
       await CartItem.deleteMany({ userId });
 
-      if (appliedCoupon) {
-        await appliedCoupon.markAsUsed(userId);
-      }
-
       return res.json({ success: true });
     } else {
       const newOrder = new Order({
@@ -335,10 +329,6 @@ const renderPlaceOrder = async (req, res) => {
 
       await CartItem.deleteMany({ userId });
 
-      if (appliedCoupon) {
-        await appliedCoupon.markAsUsed(userId);
-      }
-
       return res.json({ success: true });
     }
   } catch (error) {
@@ -354,7 +344,6 @@ function calculateOrderAmount(cartItems) {
   });
   return totalAmount;
 }
-
 
 //------------------------------------------------------- VERIFY PAYMENT --------------------------------------------------------//
 
