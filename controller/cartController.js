@@ -231,20 +231,34 @@ const renderPlaceOrder = async (req, res) => {
 
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
-    let usedCoupon = null;
 
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
       if (coupon) {
         const discountAmount = coupon.discountAmount;
         finalOrderAmount = orderAmount - discountAmount;
-        usedCoupon = coupon;
       }
     }
 
     if (paymentMethod === 'razorPay') {
-      // Razorpay logic remains unchanged
-      // ...
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+      });
+
+      const options = {
+        amount: finalOrderAmount * 100,
+        currency: 'INR',
+        receipt: `receipt_${new Date().getTime()}`,
+      };
+
+      const razorpayOrder = await razorpay.orders.create(options);
+// console.log(razorpayOrder.id + 'purchase id');
+      return res.json({
+        orderId: razorpayOrder.id,
+        amount: finalOrderAmount,
+        currency: 'INR',
+      });
     } else if (paymentMethod === 'Wallet') {
       const wallet = await Wallet.findOne({ userId });
 
@@ -263,7 +277,7 @@ const renderPlaceOrder = async (req, res) => {
 
       const newOrder = new Order({
         userId,
-        coupon: usedCoupon ? usedCoupon.couponCode : null,
+        coupon: req.session.coupon || null,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
@@ -279,15 +293,6 @@ const renderPlaceOrder = async (req, res) => {
 
       await newOrder.save();
 
-      // Remove coupon after successful payment
-      if (usedCoupon) {
-        await Coupon.findByIdAndUpdate(usedCoupon._id, {
-          $push: { usedUser: userId }
-        });
-        delete req.session.coupon;
-      }
-
-      // Update product stock and clear cart
       for (const item of cartItems) {
         const product = item.product[0].productId;
         const quantity = item.product[0].quantity;
@@ -298,10 +303,9 @@ const renderPlaceOrder = async (req, res) => {
 
       return res.json({ success: true });
     } else {
-      // COD or other payment methods
       const newOrder = new Order({
         userId,
-        coupon: usedCoupon ? usedCoupon.couponCode : null,
+        coupon: req.session.coupon || null,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
@@ -317,15 +321,6 @@ const renderPlaceOrder = async (req, res) => {
 
       await newOrder.save();
 
-      // Remove coupon after successful order placement (for COD)
-      if (usedCoupon) {
-        await Coupon.findByIdAndUpdate(usedCoupon._id, {
-          $push: { usedUser: userId }
-        });
-        delete req.session.coupon;
-      }
-
-      // Update product stock and clear cart
       for (const item of cartItems) {
         const product = item.product[0].productId;
         const quantity = item.product[0].quantity;
