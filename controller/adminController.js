@@ -584,7 +584,7 @@ const submitAddCoupon = async (req, res) => {
       errors.push("Coupon code must not be empty and must not start with a number.");
     }
 
-    if (new Date(expiryDate) < new Date()) {
+    if (new Date(expiryDate) <= new Date()) {
       errors.push("Expiry date cannot be  a past date.");
     }
 
