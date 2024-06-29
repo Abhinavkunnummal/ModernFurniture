@@ -253,7 +253,7 @@ const renderPlaceOrder = async (req, res) => {
       };
 
       const razorpayOrder = await razorpay.orders.create(options);
-// console.log(razorpayOrder.id + 'purchase id');
+
       return res.json({
         orderId: razorpayOrder.id,
         amount: finalOrderAmount,
@@ -344,6 +344,7 @@ function calculateOrderAmount(cartItems) {
   });
   return totalAmount;
 }
+
 
 //------------------------------------------------------- VERIFY PAYMENT --------------------------------------------------------//
 
