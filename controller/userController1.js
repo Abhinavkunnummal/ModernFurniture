@@ -597,7 +597,7 @@ const renderAddress = async (req, res) => {
 const addAddress = async (req, res) => {
   try {
     const address = await Address.find({});
-    res.render("addNewAddress", { address });
+    res.render("addNewAddress", { address, message: req.flash('message') });
   } catch (error) {
     console.log(error.message);
   }
