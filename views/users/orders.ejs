@@ -1,300 +1,335 @@
 <%- include('../layouts/header.ejs') %>
 <%- include('../layouts/navbar.ejs') %>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/user_profile/img/favicon/favicon.ico" />
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/user_profile/img/favicon/favicon.ico" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-      rel="stylesheet"
-    />
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+  rel="stylesheet"
+/>
 
-    <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="/user_profile/vendor/fonts/boxicons.css" />
+<!-- Icons. Uncomment required icon fonts -->
+<link rel="stylesheet" href="/user_profile/vendor/fonts/boxicons.css" />
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="/user_profile/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="/user_profile/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="/user_profile/css/demo.css" />
+<!-- Core CSS -->
+<link rel="stylesheet" href="/user_profile/vendor/css/core.css" class="template-customizer-core-css" />
+<link rel="stylesheet" href="/user_profile/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+<link rel="stylesheet" href="/user_profile/css/demo.css" />
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Page CSS -->
+<!-- Vendors CSS -->
+<link rel="stylesheet" href="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <!-- Helpers -->
-    <script src="/user_profile/vendor/js/helpers.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="/user_profile/js/config.js"></script>
-  </head>
-  <style>
-     
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            list-style: none;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .breadcrumb-item {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .breadcrumb-item a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .breadcrumb-item a:hover {
-            text-decoration: underline;
-        }
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: ">";
-            color: #6c757d;
-            margin: 0 10px;
-        }
-  </style>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Page CSS -->
 
-  <body>
-    <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
+<!-- Helpers -->
+<script src="/user_profile/vendor/js/helpers.js"></script>
 
-        <%- include('../layouts/sidenav.ejs') %>
-        <!-- / Menu -->
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+<!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+<script src="/user_profile/js/config.js"></script>
+<style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .breadcrumb-item {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+  }
+  .breadcrumb-item a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  .breadcrumb-item a:hover {
+    text-decoration: underline;
+  }
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: #6c757d;
+    margin: 0 10px;
+  }
 
-        <!-- Layout container -->
-        <div class="layout-page">
-          <!-- Navbar -->
-          <div class="content-wrapper">
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/userProfile"><strong>Profile</strong></a></li>
-                    <li class="breadcrumb-item"><a href="/wallet">Wallet</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Orders</li>
-                </ol>
-            </nav>
-              <h2>Your Orders</h2>
-              <% if (orders && orders.length > 0) { %>
-                <% if (typeof messages !== 'undefined' && messages.error) { %>
-                  <div class="alert alert-danger" role="alert">
-                    <strong><%= messages.error %></strong>
-                  </div>
-                <% } %>
-          
-                <% if (typeof messages !== 'undefined' && messages.success) { %>
-                  <div class="alert alert-success" role="alert">
-                    <strong><%= messages.success %></strong>
-                  </div>
-                <% } %>
-          
-                <% orders.reverse().forEach((order, index) => { %>
-                  <div class="order-box">
-                    <table class="table">
-                      <thead>
+  .order-box {
+    border: 1px solid #181111;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #d19bcb;
+  }
+
+  .order-box td {
+    color: #333;
+  }
+
+  .order-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .table img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .breadcrumb {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .table {
+      font-size: 0.9rem;
+    }
+
+    .table img {
+      max-width: 75px;
+      max-height: 75px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .table img {
+      max-width: 50px;
+      max-height: 50px;
+    }
+
+    .table {
+      font-size: 0.8rem;
+    }
+
+    .order-box {
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+
+<body>
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar">
+  <div class="layout-container">
+    <!-- Menu -->
+    <%- include('../layouts/sidenav.ejs') %>
+    <!-- / Menu -->
+
+    <!-- Layout container -->
+    <div class="layout-page">
+      <!-- Navbar -->
+      <div class="content-wrapper">
+        <div class="container-xxl flex-grow-1 container-p-y">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/userProfile"><strong>Profile</strong></a></li>
+              <li class="breadcrumb-item"><a href="/wallet">Wallet</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Orders</li>
+            </ol>
+          </nav>
+          <h2>Your Orders</h2>
+          <% if (orders && orders.length > 0) { %>
+            <% if (typeof messages !== 'undefined' && messages.error) { %>
+              <div class="alert alert-danger" role="alert">
+                <strong><%= messages.error %></strong>
+              </div>
+            <% } %>
+
+            <% if (typeof messages !== 'undefined' && messages.success) { %>
+              <div class="alert alert-success" role="alert">
+                <strong><%= messages.success %></strong>
+              </div>
+            <% } %>
+
+            <% orders.reverse().forEach((order, index) => { %>
+              <div class="order-box">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th colspan="4">Order <%= index + 1 %> Details</th>
+                      </tr>
+                      <tr>
+                        <td><strong>Order ID:</strong></td>
+                        <td><span style="color: #333;"><%= order._id %></span></td>
+                        <td><strong>Ordered Date:</strong></td>
+                        <td><span style="color: #333;"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th colspan="8">Ordered Items:</th>
+                      </tr>
+                      <tr>
+                        <th>Product Name</th>
+                        <th>Image</th>
+                        <th>Quantity</th>
+                        <th>Order Status</th>
+                        <th>Payment Method</th>
+                        <th>Payment Status</th>
+                        <th>Price</th>
+                        <th><strong>Total Amount</strong></th>
+                      </tr>
+                      <% order.orderedItem.forEach(item => { %>
                         <tr>
-                          <th colspan="4">Order <%= index + 1 %> Details</th>
-                        </tr>
-                        <tr>
-                          <td><strong>Order ID:</strong></td>
-                          <td><span style="color: #333;"><%= order._id %></span></td>
-                          <td><strong>Ordered Date:</strong></td>
-                          <td><span style="color: #333;"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span></td>
-                        </tr>
-                        
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <th colspan="7">Ordered Items:</th>
-                        </tr>
-                        <tr>
-                          <th>Product Name</th>
-                          <th>Image</th>
-                          <th>Quantity</th>
-                          <th>Order Status</th>
-                          <th>Payment Method</th>
-                          <th>Payment Status</th>
-                       
-                          <th>Price</th>
-                          <th><strong>Total Amount</strong></th>
-                        </tr>
-                        <% order.orderedItem.forEach(item => { %>
-                          <tr>
-                            <td><span style="color: #333;"><%= item.productId.name %></span></td>
-                            <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="max-width: 50px; max-height: 50px;" /></td>
-                            <td><span style="color: #333;"><%= item.quantity %></span></td>
-                            <td><span style="color: #333;"><%= item.orderStatus %></span></td>
-                            <td><span style="color: #333;"><%= order.paymentMethod %></span></td>
-                            <td>
-                              <% if (!order.paymentStatus) { %>
-                                <span style="color: #ca0000; background-color: #e7eb1e; padding: 2px 5px; border-radius: 3px;"> <strong>Payment Pending</strong> </span>
-                              <% } else { %>
-                                <span style="color: #333;">Done</span>
-                              <% } %>
-                            </td>
-                            <td><span style="color: #333;"><%= item.totalProductAmount %></span></td>
-                            <td><span style="color: #333;"><%= order.orderAmount %></span></td>
-                          </tr>
-                        <% }) %>
-                        <tr>
-                          <td colspan="7">
-                            <a href="/orderDetails?id=<%= order._id %>" class="btn btn-warning">Show Full Details</a>
+                          <td><span style="color: #333;"><%= item.productId.name %></span></td>
+                          <td><img src="/productimage/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="img-fluid" /></td>
+                          <td><span style="color: #333;"><%= item.quantity %></span></td>
+                          <td><span style="color: #333;"><%= item.orderStatus %></span></td>
+                          <td><span style="color: #333;"><%= order.paymentMethod %></span></td>
+                          <td>
                             <% if (!order.paymentStatus) { %>
-                              <button onclick="retryPayment('<%= order._id %>', <%= order.orderAmount %>)" class="btn btn-primary">Retry Payment</button>
+                              <span style="color: #ca0000; background-color: #e7eb1e; padding: 2px 5px; border-radius: 3px;"><strong>Payment Pending</strong></span>
+                            <% } else { %>
+                              <span style="color: #333;">Done</span>
                             <% } %>
                           </td>
+                          <td><span style="color: #333;"><%= item.totalProductAmount %></span></td>
+                          <td><span style="color: #333;"><%= order.orderAmount %></span></td>
                         </tr>
-                      </tbody>
-                    </table>
-                    <div class="order-actions"></div>
-                  </div>
-                <% }) %>
-              <% } else { %>
-                <p>No orders found for this user.</p>
-              <% } %>
-            </div>
-          </div>
-          
-          <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-          <script>
-          function retryPayment(orderId, amount) {
-            fetch('/retry-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ orderId: orderId, amount: amount }),
-            })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  console.log('data:', data);
-                  var options = {
-                    "key": "rzp_test_xRxsOz9knBNBUy", // Replace with your Razorpay Key ID
-                    "amount": data.amount*100,
-                    "currency": "INR",
-                    "name": "Your Company Name",
-                    "description": "Retry Payment for Order " + data.orderId,
-                    "order_id": '',
-                    "handler": function (response) {
-                      verifyPayment(response, data.orderId);
-                    },
-                    "prefill": {
-                      "name": "Customer Name",
-                      "email": "customer@example.com",
-                      "contact": "9999999999"
-                    },
-                    "theme": {
-                      "color": "#3399cc"
-                    }
-                  };
-                  var rzp1 = new Razorpay(options);
-                  rzp1.open();
-                } else {
-                  alert('Failed to initiate payment. Please try again.');
+                      <% }) %>
+                      <tr>
+                        <td colspan="8">
+                          <a href="/orderDetails?id=<%= order._id %>" class="btn btn-warning">Show Full Details</a>
+                          <% if (!order.paymentStatus) { %>
+                            <button onclick="retryPayment('<%= order._id %>', <%= order.orderAmount %>)" class="btn btn-primary">Retry Payment</button>
+                          <% } %>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="order-actions"></div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p>No orders found for this user.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <script>
+        function retryPayment(orderId, amount) {
+          fetch('/retry-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId: orderId, amount: amount }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              var options = {
+                "key": "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay Key ID
+                "amount": data.amount * 100,
+                "currency": "INR",
+                "name": "Your Company Name",
+                "description": "Retry Payment for Order " + data.orderId,
+                "order_id": '',
+                "handler": function (response) {
+                  verifyPayment(response, data.orderId);
+                },
+                "prefill": {
+                  "name": "Customer Name",
+                  "email": "customer@example.com",
+                  "contact": "9999999999"
+                },
+                "theme": {
+                  "color": "#3399cc"
                 }
-              })
-              .catch((error) => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-              });
-          }
-          
-          function verifyPayment(response, orderId) {
-            console.log('Verifying payment:', response, orderId);
-            fetch('/verifyretry-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                orderId: orderId,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature
-              }),
-            })
-              .then(response => response.json())
-              .then(data => {
-                console.log('Verification result:', data);
-                if (data.success) {
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'Payment successful!',
-                    text: 'Your payment was successful.',
-                    willClose: () => {
-                      location.reload(); // Reload the page to reflect the updated order status
-                    }
-                  });
-                } else {
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Payment verification failed',
-                    text: 'Reason: ' + (data.error || 'Unknown error')
-                  });
+              };
+              var rzp1 = new Razorpay(options);
+              rzp1.open();
+            } else {
+              alert('Failed to initiate payment. Please try again.');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+          });
+        }
+
+        function verifyPayment(response, orderId) {
+          console.log('Verifying payment:', response, orderId);
+          fetch('/verifyretry-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: orderId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Verification result:', data);
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Payment successful!',
+                text: 'Your payment was successful.',
+                willClose: () => {
+                  location.reload(); // Reload the page to reflect the updated order status
                 }
-              })
-              .catch((error) => {
-                console.error('Error during payment verification:', error);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Oops...',
-                  text: 'An error occurred during payment verification. Please contact support.'
-                });
               });
-          }
-          </script>
-          <style>
-            .order-box {
-              border: 1px solid #181111;
-              border-radius: 8px;
-              padding: 20px;
-              margin-bottom: 20px;
-              background-color: #d19bcb;
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Payment verification failed',
+                text: 'Reason: ' + (data.error || 'Unknown error')
+              });
             }
-          
-            .order-box td {
-              color: #333;
-            }
-          
-            .order-actions {
-              display: flex;
-              justify-content: flex-end;
-              margin-top: 20px;
-            }
-          </style>
-          
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="/user_profile/vendor/libs/jquery/jquery.js"></script>
-    <script src="/user_profile/vendor/libs/popper/popper.js"></script>
-    <script src="/user_profile/vendor/js/bootstrap.js"></script>
-    <script src="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+          })
+          .catch((error) => {
+            console.error('Error during payment verification:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'An error occurred during payment verification. Please contact support.'
+            });
+          });
+        }
+      </script>
 
-    <script src="/user_profile/vendor/js/menu.js"></script>
-    <!-- endbuild -->
+      <!-- Core JS -->
+      <!-- build:js assets/vendor/js/core.js -->
+      <script src="/user_profile/vendor/libs/jquery/jquery.js"></script>
+      <script src="/user_profile/vendor/libs/popper/popper.js"></script>
+      <script src="/user_profile/vendor/js/bootstrap.js"></script>
+      <script src="/user_profile/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+      <script src="/user_profile/vendor/js/menu.js"></script>
+      <!-- endbuild -->
 
-    <!-- Vendors JS -->
+      <!-- Vendors JS -->
 
-    <!-- Main JS -->
-    <script src="/user_profile/js/main.js"></script>
+      <!-- Main JS -->
+      <script src="/user_profile/js/main.js"></script>
 
-    <!-- Page JS -->
+      <!-- Page JS -->
 
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
-</html>
+      <!-- Place this tag in your head or just before your close body tag. -->
+      <script async defer src="https://buttons.github.io/buttons.js"></script>
+    </body>
+  </html>
