@@ -523,12 +523,23 @@ const loadFullPage = async (req, res) => {
       discountType: discountType
     };
 
-    res.render("productFullpage", { products: processedProduct, user: userData });
+    // Fetch related products
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: product._id } // Exclude the current product
+    }).limit(4); // Limit the number of related products
+
+    res.render("productFullpage", {
+      products: processedProduct,
+      user: userData,
+      relatedProducts: relatedProducts
+    });
   } catch (error) {
     console.error("Error loading full page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 //---------------------------------------------------- LOGOUT USER -----------------------------------------------------------//
 
