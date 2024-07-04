@@ -465,6 +465,7 @@ const blockProduct = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 //************************************************** ORDER DETAILS ****************************************************************/
 const renderOrders = async (req, res) => {
   try {

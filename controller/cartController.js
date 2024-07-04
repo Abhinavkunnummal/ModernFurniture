@@ -240,6 +240,28 @@ const renderPlaceOrder = async (req, res) => {
       }
     }
 
+    const handlePostOrder = async (newOrder) => {
+      await newOrder.save();
+
+      for (const item of cartItems) {
+        const product = item.product[0].productId;
+        const quantity = item.product[0].quantity;
+        await Product.updateOne({ _id: product }, { $inc: { stock: -quantity } });
+      }
+
+      await CartItem.deleteMany({ userId });
+
+      if (req.session.coupon) {
+        try {
+          await Coupon.deleteOne({ couponCode: req.session.coupon });
+          req.session.coupon = null;
+          req.session.couponApplied = false;
+        } catch (error) {
+          console.error('Error deleting coupon:', error.message);
+        }
+      }
+    };
+
     if (paymentMethod === 'razorPay') {
       const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_KEY_ID,
@@ -253,7 +275,7 @@ const renderPlaceOrder = async (req, res) => {
       };
 
       const razorpayOrder = await razorpay.orders.create(options);
-// console.log(razorpayOrder.id + 'purchase id');
+
       return res.json({
         orderId: razorpayOrder.id,
         amount: finalOrderAmount,
@@ -291,16 +313,7 @@ const renderPlaceOrder = async (req, res) => {
         paymentStatus: true,
       });
 
-      await newOrder.save();
-
-      for (const item of cartItems) {
-        const product = item.product[0].productId;
-        const quantity = item.product[0].quantity;
-        await Product.updateOne({ _id: product }, { $inc: { stock: -quantity } });
-      }
-
-      await CartItem.deleteMany({ userId });
-
+      await handlePostOrder(newOrder);
       return res.json({ success: true });
     } else {
       const newOrder = new Order({
@@ -319,16 +332,7 @@ const renderPlaceOrder = async (req, res) => {
         paymentStatus: paymentMethod === 'cod' ? false : true,
       });
 
-      await newOrder.save();
-
-      for (const item of cartItems) {
-        const product = item.product[0].productId;
-        const quantity = item.product[0].quantity;
-        await Product.updateOne({ _id: product }, { $inc: { stock: -quantity } });
-      }
-
-      await CartItem.deleteMany({ userId });
-
+      await handlePostOrder(newOrder);
       return res.json({ success: true });
     }
   } catch (error) {
@@ -350,7 +354,6 @@ function calculateOrderAmount(cartItems) {
 const verifyPayment = async (req, res) => {
   try {
     const { razorpayPaymentId, razorpayOrderId, razorpaySignature, selectedAddress, paymentMethod } = req.body;
-    // console.log(razorpayOrderId+"    Razorpay order id");
     const crypto = require('crypto');
     const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(razorpayOrderId + '|' + razorpayPaymentId);
@@ -361,7 +364,7 @@ const verifyPayment = async (req, res) => {
 
       const cartItems = await CartItem.find({ userId }).populate("product.productId");
       const orderAmount = calculateOrderAmount(cartItems);
-      let finalOrderAmount = orderAmount; 
+      let finalOrderAmount = orderAmount;
 
       if (req.session.coupon) {
         const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
@@ -378,7 +381,7 @@ const verifyPayment = async (req, res) => {
 
       const newOrder = new Order({
         userId,
-        coupon: req.session.coupon || null, 
+        coupon: req.session.coupon || null,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
@@ -406,7 +409,7 @@ const verifyPayment = async (req, res) => {
       if (req.session.coupon) {
         try {
           await Coupon.deleteOne({ couponCode: req.session.coupon });
-          req.session.coupon = null; 
+          req.session.coupon = null;
           req.session.couponApplied = false;
         } catch (error) {
           console.error('Error deleting coupon:', error.message);
@@ -430,6 +433,7 @@ function calculateOrderAmount(cartItems) {
   });
   return totalAmount;
 }
+
 
 //------------------------------------------------------- FAILED PAYMENT --------------------------------------------------------//
 
