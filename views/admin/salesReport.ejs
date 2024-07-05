@@ -64,12 +64,16 @@
             <tbody>
               <% for(let i = 0; i < orderDetails.length; i++) { %>
                 <% const order = orderDetails[i]; %>
-                <% const item = order.orderedItem[0]; %>
+                <% const item = order.orderedItem && order.orderedItem.length > 0 ? order.orderedItem[0] : {}; %>
                 <tr>
                   <td><%= i + 1 %></td>
                   <td style="color: green;"><%= order._id %></td>
-                  <td style="color: <%= item.orderStatus === 'cancelled' || item.orderStatus === 'returned' ? 'red' : item.orderStatus === 'pending' ? 'blue' : item.orderStatus === 'delivered' ? 'green' : 'black' %>;">
-                    <%= item.orderStatus %>
+                  <td style="color: 
+                    <%= item.orderStatus === 'cancelled' || item.orderStatus === 'returned' ? 'red' : 
+                         item.orderStatus === 'pending' ? 'blue' : 
+                         item.orderStatus === 'delivered' ? 'green' : 
+                         'black' %>;">
+                    <%= item.orderStatus || 'N/A' %>
                   </td>
                   <td><%= order.formattedCreatedAt %></td>
                   <td><%= order.deliveryAddress ? order.deliveryAddress.city : 'N/A' %></td>
