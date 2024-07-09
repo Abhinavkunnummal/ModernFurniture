@@ -492,6 +492,7 @@ const loadShop = async (req, res) => {
 
 
 
+
 //---------------------------------------------------- LOAD FULL PRODUCT DETAILS PAGE -----------------------------------------------------------//
 
 const loadFullPage = async (req, res) => {
