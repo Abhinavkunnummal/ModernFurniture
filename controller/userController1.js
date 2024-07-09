@@ -414,7 +414,7 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
-    const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
+    const categories = await Category.find({ is_Listed: true }).populate('categoryOfferId');
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
     const currentDate = new Date();
@@ -431,13 +431,13 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    const products = await Product.find({})
+    const products = await Product.find({ is_Listed: true }) // Only fetch products that are listed
       .populate('category')
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
       .limit(limit);
 
-    const totalProducts = await Product.countDocuments();
+    const totalProducts = await Product.countDocuments({ is_Listed: true }); // Count only listed products
     const totalPages = Math.ceil(totalProducts / limit);
 
     const processedProducts = products.map(product => {
