@@ -426,6 +426,7 @@ const loadShop = async (req, res) => {
       });
       return;
     }
+
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
@@ -450,8 +451,10 @@ const loadShop = async (req, res) => {
     const categoryIdsArray = categoryIds.map(category => category._id);
 
     const products = await Product.find({
-      is_Listed: false,
-      category: { $in: categoryIdsArray }
+      $or: [
+        { is_Listed: false },
+        { category: { $in: categoryIdsArray } }
+      ]
     })
       .populate('category')
       .populate('productOfferId')
@@ -459,9 +462,12 @@ const loadShop = async (req, res) => {
       .limit(limit);
 
     const totalProducts = await Product.countDocuments({
-      is_Listed: false,
-      category: { $in: categoryIdsArray }
+      $or: [
+        { is_Listed: false },
+        { category: { $in: categoryIdsArray } }
+      ]
     });
+
     const totalPages = Math.ceil(totalProducts / limit);
 
     const processedProducts = products.map(product => {
@@ -499,6 +505,7 @@ const loadShop = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 //---------------------------------------------------- LOAD FULL PRODUCT DETAILS PAGE -----------------------------------------------------------//
