@@ -1114,9 +1114,6 @@ const loadInvoice = async (req, res) => {
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-    // Set font to ensure Rupee symbol is supported
-    doc.font('Helvetica');
-
     // Header
     doc
       .fontSize(20)
@@ -1164,8 +1161,8 @@ const loadInvoice = async (req, res) => {
       doc
         .text(item.productId.name, 50, yPosition, { width: 180 })
         .text(item.quantity.toString(), 250, yPosition)
-        .text(`₹${item.productId.price.toFixed(2)}`, 350, yPosition)
-        .text(`₹${totalPrice.toFixed(2)}`, 450, yPosition);
+        .text(`Rs ${item.productId.price.toFixed(2)}`, 350, yPosition)
+        .text(`Rs ${totalPrice.toFixed(2)}`, 450, yPosition);
 
       totalAmount += totalPrice;
     });
@@ -1183,11 +1180,11 @@ const loadInvoice = async (req, res) => {
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`₹${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
+      .text(`Rs ${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
       .text('Discount', 350, summaryTop + 35)
-      .text(`₹${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text(`Rs ${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
       .text('Grand Total', 350, summaryTop + 55)
-      .text(`₹${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
     // Footer
@@ -1217,7 +1214,6 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
-
 //---------------------------------------------------------- APPLY COUPON -----------------------------------------------------------//
 
 const applyCoupon = async (req, res) => {
