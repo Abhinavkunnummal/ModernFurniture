@@ -1205,20 +1205,20 @@ const updateProductOffer = async (req, res) => {
     }
 
     const today = new Date();
-today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
-
-// Validate if the start date is after today
-if (new Date(startDate) <= today) {
-  req.flash('error', 'Start date must be after today.');
-  return res.redirect(`/admin/editProductOffer/${offerId}`);
-}
-
-// Validate if the start date is before the end date
-if (new Date(startDate) >= new Date(endDate)) {
-  req.flash('error', 'Start date must be before end date.');
-  return res.redirect(`/admin/editProductOffer/${offerId}`);
-}
-
+    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+    
+    // Validate if the start date is today or after today
+    if (new Date(startDate) < today) {
+      req.flash('error', 'Start date must be today or after today.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+    
+    // Validate if the start date is before the end date
+    if (new Date(startDate) >= new Date(endDate)) {
+      req.flash('error', 'Start date must be before end date.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
+    
 
     // Update the offer
     await ProductOffer.findByIdAndUpdate(offerId, {
