@@ -78,7 +78,7 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 
 <script>
-  async function validateForm() {
+  function validateForm() {
     const offerName = document.getElementById('offerName').value;
     const discount = document.getElementById('discount').value;
     const startDate = document.getElementById('startDate').value;
@@ -106,15 +106,6 @@
       return false;
     }
 
-    if (offerName.toUpperCase() === offerName || offerName.toLowerCase() === offerName) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Offer name must contain both uppercase and lowercase letters.'
-      });
-      return false;
-    }
-
     if (discount <= 0) {
       Swal.fire({
         icon: 'error',
@@ -134,46 +125,25 @@
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
-    if (new Date(startDate) < today) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Start date must be today or after today.'
-      });
-      return false;
-    }
+if (new Date(startDate) <= today) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: 'Start date must be after today.'
+  });
+  return false;
+}
 
-    if (new Date(startDate) >= new Date(endDate)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Start date must be before end date.'
-      });
-      return false;
-    }
-
-    // Check for duplicate offer names (case insensitive)
-    const response = await fetch('/admin/checkDuplicateOfferName', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ offerName })
-    });
-
-    const result = await response.json();
-    if (result.isDuplicate) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Duplicate offer name is not allowed.'
-      });
-      return false;
-    }
-
+if (new Date(startDate) >= new Date(endDate)) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: 'Start date must be before end date.'
+  });
+  return false;
+}
     return true;
   }
 </script>
-

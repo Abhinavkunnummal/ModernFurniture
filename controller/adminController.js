@@ -1239,6 +1239,7 @@ const updateProductOffer = async (req, res) => {
 
 
 
+
 const deleteProductOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
