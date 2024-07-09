@@ -1252,7 +1252,7 @@ const duplicateProductOffer = async (req, res) => {
     console.error("Error checking duplicate offer name:", error);
     return res.status(500).json({ isDuplicate: false });
   }
-});
+};
 
 
 
