@@ -431,27 +431,16 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    // Fetch only products that are not listed and belong to categories that are not listed
-    const products = await Product.find({ is_Listed: true })
-      .populate({
-        path: 'category',
-        match: { is_Listed: true }
-      })
+    const products = await Product.find({})
+      .populate('category')
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
       .limit(limit);
 
-    // Filter out products whose categories are listed
-    const filteredProducts = products.filter(product => product.category);
-
-    // Count only valid products
-    const totalProducts = await Product.countDocuments({
-      is_Listed: false,
-      category: { $in: categories.map(cat => cat._id) }
-    });
+    const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts / limit);
 
-    const processedProducts = filteredProducts.map(product => {
+    const processedProducts = products.map(product => {
       let bestDiscount = 0;
       let discountedPrice = product.price;
 
