@@ -414,7 +414,11 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
+    
+    // Fetch categories with is_Listed set to false
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
+    const categoryIds = categories.map(category => category._id);
+    
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
     const currentDate = new Date();
@@ -431,15 +435,10 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    // Find categories that are not listed
-    const categoryIds = await Category.find({ is_Listed: false }).select('_id');
-    
-    // Extract the category IDs
-    const categoryIdsArray = categoryIds.map(category => category._id);
-
+    // Fetch products that are listed and belong to the listed categories
     const products = await Product.find({
       is_Listed: false,
-      category: { $in: categoryIdsArray }
+      category: { $in: categoryIds }
     })
       .populate('category')
       .populate('productOfferId')
@@ -448,7 +447,7 @@ const loadShop = async (req, res) => {
 
     const totalProducts = await Product.countDocuments({
       is_Listed: false,
-      category: { $in: categoryIdsArray }
+      category: { $in: categoryIds }
     });
     const totalPages = Math.ceil(totalProducts / limit);
 
