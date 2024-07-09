@@ -413,8 +413,11 @@ const verifyLogin = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    const userData = await User.findById(req.session.user_id);
-    
+    let userData;
+    if (req.session.user_id) {
+      userData = await User.findById(req.session.user_id);
+    }
+
     // Fetch categories with is_Listed set to false
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const categoryIds = categories.map(category => category._id);
@@ -486,6 +489,7 @@ const loadShop = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 
 //---------------------------------------------------- LOAD FULL PRODUCT DETAILS PAGE -----------------------------------------------------------//
