@@ -1133,6 +1133,24 @@ const addProductOfferPost = async (req, res) => {
       return res.redirect('/admin/addProductOffer');
     }
 
+    if (discount <= 0) {
+      req.flash('error', 'Discount cannot be less than or equal to 0.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
+    if (discount > 100) {
+      req.flash('error', 'Discount cannot be greater than 100.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+
+    if (new Date(startDate) < today) {
+      req.flash('error', 'Start date must be today or after today.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
       return res.redirect('/admin/addProductOffer');
@@ -1155,6 +1173,7 @@ const addProductOfferPost = async (req, res) => {
     res.redirect('/admin/addProductOffer');
   }
 };
+
 
 
 const editProductOffer = async (req, res) => {
