@@ -124,15 +124,26 @@
       return false;
     }
 
-    if (new Date(startDate) >= new Date(endDate)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Start date must be before end date.'
-      });
-      return false;
-    }
+    const today = new Date();
+today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
+if (new Date(startDate) <= today) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: 'Start date must be after today.'
+  });
+  return false;
+}
+
+if (new Date(startDate) >= new Date(endDate)) {
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: 'Start date must be before end date.'
+  });
+  return false;
+}
     return true;
   }
 </script>
