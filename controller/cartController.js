@@ -1091,7 +1091,7 @@ const fs = require('fs');
 const path = require('path');
 const loadInvoice = async (req, res) => {
   try {
-    const { orderId } = req.query; 
+    const { orderId } = req.query;
     const userId = req.session.user_id;
 
     const order = await Order.findById(orderId)
@@ -1104,31 +1104,34 @@ const loadInvoice = async (req, res) => {
     }
 
     const generateInvoiceNumber = () => {
-      return Math.floor(10000 + Math.random() * 90000).toString();
+      return Math.floor(100000 + Math.random() * 900000).toString();
     };
 
     const doc = new PDFDocument({ margin: 50 });
-    const fileName = `invoice_${generateInvoiceNumber()}.pdf`; 
+    const fileName = `invoice_${generateInvoiceNumber()}.pdf`;
     const filePath = path.join(__dirname, '../invoice', fileName);
 
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
+
+    // Set font to ensure Rupee symbol is supported
+    doc.font('Helvetica');
+
+    // Header
     doc
       .fontSize(20)
-      .font('Helvetica-Bold')
       .text('Modern Furniture', { align: 'center' })
       .moveDown()
       .fontSize(12)
-      .font('Helvetica')
       .text(`Invoice Number: ${generateInvoiceNumber()}`, { align: 'right' })
       .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
       .moveDown();
+
+    // Delivery Address
     doc
       .fontSize(12)
-      .font('Helvetica-Bold')
       .text('Delivery Address:', { underline: true })
       .moveDown(0.5)
-      .font('Helvetica')
       .text(`Name: ${order.userId.name}`)
       .text(`Mobile: ${order.userId.mobile}`)
       .text(`Street Address: ${order.deliveryAddress.address}`)
@@ -1136,70 +1139,60 @@ const loadInvoice = async (req, res) => {
       .text(`State: ${order.deliveryAddress.state}`)
       .text(`Pincode: ${order.deliveryAddress.zipcode}`)
       .moveDown();
-    const tableTop = doc.y;
-    const itemLineHeight = 20;
 
+    // Table Header
+    const tableTop = doc.y;
     doc
-      .fontSize(12)
-      .font('Helvetica-Bold')
       .text('Product Name', 50, tableTop)
       .text('Quantity', 250, tableTop)
       .text('Unit Price', 350, tableTop)
       .text('Total Price', 450, tableTop);
 
     doc
-      .strokeColor('#aaaaaa')
-      .lineWidth(1)
       .moveTo(50, tableTop + 15)
       .lineTo(550, tableTop + 15)
       .stroke()
-      .moveDown(0.5);
+      .moveDown();
 
-
+    // Table Content
     let totalAmount = 0;
-    order.orderedItem.forEach(item => {
-      const itemPosition = doc.y + 20;
+    let yPosition = doc.y;
+    order.orderedItem.forEach((item, index) => {
       const totalPrice = item.quantity * item.productId.price;
+      yPosition = doc.y + (index * 20);
 
       doc
-        .fontSize(12)
-        .font('Helvetica')
-        .text(item.productId.name, 50, itemPosition, { width: 150 })
-        .text(item.quantity.toString(), 250, itemPosition)
-        .text(`₹${item.productId.price.toFixed(2)}`, 350, itemPosition)
-        .text(`₹${totalPrice.toFixed(2)}`, 450, itemPosition);
+        .text(item.productId.name, 50, yPosition, { width: 180 })
+        .text(item.quantity.toString(), 250, yPosition)
+        .text(`₹${item.productId.price.toFixed(2)}`, 350, yPosition)
+        .text(`₹${totalPrice.toFixed(2)}`, 450, yPosition);
 
       totalAmount += totalPrice;
     });
 
-    const discountAmount = totalAmount - order.orderAmount;
-    const finalAmount = order.orderAmount;
-    const summaryTop = doc.y + itemLineHeight + 15;
-
+    // Summary
+    const summaryTop = yPosition + 40;
     doc
-      .strokeColor('#aaaaaa')
-      .lineWidth(1)
       .moveTo(50, summaryTop)
       .lineTo(550, summaryTop)
       .stroke()
-      .moveDown(0.5);
+      .moveDown();
+
+    const discountAmount = totalAmount - order.orderAmount;
+    const finalAmount = order.orderAmount;
 
     doc
-      .fontSize(12)
-      .font('Helvetica-Bold')
       .text('Subtotal', 350, summaryTop + 15)
       .text(`₹${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
-      .moveDown(0.5)
-      .text('Discount', 350, summaryTop + 30)
-      .text(`₹${discountAmount.toFixed(2)}`, 450, summaryTop + 30)
-      .moveDown(0.5)
-      .text('Grand Total', 350, summaryTop + 45)
-      .text(`₹${finalAmount.toFixed(2)}`, 450, summaryTop + 45)
+      .text('Discount', 350, summaryTop + 35)
+      .text(`₹${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text('Grand Total', 350, summaryTop + 55)
+      .text(`₹${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
+    // Footer
     doc
       .fontSize(10)
-      .font('Helvetica')
       .text('Thank you for your business.', { align: 'center' })
       .moveDown();
 
