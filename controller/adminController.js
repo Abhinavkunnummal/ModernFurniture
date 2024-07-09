@@ -1318,10 +1318,14 @@ const addCategoryOfferPost = async (req, res) => {
       return res.redirect('/admin/addCategoryOffer');
     }
 
-    // Validate date range
+    if (new Date(startDate) < today) {
+      req.flash('error', 'Start date must be today or after today.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
-      return res.redirect('/admin/addCategoryOffer');
+      return res.redirect('/admin/addProductOffer');
     }
 
     const newOffer = new CategoryOffer({
