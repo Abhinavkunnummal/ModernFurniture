@@ -1193,12 +1193,6 @@ const updateProductOffer = async (req, res) => {
       return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
-    // Ensure the new offer name is not the same as the current one
-    if (offerName === currentOffer.offerName) {
-      req.flash('error', 'Offer name cannot be the same as the previous offer name.');
-      return res.redirect(`/admin/editProductOffer/${offerId}`);
-    }
-
     // Validate discount value
     if (discount <= 0) {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
@@ -1210,11 +1204,21 @@ const updateProductOffer = async (req, res) => {
       return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
 
-    // Validate date range
-    if (new Date(startDate) >= new Date(endDate)) {
-      req.flash('error', 'Start date must be before end date.');
-      return res.redirect(`/admin/editProductOffer/${offerId}`);
-    }
+    const today = new Date();
+today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+
+// Validate if the start date is after today
+if (new Date(startDate) <= today) {
+  req.flash('error', 'Start date must be after today.');
+  return res.redirect(`/admin/editProductOffer/${offerId}`);
+}
+
+// Validate if the start date is before the end date
+if (new Date(startDate) >= new Date(endDate)) {
+  req.flash('error', 'Start date must be before end date.');
+  return res.redirect(`/admin/editProductOffer/${offerId}`);
+}
+
 
     // Update the offer
     await ProductOffer.findByIdAndUpdate(offerId, {
