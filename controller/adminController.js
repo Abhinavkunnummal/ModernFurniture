@@ -1317,17 +1317,18 @@ const addCategoryOfferPost = async (req, res) => {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
       return res.redirect('/admin/addCategoryOffer');
     }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
-      return res.redirect('/admin/addProductOffer');
+      return res.redirect('/admin/addCategoryOffer');
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
-      return res.redirect('/admin/addProductOffer');
+      return res.redirect('/admin/addCategoryOffer');
     }
 
     const newOffer = new CategoryOffer({
@@ -1340,13 +1341,15 @@ const addCategoryOfferPost = async (req, res) => {
     });
 
     await newOffer.save();
+    req.flash('success', 'Category offer added successfully.');
     res.redirect('/admin/categoryOffer');
   } catch (error) {
-    console.error('Error in the offer page:', error);
+    console.error('Error in addCategoryOfferPost:', error);
     req.flash('error', 'Failed to add the category offer');
     res.redirect('/admin/addCategoryOffer');
   }
 };
+
 
 
 const editCategoryOffer = async (req, res) => {
