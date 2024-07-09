@@ -1391,6 +1391,14 @@ const updateCategoryOffer = async (req, res) => {
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
+       const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+
+    if (new Date(startDate) < today) {
+      req.flash('error', 'Start date must be today or after today.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
     // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
