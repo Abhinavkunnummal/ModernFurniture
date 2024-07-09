@@ -414,7 +414,7 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
-    const categories = await Category.find({ is_Listed: true }).populate('categoryOfferId');
+    const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
     const currentDate = new Date();
@@ -431,16 +431,27 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    const products = await Product.find({ is_Listed: true }) // Only fetch products that are listed
-      .populate('category')
+    // Fetch only products that are not listed and belong to categories that are not listed
+    const products = await Product.find({ is_Listed: false })
+      .populate({
+        path: 'category',
+        match: { is_Listed: false }
+      })
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
       .limit(limit);
 
-    const totalProducts = await Product.countDocuments({ is_Listed: true }); // Count only listed products
+    // Filter out products whose categories are listed
+    const filteredProducts = products.filter(product => product.category);
+
+    // Count only valid products
+    const totalProducts = await Product.countDocuments({
+      is_Listed: false,
+      category: { $in: categories.map(cat => cat._id) }
+    });
     const totalPages = Math.ceil(totalProducts / limit);
 
-    const processedProducts = products.map(product => {
+    const processedProducts = filteredProducts.map(product => {
       let bestDiscount = 0;
       let discountedPrice = product.price;
 
