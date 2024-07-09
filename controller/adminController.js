@@ -1237,8 +1237,22 @@ const updateProductOffer = async (req, res) => {
   }
 };
 
+const duplicateProductOffer = async (req, res) => {
+  try {
+    const { offerName } = req.body;
+    const existingOffer = await ProductOffer.findOne({
+      offerName: { $regex: new RegExp(`^${offerName}$`, 'i') }
+    });
 
-
+    if (existingOffer) {
+      return res.json({ isDuplicate: true });
+    }
+    return res.json({ isDuplicate: false });
+  } catch (error) {
+    console.error("Error checking duplicate offer name:", error);
+    return res.status(500).json({ isDuplicate: false });
+  }
+};
 
 const deleteProductOffer = async (req, res) => {
   try {
@@ -1566,5 +1580,6 @@ module.exports = {
   editCategoryOffer,
   updateCategoryOffer,
   deleteCategoryOffer,
+  duplicateProductOffer,
   rendererror
 };
