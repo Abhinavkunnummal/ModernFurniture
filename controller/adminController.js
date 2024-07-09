@@ -229,8 +229,9 @@ const getEditCategory = async (req, res) => {
 const blockCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
-    const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: true });
-    
+
+    // Block the category
+    const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: false });
     if (!category) {
       return res.status(404).send("Category not found");
     }
@@ -238,7 +239,7 @@ const blockCategory = async (req, res) => {
     // Block all products under this category
     await Product.updateMany(
       { category: categoryId },
-      { $set: { is_Listed: true } }
+      { $set: { is_Listed: false } }
     );
 
     res.redirect("/admin/categoryDetails");
@@ -253,16 +254,20 @@ const blockCategory = async (req, res) => {
 const unblockCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
-    const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: false });
+
+    // Unblock the category
+    const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: true });
     if (!category) {
       return res.status(404).send("Category not found");
     }
+
     res.redirect("/admin/categoryDetails");
   } catch (error) {
     console.error("Error occurred while unblocking category:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 //-------------------------------------------------------- UPDATE CATEGORY -------------------------------------------------------//
 
