@@ -414,6 +414,19 @@ const verifyLogin = async (req, res) => {
 const loadShop = async (req, res) => {
   try {
     const userData = await User.findById(req.session.user_id);
+
+    // Check if the user is blocked
+    if (userData.is_blocked) {
+      req.session.destroy(err => {
+        if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).send("Internal Server Error");
+        }
+        res.redirect("/login"); // Redirect to login page or an appropriate error page
+      });
+      return;
+    }
+
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
