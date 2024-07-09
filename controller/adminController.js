@@ -227,22 +227,44 @@ const getEditCategory = async (req, res) => {
 //-------------------------------------------------------- BLOCK CATEGORY ---------------------------------------------------------//
 
 const blockCategory = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const categoryId = req.query.id;
-    const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: true });
-    
+
+    // Use findOneAndUpdate to get the previous state of the category
+    const category = await Category.findOneAndUpdate(
+      { _id: categoryId },
+      { is_Listed: true },
+      { new: false, session }
+    );
+
     if (!category) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).send("Category not found");
     }
 
-    // Block all products under this category
-    await Product.updateMany(
-      { category: categoryId },
-      { $set: { is_Listed: true } }
-    );
+    // Only update products if the category wasn't already blocked
+    if (!category.is_Listed) {
+      // Block all products under this category
+      const result = await Product.updateMany(
+        { category: categoryId },
+        { $set: { is_Listed: true } },
+        { session }
+      );
+
+      console.log(`Updated ${result.modifiedCount} products`);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.redirect("/admin/categoryDetails");
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Error occurred while blocking category and products:", error);
     res.status(500).send("Internal Server Error");
   }
