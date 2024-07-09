@@ -1317,6 +1317,8 @@ const addCategoryOfferPost = async (req, res) => {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
       return res.redirect('/admin/addCategoryOffer');
     }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
