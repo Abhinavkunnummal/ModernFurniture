@@ -795,7 +795,13 @@ const sortProducts = async (req, res) => {
     const { sort, category, search, page = 1, limit = 9 } = req.query;
     const currentDate = new Date();
 
-    let productsQuery = Product.find().populate('category').populate('productOfferId');
+    // Start with a query that only includes active products
+    let productsQuery = Product.find({ is_Listed: false })
+                               .populate({
+                                 path: 'category',
+                                 match: { is_Listed: false } // Only include active categories
+                               })
+                               .populate('productOfferId');
 
     if (category) {
       productsQuery = productsQuery.where('category').equals(category);
@@ -806,6 +812,9 @@ const sortProducts = async (req, res) => {
     }
 
     let products = await productsQuery.exec();
+
+    // Filter out products whose populated category is null (meaning the category was blocked)
+    products = products.filter(product => product.category !== null);
 
     const categoryOffers = await CategoryOffer.find({
       is_active: true,
