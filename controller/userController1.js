@@ -426,7 +426,6 @@ const loadShop = async (req, res) => {
       });
       return;
     }
-
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
