@@ -431,13 +431,25 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    const products = await Product.find({})
+    // Find categories that are not listed
+    const categoryIds = await Category.find({ is_Listed: false }).select('_id');
+    
+    // Extract the category IDs
+    const categoryIdsArray = categoryIds.map(category => category._id);
+
+    const products = await Product.find({
+      is_Listed: false,
+      category: { $in: categoryIdsArray }
+    })
       .populate('category')
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
       .limit(limit);
 
-    const totalProducts = await Product.countDocuments();
+    const totalProducts = await Product.countDocuments({
+      is_Listed: false,
+      category: { $in: categoryIdsArray }
+    });
     const totalPages = Math.ceil(totalProducts / limit);
 
     const processedProducts = products.map(product => {
