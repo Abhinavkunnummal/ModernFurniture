@@ -432,10 +432,10 @@ const loadShop = async (req, res) => {
     });
 
     // Fetch only products that are not listed and belong to categories that are not listed
-    const products = await Product.find({ is_Listed: false })
+    const products = await Product.find({ is_Listed: true })
       .populate({
         path: 'category',
-        match: { is_Listed: false }
+        match: { is_Listed: true }
       })
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
