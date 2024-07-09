@@ -234,13 +234,11 @@ const blockCategory = async (req, res) => {
     if (!category) {
       return res.status(404).send("Category not found");
     }
-
     // Block all products under this category
     await Product.updateMany(
       { category: categoryId },
       { $set: { is_Listed: true } }
     );
-
     res.redirect("/admin/categoryDetails");
   } catch (error) {
     console.error("Error occurred while blocking category and products:", error);
@@ -251,24 +249,23 @@ const blockCategory = async (req, res) => {
 
 //-------------------------------------------------------- UNBLOCK CATEGORY -------------------------------------------------------//
 
+
 const unblockCategory = async (req, res) => {
   try {
     const categoryId = req.query.id;
     const category = await Category.findByIdAndUpdate(categoryId, { is_Listed: false }, { new: true });
-    
     if (!category) {
       return res.status(404).send("Category not found");
     }
-
-    // Unblock all products under this category
+    // Optionally unblock all products under this category
+    // Uncomment the following lines if you want to unblock products when unblocking a category
     await Product.updateMany(
       { category: categoryId },
       { $set: { is_Listed: false } }
     );
-
     res.redirect("/admin/categoryDetails");
   } catch (error) {
-    console.error("Error occurred while unblocking category and products:", error);
+    console.error("Error occurred while unblocking category:", error);
     res.status(500).send("Internal Server Error");
   }
 };

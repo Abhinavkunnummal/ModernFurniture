@@ -417,28 +417,24 @@ const loadShop = async (req, res) => {
     if (req.session.user_id) {
       userData = await User.findById(req.session.user_id);
     }
-
-    // Fetch categories with is_Listed set to false
+    // Fetch categories that are listed (i.e., active categories)
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const categoryIds = categories.map(category => category._id);
     
     const currentPage = parseInt(req.query.page) || 1;
     const limit = 10;
     const currentDate = new Date();
-
     const categoryOffers = await CategoryOffer.find({
       is_active: true,
       startDate: { $lte: currentDate },
       endDate: { $gte: currentDate }
     });
-
     const productOffers = await ProductOffer.find({
       is_active: true,
       startDate: { $lte: currentDate },
       endDate: { $gte: currentDate }
     });
-
-    // Fetch products that are listed and belong to the listed categories
+    // Fetch products that are listed and belong to active categories
     const products = await Product.find({
       is_Listed: false,
       category: { $in: categoryIds }
@@ -447,36 +443,30 @@ const loadShop = async (req, res) => {
       .populate('productOfferId')
       .skip((currentPage - 1) * limit)
       .limit(limit);
-
     const totalProducts = await Product.countDocuments({
       is_Listed: false,
       category: { $in: categoryIds }
     });
     const totalPages = Math.ceil(totalProducts / limit);
-
     const processedProducts = products.map(product => {
       let bestDiscount = 0;
       let discountedPrice = product.price;
-
       const productOffer = productOffers.find(offer => offer.productId.equals(product._id));
       if (productOffer) {
         bestDiscount = productOffer.discount;
         discountedPrice = product.price - (product.price * (productOffer.discount / 100));
       }
-
       const categoryOffer = categoryOffers.find(offer => offer.categoryId.equals(product.category._id));
       if (categoryOffer && categoryOffer.discount > bestDiscount) {
         bestDiscount = categoryOffer.discount;
         discountedPrice = product.price - (product.price * (categoryOffer.discount / 100));
       }
-
       return {
         ...product._doc,
         discount: bestDiscount,
         discountedPrice: parseFloat(discountedPrice.toFixed(2)),
       };
     });
-
     res.render("shop", {
       products: processedProducts,
       user: userData,
@@ -489,8 +479,6 @@ const loadShop = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
-
 
 
 //---------------------------------------------------- LOAD FULL PRODUCT DETAILS PAGE -----------------------------------------------------------//
