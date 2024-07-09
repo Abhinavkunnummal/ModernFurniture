@@ -94,7 +94,7 @@ adminRoute.post('/productOffer', isLogin,adminController.addProductOfferPost);
 adminRoute.get('/editProductOffer/:id', isLogin,adminController.editProductOffer);
 adminRoute.post('/editProductOfferPost/:id', isLogin, adminController.updateProductOffer);
 adminRoute.get('/deleteProductOffer/:id', isLogin,adminController.deleteProductOffer);
-adminRoute.post('/checkDuplicateOfferName',isLogin,adminController.duplicateProductOffer)
+
 //category
 adminRoute.get('/categoryOffer', isLogin,adminController.categoryOfferPage);
 adminRoute.get('/addCategoryOffer', isLogin,adminController.addCategoryOfferPage);
