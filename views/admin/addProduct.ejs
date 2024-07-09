@@ -10,7 +10,7 @@
         <form action="/admin/products" method="post" class="forms-sample" enctype="multipart/form-data">
             <% if (typeof message != 'undefined') { %>
                 <p class="text-danger"><%= message %></p>
-            <% } %>
+              <% } %>
             <h1 class="mb-4">Welcome to Add Product</h1>
             <div class="row">
                 <div class="col-md-6">
@@ -28,6 +28,7 @@
                     <div class="form-group">
                         <label for="productimages">Images (up to 4)</label>
                         <input type="file" class="form-control border" id="productimages" name="images" accept="image/jpeg, image/png" multiple>
+
                         <!-- Image preview container -->
                         <div id="image-preview-container" class="mt-3"></div>
                         <div id="images-error" class="error-message"></div>
@@ -57,12 +58,10 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Create Product</button>
+            <button type="submit" class="btn btn-primary ">Create Product</button>
         </form>
     </section>
-    <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet"/>
-    <script src="https://unpkg.com/cropperjs"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
           const maxImageCount = 4;
@@ -89,31 +88,25 @@
               reader.onload = (function (img) {
                 return function (e) {
                   img.src = e.target.result;
-                  const cropper = new Cropper(img, {
-                    aspectRatio: 7 / 9,
-                    viewMode: 1,
-                    ready: function () {
-                      cropper.crop();
-                    },
-                  });
-                  previewContainer.appendChild(img);
                 };
               })(previewImage);
       
               reader.readAsDataURL(files[i]);
+              previewContainer.appendChild(previewImage);
             }
           }
       
-          form.addEventListener('submit', async (event) => {
+          form.addEventListener('submit', (event) => {
             event.preventDefault();
       
             const name = document.getElementById('name');
             const description = document.getElementById('description');
+            const images = document.getElementById('productimages');
             const price = document.getElementById('price');
             const category = document.getElementById('category');
-            const quantity = document.getElementById('quantity');
-            const imageElements = previewContainer.getElementsByTagName('img');
+            // const quantity = document.getElementById('quantity');
       
+           
             let isValid = true;
       
             showError('name', '');
@@ -125,6 +118,12 @@
             showError('description', ''); 
             if (description.value.trim() === '') {
               showError('description', 'Please enter a product description.');
+              isValid = false;
+            }
+      
+            showError('images', ''); 
+            if (images.files.length === 0) {
+              showError('images', 'Please select at least one image.');
               isValid = false;
             }
       
@@ -140,50 +139,8 @@
               isValid = false;
             }
       
-            showError('quantity', '');
-            if (quantity.value.trim() === '' || parseInt(quantity.value) < 0) {
-              showError('quantity', 'Please enter a valid stock quantity.');
-              isValid = false;
-            }
-      
-            if (imageElements.length === 0) {
-              showError('images', 'Please select at least one image.');
-              isValid = false;
-            }
-      
             if (isValid) {
-              const croppedImages = [];
-              for (let i = 0; i < imageElements.length; i++) {
-                const cropper = Cropper.getCropper(imageElements[i]);
-                const canvas = cropper.getCroppedCanvas();
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
-                const file = new File([blob], `cropped_image_${i + 1}.jpeg`, { type: 'image/jpeg' });
-                croppedImages.push(file);
-              }
-      
-              const formData = new FormData();
-              formData.append('name', name.value);
-              formData.append('description', description.value);
-              formData.append('price', price.value);
-              formData.append('category', category.value);
-              formData.append('stock', quantity.value);
-              croppedImages.forEach((file, index) => {
-                formData.append(`images`, file, file.name);
-              });
-      
-              const response = await fetch('/admin/products', {
-                method: 'POST',
-                body: formData
-              });
-      
-              if (response.ok) {
-                window.location.href = '/admin/productlist';
-              } else {
-                const errorData = await response.json();
-                if (errorData.message) {
-                  showError('form', errorData.message);
-                }
-              }
+              form.submit(); 
             }
           });
       
@@ -196,7 +153,9 @@
             }
           }
         });
-    </script>
+      </script>
+      
 </main>
 
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
+
