@@ -17,7 +17,7 @@ const renderLogin = async (req, res) => {
   try {
     res.render("login");
   } catch (error) {
-    console.error("Error rendering login:", error);
+    // console.error("Error rendering login:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -87,7 +87,8 @@ const loadDashboard = async (req, res) => {
       monthlyEarning: currentMonthEarnings
     });
   } catch (error) {
-    console.log("Error loading dashboard:", error);
+    // console.log("Error loading dashboard:", error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -342,7 +343,7 @@ const addProduct = async (req, res) => {
 const addingNewProduct = async (req, res) => {
   try {
     const { name, description, price, stock, dateCreated, category } = req.body;
-    console.log(stock);
+    // console.log(stock);
     const categoryId = await Category.findOne({ _id: category, is_Listed: false });
     const categoryData = await Category.find({ is_Listed: false });
     if (!categoryId) {
@@ -498,6 +499,7 @@ const renderOrders = async (req, res) => {
       res.render('orderDetails', { orderData });
   } catch (error) {
       console.log(error.message);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -508,6 +510,7 @@ const renderSingleView=async(req,res)=>{
     res.render('singleOrder')
   }catch(error){
     console.log(error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
 
@@ -686,7 +689,7 @@ const renderOffer = async (req, res) => {
 
 const loadAddOffer = async (req, res) => {
   try {
-      console.log('entering load add offer page');
+      // console.log('entering load add offer page');
 
       const products = await Product.find({})
 
@@ -696,6 +699,7 @@ const loadAddOffer = async (req, res) => {
       res.render('addOffer', { products: products, categories: categories })
   } catch (error) {
       console.log('error in loading the add offer page');
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
 
@@ -769,7 +773,7 @@ const loadEditOffer = async (req, res) => {
       // console.log('starting to laod the edit offer page');
 
       const id = req.query.id
-      console.log("id", id);
+      // console.log("id", id);
 
       const products = await Product.find({})
 
@@ -783,6 +787,7 @@ const loadEditOffer = async (req, res) => {
 
   } catch (error) {
       console.log('error loading edit offer page', error)
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
 

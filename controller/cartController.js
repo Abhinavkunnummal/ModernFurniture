@@ -1114,7 +1114,7 @@ const loadInvoice = async (req, res) => {
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-    // Header
+
     doc
       .fontSize(20)
       .text('Modern Furniture', { align: 'center' })
@@ -1124,7 +1124,7 @@ const loadInvoice = async (req, res) => {
       .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
       .moveDown();
 
-    // Delivery Address
+
     doc
       .fontSize(12)
       .text('Delivery Address:', { underline: true })
@@ -1137,7 +1137,7 @@ const loadInvoice = async (req, res) => {
       .text(`Pincode: ${order.deliveryAddress.zipcode}`)
       .moveDown();
 
-    // Table Header
+
     const tableTop = doc.y;
     doc
       .text('Product Name', 50, tableTop)
@@ -1151,7 +1151,7 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    // Table Content
+
     let totalAmount = 0;
     let yPosition = doc.y;
     order.orderedItem.forEach((item, index) => {
@@ -1167,7 +1167,7 @@ const loadInvoice = async (req, res) => {
       totalAmount += totalPrice;
     });
 
-    // Summary
+
     const summaryTop = yPosition + 40;
     doc
       .moveTo(50, summaryTop)
@@ -1187,7 +1187,7 @@ const loadInvoice = async (req, res) => {
       .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
-    // Footer
+
     doc
       .fontSize(10)
       .text('Thank you for your business.', { align: 'center' })

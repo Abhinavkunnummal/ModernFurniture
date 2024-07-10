@@ -417,21 +417,21 @@ const loadShop = async (req, res) => {
     if (req.session.user_id) {
       userData = await User.findById(req.session.user_id);
 
-      // Check if the user is blocked
+    
       if (userData && userData.is_blocked) {
-        // Destroy the session and redirect to login or appropriate page
+
         req.session.destroy((err) => {
           if (err) {
             console.error("Error destroying session:", err);
             return res.status(500).send("Internal Server Error");
           }
-          return res.redirect('/login'); // Redirect to login or appropriate page
+          return res.redirect('/login'); 
         });
-        return; // Exit the function
+        return; 
       }
     }
 
-    // Fetch categories that are listed (i.e., active categories)
+
     const categories = await Category.find({ is_Listed: false }).populate('categoryOfferId');
     const categoryIds = categories.map(category => category._id);
     
@@ -451,7 +451,7 @@ const loadShop = async (req, res) => {
       endDate: { $gte: currentDate }
     });
 
-    // Fetch products that are listed and belong to active categories
+
     const products = await Product.find({
       is_Listed: false,
       category: { $in: categoryIds }
@@ -818,11 +818,11 @@ const sortProducts = async (req, res) => {
     const { sort, category, search, page = 1, limit = 9 } = req.query;
     const currentDate = new Date();
 
-    // Start with a query that only includes active products
+
     let productsQuery = Product.find({ is_Listed: false })
                                .populate({
                                  path: 'category',
-                                 match: { is_Listed: false } // Only include active categories
+                                 match: { is_Listed: false } 
                                })
                                .populate('productOfferId');
 
@@ -836,7 +836,6 @@ const sortProducts = async (req, res) => {
 
     let products = await productsQuery.exec();
 
-    // Filter out products whose populated category is null (meaning the category was blocked)
     products = products.filter(product => product.category !== null);
 
     const categoryOffers = await CategoryOffer.find({
