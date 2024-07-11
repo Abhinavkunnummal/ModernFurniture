@@ -490,18 +490,36 @@ const blockProduct = async (req, res) => {
 
 
 //************************************************** ORDER DETAILS ****************************************************************/
+const ITEMS_PER_PAGE = 10; // Number of orders per page
+
 const renderOrders = async (req, res) => {
   try {
-      const orderData = await Order.find()
-          .populate('orderedItem.productId')
-          .populate('userId')
-          .populate('deliveryAddress');
-      res.render('orderDetails', { orderData });
+    const page = parseInt(req.query.page) || 1; // Get current page from query params, default to 1
+    const totalOrders = await Order.countDocuments(); // Count total number of orders
+
+    // Fetch paginated orders with population
+    const orderData = await Order.find()
+      .populate('orderedItem.productId')
+      .populate('userId')
+      .populate('deliveryAddress')
+      .skip((page - 1) * ITEMS_PER_PAGE) // Skip orders for previous pages
+      .limit(ITEMS_PER_PAGE); // Limit to ITEMS_PER_PAGE orders
+
+    res.render('orderDetails', {
+      orderData,
+      currentPage: page,
+      hasNextPage: ITEMS_PER_PAGE * page < totalOrders,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalOrders / ITEMS_PER_PAGE)
+    });
   } catch (error) {
-      console.log(error.message);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.log(error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
 
 //------------------------------------------------------ SINGLE VIEW ---------------------------------------------------------//
 
