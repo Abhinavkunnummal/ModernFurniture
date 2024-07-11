@@ -8,7 +8,132 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Your styles here */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .main-wrap {
+            padding: 20px;
+        }
+        .content-main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .order-container {
+            display: flex;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .order-index {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 20px;
+            align-self: center;
+        }
+        .order-content {
+            flex-grow: 1;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        .order-header strong {
+            font-size: 1.5rem;
+        }
+        .order-details {
+            margin-bottom: 20px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .order-item img {
+            margin-right: 15px;
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .order-item div {
+            margin-right: 20px;
+        }
+        .order-actions {
+            text-align: right;
+        }
+        .user-address {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        @media (max-width: 768px) {
+            .order-container {
+                flex-direction: column;
+            }
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .order-item div {
+                margin-bottom: 10px;
+            }
+            .order-index {
+                align-self: flex-start;
+            }
+        }
+        .modal .modal-header {
+            border-bottom: 1px solid #ddd;
+        }
+        .modal .modal-footer {
+            border-top: 1px solid #ddd;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        /* Order status styles */
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .status-processing {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        .status-shipped {
+            color: #6c757d;
+            font-weight: bold;
+        }
+        .status-delivered {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-cancelled {
+            color: #dc3545;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -21,13 +146,13 @@
         </header>
     
         <section class="content-main">
-            <% orderData.forEach((order, index) => { %>
+            <% orderData.reverse().forEach((order, index) => { %>
                 <div class="order-container">
-                    <div class="order-index"><%= (currentPage - 1) * ITEMS_PER_PAGE + index + 1 %></div>
+                    <div class="order-index"><%= orderData.length - index %></div>
                     <div class="order-content">
                         <div class="order-header">
                             <div>
-                                <strong>Order #<%= order._id %></strong> <span>(<%= (currentPage - 1) * ITEMS_PER_PAGE + index + 1 %>)</span><br>
+                                <strong>Order #<%= order._id %></strong> <span>(<%= orderData.length - index %>)</span><br>
                                 <span>Total Amount: $<%= order.orderAmount %></span>
                             </div>
                         </div>
@@ -68,6 +193,7 @@
                                             <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" <% if (item.orderStatus === 'cancelled') { %> disabled <% } %>>Change Status</button>
                                         <% } %>
                                     </div>
+                                    
                                 </div>
                             <% }) %>
                         </div>
@@ -75,37 +201,6 @@
                 </div>
             <% }) %>
         </section>
-
-        <!-- Pagination Controls -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <% if (hasPreviousPage) { %>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<%= previousPage %>">Previous</a>
-                    </li>
-                <% } else { %>
-                    <li class="page-item disabled">
-                        <span class="page-link">Previous</span>
-                    </li>
-                <% } %>
-
-                <% for (let i = 1; i <= lastPage; i++) { %>
-                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-                    </li>
-                <% } %>
-
-                <% if (hasNextPage) { %>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<%= nextPage %>">Next</a>
-                    </li>
-                <% } else { %>
-                    <li class="page-item disabled">
-                        <span class="page-link">Next</span>
-                    </li>
-                <% } %>
-            </ul>
-        </nav>
         
         <!-- Status Change Modal -->
         <div class="modal fade" id="statusChangeModal" tabindex="-1" role="dialog" aria-labelledby="statusChangeModalLabel" aria-hidden="true">
@@ -171,6 +266,7 @@
                     });
                 });
         
+               
                 $(document).on('click', '.approveReturnBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -187,8 +283,11 @@
                             $.post('/admin/approveReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return approved successfully.", "success").then(() => {
+                                     
                                         button.text('Approved').prop('disabled', true).removeClass('approveReturnBtn').addClass('btn-success');
+                                        
                                         button.closest('.order-actions').find('.rejectReturnBtn').remove();
+                                        
                                         button.closest('.order-actions').data('status', 'approved');
                                     });
                                 } else {
@@ -199,6 +298,7 @@
                     });
                 });
         
+                
                 $(document).on('click', '.rejectReturnBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -215,8 +315,11 @@
                             $.post('/admin/rejectReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return rejected successfully.", "success").then(() => {
+                                     
                                         button.text('Rejected').prop('disabled', true).removeClass('rejectReturnBtn').addClass('btn-danger');
+                                     
                                         button.closest('.order-actions').find('.approveReturnBtn').remove();
+                                     
                                         button.closest('.order-actions').data('status', 'rejected');
                                     });
                                 } else {
@@ -227,6 +330,7 @@
                     });
                 });
         
+                
                 $(document).on('click', '.approveCancellationBtn', function(e){
                     e.preventDefault();
                     const itemId = $(this).data('item-id');
@@ -243,7 +347,9 @@
                             $.post('/admin/approveCancellation', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Cancellation request approved successfully.", "success").then(() => {
+                                      
                                         button.text('Cancellation Approved').prop('disabled', true).removeClass('approveCancellationBtn').addClass('btn-success');
+                                      
                                         button.closest('.order-actions').data('status', 'cancelled');
                                     });
                                 } else {
@@ -259,3 +365,4 @@
     </main>
 </body>
 </html>
+ 
