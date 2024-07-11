@@ -68,7 +68,6 @@
                                             <button class="btn btn-success changeStatusBtn" data-toggle="modal" data-target="#statusChangeModal" data-order-id="<%= order._id %>" data-item-id="<%= item._id %>" <% if (item.orderStatus === 'cancelled') { %> disabled <% } %>>Change Status</button>
                                         <% } %>
                                     </div>
-                                    
                                 </div>
                             <% }) %>
                         </div>
@@ -188,11 +187,8 @@
                             $.post('/admin/approveReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return approved successfully.", "success").then(() => {
-                                     
                                         button.text('Approved').prop('disabled', true).removeClass('approveReturnBtn').addClass('btn-success');
-                                        
                                         button.closest('.order-actions').find('.rejectReturnBtn').remove();
-                                        
                                         button.closest('.order-actions').data('status', 'approved');
                                     });
                                 } else {
@@ -219,11 +215,8 @@
                             $.post('/admin/rejectReturn', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Return rejected successfully.", "success").then(() => {
-                                     
                                         button.text('Rejected').prop('disabled', true).removeClass('rejectReturnBtn').addClass('btn-danger');
-                                     
                                         button.closest('.order-actions').find('.approveReturnBtn').remove();
-                                     
                                         button.closest('.order-actions').data('status', 'rejected');
                                     });
                                 } else {
@@ -250,9 +243,7 @@
                             $.post('/admin/approveCancellation', { itemId: itemId }, function(response){
                                 if(response.success){
                                     swal("Success", "Cancellation request approved successfully.", "success").then(() => {
-                                      
                                         button.text('Cancellation Approved').prop('disabled', true).removeClass('approveCancellationBtn').addClass('btn-success');
-                                      
                                         button.closest('.order-actions').data('status', 'cancelled');
                                     });
                                 } else {

@@ -512,13 +512,15 @@ const renderOrders = async (req, res) => {
       hasPreviousPage: page > 1,
       nextPage: page + 1,
       previousPage: page - 1,
-      lastPage: Math.ceil(totalOrders / ITEMS_PER_PAGE)
+      lastPage: Math.ceil(totalOrders / ITEMS_PER_PAGE),
+      ITEMS_PER_PAGE // Pass ITEMS_PER_PAGE to EJS template
     });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
 
 
 //------------------------------------------------------ SINGLE VIEW ---------------------------------------------------------//
