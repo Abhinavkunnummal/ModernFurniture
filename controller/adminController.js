@@ -408,6 +408,7 @@ const editproductsLoad = async (req, res) => {
   }
 };
 
+   
 const updateProduct = async (req, res) => {
   try {
     const { id, name, description, price, category, stock, dateCreated } = req.body;
