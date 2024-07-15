@@ -141,14 +141,13 @@
         </header>
     
         <section class="content-main">
-            <% orderData.reverse().forEach((order, index) => { %>
+            <% orderData.forEach((order, index) => { %>
                 <div class="order-container">
                     <div class="order-header">
                         <div>
                             <strong>Order #<%= order._id %></strong><br>
                             <span>Total Amount: $<%= order.orderAmount %></span>
                         </div>
-                        <span>(<%= currentPage * 10 - (orderData.length - index) %>)</span>
                     </div>
                     <% if (order.deliveryAddress) { %>
                         <div class="user-address">

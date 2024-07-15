@@ -517,6 +517,7 @@ const renderOrders = async (req, res) => {
   }
 };
 
+
 //------------------------------------------------------ SINGLE VIEW ---------------------------------------------------------//
 
 const renderSingleView=async(req,res)=>{
