@@ -493,11 +493,24 @@ const blockProduct = async (req, res) => {
 //************************************************** ORDER DETAILS ****************************************************************/
 const renderOrders = async (req, res) => {
   try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = 10;
+      const skip = (page - 1) * limit;
+
       const orderData = await Order.find()
           .populate('orderedItem.productId')
           .populate('userId')
-          .populate('deliveryAddress');
-      res.render('orderDetails', { orderData });
+          .populate('deliveryAddress')
+          .skip(skip)
+          .limit(limit);
+
+      const totalOrders = await Order.countDocuments();
+
+      res.render('orderDetails', {
+          orderData,
+          currentPage: page,
+          totalPages: Math.ceil(totalOrders / limit),
+      });
   } catch (error) {
       console.log(error.message);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
