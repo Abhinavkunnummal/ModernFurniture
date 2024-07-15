@@ -7,56 +7,57 @@
 
 <h1>Modern Furniture Sales Report</h1>
 
-<div class="d-flex justify-content-end pe-4 pt-2" >
+<div class="d-flex justify-content-end pe-4 pt-2">
     <div class="dropdown">
         <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown"
             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Sales Report
         </button>
         <ul class="dropdown-menu" aria-labelledby="salesReportDropdown">
-            <li><a class="dropdown-item" href="/admin/salesDaily"><i
-                        class="fas fa-calendar-day me-2"></i>Daily</a>
-            </li>
-            <li><a class="dropdown-item" href="/admin/salesWeekly"><i
-                        class="fas fa-calendar-week me-2"></i>Weekly</a>
-            </li>
-            <li><a class="dropdown-item" href="/admin/salesMonthly"><i
-                        class="fas fa-calendar-alt me-2"></i>Monthly</a></li>
-            <li><a class="dropdown-item" href="/admin/salesYearly"><i
-                        class="fas fa-calendar me-2"></i>Yearly</a></li>
+            <li><a class="dropdown-item" href="/admin/salesDaily"><i class="fas fa-calendar-day me-2"></i>Daily</a></li>
+            <li><a class="dropdown-item" href="/admin/salesWeekly"><i class="fas fa-calendar-week me-2"></i>Weekly</a></li>
+            <li><a class="dropdown-item" href="/admin/salesMonthly"><i class="fas fa-calendar-alt me-2"></i>Monthly</a></li>
+            <li><a class="dropdown-item" href="/admin/salesYearly"><i class="fas fa-calendar me-2"></i>Yearly</a></li>
         </ul>
     </div>
 </div>
-<div class="card-body"style="margin-left: 300px;">
+
+<div class="card-body" style="margin-left: 300px;">
     <div class="table-responsive">  
         <table id="myTable" class="table table-hover">
             <thead>
                 <tr>
-                    <th style="width: 50px;">ID</th>
-                    <th>TIme Line</th>
-                    <th>Total Orders</th>
-                    <th>Total Revenue</th>
-                  
-                    <th>Total Coupon Discount</th>
-                    
+                    <th>ID</th>
+                    <th>Time Line</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
+                <% let totalQuantity = 0; %>
+                <% let totalRevenue = 0; %>
                 <% report.forEach((order, index) => { %>
-                    <tr>
-                        <td><%= index + 1 %></td>
-                        <td><%= order._id %></td>
-                        <td><%= order.totalOrders %></td>
-                        <td>₹<%= order.totalAmount.toFixed(2) %></td>
-                      
-                        <td><%= totalCouponAmount %></td>
-                      
-                    </tr>
+                    <% order.orderedItems.forEach((item, itemIndex) => { %>
+                        <% if (item.orderStatus !== 'cancelled' && item.orderStatus !== 'returned') { %>
+                            <tr>
+                                <td><%= index + 1 %>.<%= itemIndex + 1 %></td>
+                                <td><%= order._id %></td>
+                                <td><%= item.productName %></td>
+                                <td>₹<%= item.price.toFixed(2) %></td>
+                                <td><%= item.quantity %></td>
+                                <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                            </tr>
+                            <% totalQuantity += item.quantity; %>
+                            <% totalRevenue += item.price * item.quantity; %>
+                        <% } %>
+                    <% }); %>
                 <% }); %>
-                <tr> 
-                    <td colspan="2"><strong>Total:</strong></td> 
-                    <td><%= totalOrders %></td> 
-                    <td>₹<%= totalAmount.toFixed(2) - totalCouponAmount %></td> 
+                <tr>
+                    <td colspan="4"><strong>Total:</strong></td>
+                    <td><strong><%= totalQuantity %></strong></td>
+                    <td><strong>₹<%= totalRevenue.toFixed(2) %></strong></td>
                 </tr>
             </tbody>   
         </table>
@@ -64,7 +65,6 @@
 </div>
 
 <div class="text-center mb-4">
-    
     <button id="download-pdf" class="btn btn-success mr-2" aria-controls="myTable">
         Download as PDF
     </button>
@@ -72,9 +72,10 @@
         Download as Excel
     </a>
 </div>
+
 <br><br><br>
+
 <style>
-    /* CSS for table borders */
     table {
         border-collapse: collapse;
         width: 100%;
@@ -90,31 +91,22 @@
         background-color: #f2f2f2;
     }
 </style>
-<%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
-<script>
-   
-    function downloadExcel() {
-       
-        const table = document.getElementById('myTable');
-        
-        
-        const wb = XLSX.utils.table_to_book(table);
 
-      
+<%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
+
+<script>
+    function downloadExcel() {
+        const table = document.getElementById('myTable');
+        const wb = XLSX.utils.table_to_book(table);
         XLSX.writeFile(wb, 'sales_report.xlsx');
     }
 
-   
     document.getElementById('download-excel').addEventListener('click', function() {
         downloadExcel();
     });
 
-    
     document.getElementById('download-pdf').addEventListener('click', function() {
-       
         const element = document.getElementById('myTable');
-
-        
         const opt = {
             margin: 0.5,
             filename: 'sales_report.pdf',
@@ -122,9 +114,6 @@
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
-
-       
         html2pdf().from(element).set(opt).save();
     });
 </script>
- 
