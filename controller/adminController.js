@@ -493,14 +493,34 @@ const blockProduct = async (req, res) => {
 //************************************************** ORDER DETAILS ****************************************************************/
 const renderOrders = async (req, res) => {
   try {
-      const orderData = await Order.find()
-          .populate('orderedItem.productId')
-          .populate('userId')
-          .populate('deliveryAddress');
-      res.render('orderDetails', { orderData });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await Order.countDocuments();
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    const orderData = await Order.find()
+      .populate('orderedItem.productId')
+      .populate('userId')
+      .populate('deliveryAddress')
+      .sort({ createdAt: -1 }) // Sort by creation date, newest first
+      .skip(skip)
+      .limit(limit);
+
+    res.render('orderDetails', { 
+      orderData,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: totalPages
+    });
   } catch (error) {
-      console.log(error.message);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.log(error.message);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
