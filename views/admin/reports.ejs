@@ -102,11 +102,8 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 <script>
     // PDF download function
-    document.getElementById('download-pdf').addEventListener('click', function () {
+    document.getElementById('download-pdf').addEventListener('click', function() {
         const element = document.getElementById('salesReportTable');
-        const title = "<h1 style='text-align:center;margin-bottom:20px;'>Modern Furniture Sales Report</h1>";
-
-        // Options for PDF generation
         const opt = {
             margin: 0.5,
             filename: '<%= reportType.toLowerCase() %>_sales_report.pdf',
@@ -114,30 +111,11 @@
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
-
-        // Generate PDF with title included
-        html2pdf()
-            .from(element)
-            .set({ html2canvas: { scale: 2 } })
-            .toPdf()
-            .get('pdf')
-            .then(function (pdf) {
-                pdf.addPage();
-                pdf.setFillColor(255, 255, 255);
-                pdf.rect(0, 0, pdf.internal.pageSize.width, 40, 'F');
-                pdf.fromHTML(title + element.outerHTML, 15, 15, {
-                    'elementHandlers': {
-                        '#ignorePDF': function (element, renderer) {
-                            return true;
-                        }
-                    }
-                });
-                pdf.save('<%= reportType.toLowerCase() %>_sales_report.pdf');
-            });
+        html2pdf().from(element).set(opt).save();
     });
 
     // Excel download function
-    document.getElementById('download-excel').addEventListener('click', function () {
+    document.getElementById('download-excel').addEventListener('click', function() {
         const table = document.getElementById('salesReportTable');
         const wb = XLSX.utils.table_to_book(table);
         XLSX.writeFile(wb, '<%= reportType.toLowerCase() %>_sales_report.xlsx');
