@@ -27,7 +27,7 @@
         </ul>
     </div>
 </div>
-<h1 style="margin-left:350px;">Modern Furniture Sales Report</h1>
+<h1 style="margin-left: 350px;">Modern Furniture Sales Report</h1>
 <div class="card-body" style="margin-left: 350px;">
     <div class="table-responsive">
         <table id="salesReportTable" class="table table-hover">
@@ -74,14 +74,14 @@
 </div>
 
 <div class="text-center mb-4">
-    <button id="download-pdf" class="btn btn-success mr-2" aria-controls="myTable">
+    <button id="download-pdf" class="btn btn-success mr-2" aria-controls="salesReportTable">
         Download as PDF
     </button>
-    <a id="download-excel" class="btn btn-success" aria-controls="myTable">
+    <a id="download-excel" class="btn btn-success" aria-controls="salesReportTable">
         Download as Excel
     </a>
 </div>
-<br><br><br>
+
 <style>
     /* CSS for table borders */
     table {
@@ -99,7 +99,9 @@
         background-color: #f2f2f2;
     }
 </style>
+
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
+
 <script>
     // PDF download function
     document.getElementById('download-pdf').addEventListener('click', function() {
