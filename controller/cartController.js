@@ -1091,9 +1091,10 @@ const fs = require('fs');
 const path = require('path');
 const loadInvoice = async (req, res) => {
   try {
-    const { orderId } = req.query;
+    const { orderId, itemId } = req.query;
     const userId = req.session.user_id;
 
+    // Find the order
     const order = await Order.findById(orderId)
       .populate('deliveryAddress')
       .populate('orderedItem.productId')
@@ -1101,6 +1102,12 @@ const loadInvoice = async (req, res) => {
 
     if (!order) {
       return res.status(400).send('Invalid order ID');
+    }
+
+    // Find the specific item in the order
+    const orderedItem = order.orderedItem.find(item => item._id.toString() === itemId);
+    if (!orderedItem) {
+      return res.status(400).send('Invalid item ID');
     }
 
     const generateInvoiceNumber = () => {
@@ -1114,7 +1121,6 @@ const loadInvoice = async (req, res) => {
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-
     doc
       .fontSize(20)
       .text('Modern Furniture', { align: 'center' })
@@ -1123,7 +1129,6 @@ const loadInvoice = async (req, res) => {
       .text(`Invoice Number: ${generateInvoiceNumber()}`, { align: 'right' })
       .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
       .moveDown();
-
 
     doc
       .fontSize(12)
@@ -1136,7 +1141,6 @@ const loadInvoice = async (req, res) => {
       .text(`State: ${order.deliveryAddress.state}`)
       .text(`Pincode: ${order.deliveryAddress.zipcode}`)
       .moveDown();
-
 
     const tableTop = doc.y;
     doc
@@ -1151,22 +1155,14 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
+    const yPosition = doc.y;
+    const unitPrice = orderedItem.totalProductAmount / orderedItem.quantity;
 
-    let totalAmount = 0;
-    let yPosition = doc.y;
-    order.orderedItem.forEach((item, index) => {
-      const totalPrice = item.quantity * item.productId.price;
-      yPosition = doc.y + (index * 20);
-
-      doc
-        .text(item.productId.name, 50, yPosition, { width: 180 })
-        .text(item.quantity.toString(), 250, yPosition)
-        .text(`Rs ${item.productId.price.toFixed(2)}`, 350, yPosition)
-        .text(`Rs ${totalPrice.toFixed(2)}`, 450, yPosition);
-
-      totalAmount += totalPrice;
-    });
-
+    doc
+      .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
+      .text(orderedItem.quantity.toString(), 250, yPosition)
+      .text(`Rs ${unitPrice.toFixed(2)}`, 350, yPosition)
+      .text(`Rs ${orderedItem.totalProductAmount.toFixed(2)}`, 450, yPosition);
 
     const summaryTop = yPosition + 40;
     doc
@@ -1175,18 +1171,18 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    const discountAmount = totalAmount - order.orderAmount;
+    const subtotal = orderedItem.totalProductAmount;
+    const discount = subtotal - order.orderAmount; // This may need adjustment based on your business logic
     const finalAmount = order.orderAmount;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`Rs ${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
+      .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Discount', 350, summaryTop + 35)
-      .text(`Rs ${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
       .text('Grand Total', 350, summaryTop + 55)
       .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
-
 
     doc
       .fontSize(10)

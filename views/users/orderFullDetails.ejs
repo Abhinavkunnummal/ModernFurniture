@@ -122,7 +122,8 @@
                                           </div>
                                           <button class="btn btn-primary mt-2" onclick="submitReturn('<%= item._id %>')">Submit Return</button>
                                         </div>
-                                        <a href="/invoice?orderId=<%= item._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
+                                        <a href="/invoice?itemId=<%= item._id %>&orderId=<%= orders._id %>" class="btn btn-sm btn-primary" id="download-pdf" style="background-color: blue; width: 100px; height: 30px;">Invoice</a>
+
                                       <% } else if (item.orderStatus === 'returned') { %>
                                         <button class="btn btn-success" disabled>Returned</button>
                                       <% } else if (item.orderStatus === 'approved') { %>
