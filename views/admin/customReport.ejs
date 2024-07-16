@@ -101,9 +101,11 @@
           html2canvas: { scale: 2 },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
+      html2pdf().from(element).set(opt).save();
+  });
 
-      // Adding custom header
-      const header = {
+       // Adding custom header
+       const header = {
           text: 'MODERN FURNITURE SALES REPORT',
           fontSize: 20,
           alignment: 'center',
@@ -113,9 +115,8 @@
       opt.jsPDF.options.header = header;
 
       html2pdf().from(element).set(opt).save();
-  });
 
-  // Rest of your Excel download script remains unchanged
+
   document.getElementById('download-excel').addEventListener('click', function() {
       const data = [
           ["Date", "Product Name", "Product Price", "Total Orders", "Total Quantity", "Total Amount"],
@@ -130,4 +131,3 @@
       XLSX.writeFile(wb, 'sales_report.xlsx');
   });
 </script>
-
