@@ -1114,7 +1114,7 @@ const loadInvoice = async (req, res) => {
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
-    // Header
+
     doc
       .fontSize(20)
       .text('Modern Furniture', { align: 'center' })
@@ -1124,7 +1124,7 @@ const loadInvoice = async (req, res) => {
       .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'right' })
       .moveDown();
 
-    // Delivery Address
+
     doc
       .fontSize(12)
       .text('Delivery Address:', { underline: true })
@@ -1137,47 +1137,57 @@ const loadInvoice = async (req, res) => {
       .text(`Pincode: ${order.deliveryAddress.zipcode}`)
       .moveDown();
 
-    // Product Details
+
+    const tableTop = doc.y;
+    doc
+      .text('Product Name', 50, tableTop)
+      .text('Quantity', 250, tableTop)
+      .text('Unit Price', 350, tableTop)
+      .text('Total Price', 450, tableTop);
+
+    doc
+      .moveTo(50, tableTop + 15)
+      .lineTo(550, tableTop + 15)
+      .stroke()
+      .moveDown();
+
+
     let totalAmount = 0;
+    let yPosition = doc.y;
     order.orderedItem.forEach((item, index) => {
       const totalPrice = item.quantity * item.productId.price;
-      totalAmount += totalPrice;
+      yPosition = doc.y + (index * 20);
 
       doc
-        .fontSize(14)
-        .text(`Product ${index + 1}`, { underline: true })
-        .moveDown(0.5)
-        .fontSize(12)
-        .text(`Product Name: ${item.productId.name}`)
-        .text(`Quantity: ${item.quantity}`)
-        .text(`Unit Price: Rs ${item.productId.price.toFixed(2)}`)
-        .text(`Total Price: Rs ${totalPrice.toFixed(2)}`)
-        .moveDown();
+        .text(item.productId.name, 50, yPosition, { width: 180 })
+        .text(item.quantity.toString(), 250, yPosition)
+        .text(`Rs ${item.productId.price.toFixed(2)}`, 350, yPosition)
+        .text(`Rs ${totalPrice.toFixed(2)}`, 450, yPosition);
 
-      // Add a page break if it's not the last item
-      if (index < order.orderedItem.length - 1) {
-        doc.addPage();
-      }
+      totalAmount += totalPrice;
     });
 
-    // Order Summary
-    doc.addPage();
+
+    const summaryTop = yPosition + 40;
     doc
-      .fontSize(16)
-      .text('Order Summary', { underline: true })
-      .moveDown()
-      .fontSize(12);
+      .moveTo(50, summaryTop)
+      .lineTo(550, summaryTop)
+      .stroke()
+      .moveDown();
 
     const discountAmount = totalAmount - order.orderAmount;
     const finalAmount = order.orderAmount;
 
     doc
-      .text(`Subtotal: Rs ${totalAmount.toFixed(2)}`)
-      .text(`Discount: Rs ${discountAmount.toFixed(2)}`)
-      .text(`Grand Total: Rs ${finalAmount.toFixed(2)}`)
+      .text('Subtotal', 350, summaryTop + 15)
+      .text(`Rs ${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
+      .text('Discount', 350, summaryTop + 35)
+      .text(`Rs ${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text('Grand Total', 350, summaryTop + 55)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
-    // Footer
+
     doc
       .fontSize(10)
       .text('Thank you for your business.', { align: 'center' })
