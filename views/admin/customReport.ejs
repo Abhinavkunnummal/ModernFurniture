@@ -11,7 +11,7 @@
   <!-- Sales Report Dropdown -->
   <div class="d-flex justify-content-end mt-4">
     <div class="dropdown">
-      <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown " style="margin-right: 200px;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+      <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown" style="margin-right: 200px;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
          Sales Report
       </button>
       <ul class="dropdown-menu" aria-labelledby="salesReportDropdown">
@@ -34,20 +34,42 @@
           <table id="myTable" class="table table-hover table-bordered">
             <thead>
               <tr>
-                <th>Start Date</th>
-                <th>End Date</th>
+                <th>Date</th>
+                <th>Product Name</th>
+                <th>Product Price</th>
                 <th>Total Orders</th>
+                <th>Total Quantity</th>
                 <th>Total Amount</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><%= startDate %></td>
-                <td><%= endDate %></td>
-                <td><%= totals.totalOrders %></td>
-                <td>₹<%= totals.totalAmount.toFixed(2) %></td>
-              </tr>
+              <% report.forEach((item) => { %>
+                <tr>
+                  <td><%= item.date %></td>
+                  <td><%= item.productName %></td>
+                  <td>₹<%= item.productPrice.toFixed(2) %></td>
+                  <td><%= item.totalOrders %></td>
+                  <td><%= item.totalQuantity %></td>
+                  <td>₹<%= item.totalAmount.toFixed(2) %></td>
+                </tr>
+              <% }); %>
             </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3">Totals:</th>
+                <th><%= totals.totalOrders %></th>
+                <th><%= totals.totalQuantity %></th>
+                <th>₹<%= totals.totalAmount.toFixed(2) %></th>
+              </tr>
+              <tr>
+                <th colspan="5">Total Coupon Discount:</th>
+                <th>₹<%= totals.totalCouponAmount.toFixed(2) %></th>
+              </tr>
+              <tr>
+                <th colspan="5">Net Total:</th>
+                <th>₹<%= (totals.totalAmount - totals.totalCouponAmount).toFixed(2) %></th>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -84,8 +106,11 @@
 
   document.getElementById('download-excel').addEventListener('click', function() {
       const data = [
-          ["Start Date", "End Date", "Total Orders", "Total Amount"],
-          ["<%= startDate %>", "<%= endDate %>", "<%= totals.totalOrders %>", "₹<%= totals.totalAmount.toFixed(2) %>"]
+          ["Date", "Product Name", "Product Price", "Total Orders", "Total Quantity", "Total Amount"],
+          <% report.forEach((item) => { %>
+            ["<%= item.date %>", "<%= item.productName %>", "₹<%= item.productPrice.toFixed(2) %>", "<%= item.totalOrders %>", "<%= item.totalQuantity %>", "₹<%= item.totalAmount.toFixed(2) %>"],
+          <% }); %>
+          ["Totals:", "", "", "<%= totals.totalOrders %>", "<%= totals.totalQuantity %>", "₹<%= totals.totalAmount.toFixed(2) %>"]
       ];
       const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
