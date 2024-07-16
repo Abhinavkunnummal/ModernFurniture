@@ -1071,6 +1071,7 @@ const generateCustomDateReport = async (req, res) => {
   }
 };
 
+
 //---------------------------------------------------- CANCEL ORDER ----------------------------------------------------------//
 
 const approveCancelOrder=async(req,res)=>{
