@@ -101,21 +101,15 @@
           html2canvas: { scale: 2 },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-      html2pdf().from(element).set(opt).save();
+
+      // Adding heading before the table
+      const heading = '<h1 style="text-align: center; margin-bottom: 20px;">MODERN FURNITURE SALES REPORT</h1>';
+
+      // Combine heading with table content
+      const content = heading + element.outerHTML;
+
+      html2pdf().from(content).set(opt).save();
   });
-
-       // Adding custom header
-       const header = {
-          text: 'MODERN FURNITURE SALES REPORT',
-          fontSize: 20,
-          alignment: 'center',
-          margin: [0, 10, 0, 20] // [left, top, right, bottom]
-      };
-
-      opt.jsPDF.options.header = header;
-
-      html2pdf().from(element).set(opt).save();
-
 
   document.getElementById('download-excel').addEventListener('click', function() {
       const data = [
