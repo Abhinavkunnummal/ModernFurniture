@@ -27,18 +27,16 @@
         </ul>
     </div>
 </div>
-<div class="card-body"style="margin-left: 300px;">
-    <div class="table-responsive">  
+<div class="card-body" style="margin-left: 300px;">
+    <div class="table-responsive">
         <table id="myTable" class="table table-hover">
             <thead>
                 <tr>
                     <th style="width: 50px;">ID</th>
-                    <th>TIme Line</th>
+                    <th>Time Line</th>
                     <th>Total Orders</th>
                     <th>Total Revenue</th>
-                  
                     <th>Total Coupon Discount</th>
-                    
                 </tr>
             </thead>
             <tbody>
@@ -48,20 +46,29 @@
                         <td><%= order._id %></td>
                         <td><%= order.totalOrders %></td>
                         <td>₹<%= order.totalAmount.toFixed(2) %></td>
-                      
                         <td><%= totalCouponAmount %></td>
-                      
                     </tr>
+                    <% order.products.forEach((product, pIndex) => { %>
+                        <tr>
+                            <td colspan="2"></td>
+                            <td colspan="3">
+                                <strong>Product <%= pIndex + 1 %>:</strong> <%= product.productId.name %>, 
+                                Price: ₹<%= product.totalProductAmount.toFixed(2) %>, 
+                                Quantity: <%= product.quantity %>
+                            </td>
+                        </tr>
+                    <% }); %>
                 <% }); %>
-                <tr> 
-                    <td colspan="2"><strong>Total:</strong></td> 
-                    <td><%= totalOrders %></td> 
-                    <td>₹<%= totalAmount.toFixed(2) - totalCouponAmount %></td> 
+                <tr>
+                    <td colspan="2"><strong>Total:</strong></td>
+                    <td><%= totalOrders %></td>
+                    <td>₹<%= totalAmount.toFixed(2) - totalCouponAmount %></td>
                 </tr>
-            </tbody>   
+            </tbody>
         </table>
     </div>
 </div>
+
 
 <div class="text-center mb-4">
     
@@ -92,29 +99,18 @@
 </style>
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 <script>
-   
     function downloadExcel() {
-       
         const table = document.getElementById('myTable');
-        
-        
         const wb = XLSX.utils.table_to_book(table);
-
-      
         XLSX.writeFile(wb, 'sales_report.xlsx');
     }
 
-   
     document.getElementById('download-excel').addEventListener('click', function() {
         downloadExcel();
     });
 
-    
     document.getElementById('download-pdf').addEventListener('click', function() {
-       
         const element = document.getElementById('myTable');
-
-        
         const opt = {
             margin: 0.5,
             filename: 'sales_report.pdf',
@@ -122,9 +118,8 @@
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
-
-       
         html2pdf().from(element).set(opt).save();
     });
 </script>
+
  
