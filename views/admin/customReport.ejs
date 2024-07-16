@@ -8,11 +8,10 @@
 <div class="container" style="margin-left: 300px;">
   <h1 class="mt-4">Modern Furniture Custom Sales Report Page</h1>
 
-  
   <!-- Sales Report Dropdown -->
   <div class="d-flex justify-content-end mt-4">
     <div class="dropdown">
-      <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown " style="margin-right: 200px;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false " >
+      <button class="btn btn-info dropdown-toggle" type="button" id="salesReportDropdown " style="margin-right: 200px;" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
          Sales Report
       </button>
       <ul class="dropdown-menu" aria-labelledby="salesReportDropdown">
@@ -45,8 +44,8 @@
               <tr>
                 <td><%= startDate %></td>
                 <td><%= endDate %></td>
-                <td><%= totalOrders %></td>
-                <td>₹<%= totalAmount %></td>
+                <td><%= totals.totalOrders %></td>
+                <td>₹<%= totals.totalAmount.toFixed(2) %></td>
               </tr>
             </tbody>
           </table>
@@ -55,7 +54,6 @@
     </div>
 
     <div class="text-center mb-4 mt-4">
-     
       <button id="download-pdf" class="btn btn-success me-2" aria-controls="myTable">
         Download as PDF
       </button>
@@ -68,17 +66,12 @@
 
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 
 <script>
-  
   document.getElementById('download-pdf').addEventListener('click', function() {
-     
       const element = document.getElementById('myTable');
-
-      
       const opt = {
           margin: 0.5,
           filename: 'sales_report.pdf',
@@ -86,27 +79,17 @@
           html2canvas: { scale: 2 },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-
-      
       html2pdf().from(element).set(opt).save();
   });
 
- 
   document.getElementById('download-excel').addEventListener('click', function() {
-      
       const data = [
           ["Start Date", "End Date", "Total Orders", "Total Amount"],
-          ["<%= startDate %>", "<%= endDate %>", "<%= totalOrders %>", "<%= totalAmount %>"]
+          ["<%= startDate %>", "<%= endDate %>", "<%= totals.totalOrders %>", "₹<%= totals.totalAmount.toFixed(2) %>"]
       ];
-
-      
       const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
-
       XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-
-      
       XLSX.writeFile(wb, 'sales_report.xlsx');
   });
 </script>
- 
