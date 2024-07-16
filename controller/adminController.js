@@ -915,23 +915,81 @@ const loadSalesReport = async (req, res) => {
       const orders = await Order.find({})
           .populate('userId')
           .populate('deliveryAddress')
-          .populate({ path: 'orderedItem.productId', model: 'Product' }) 
-          .sort({ _id: -1 });
-      // console.log('orders', orders);
+          .populate({ path: 'orderedItem.productId', model: 'Product' })
+          .sort({ createdAt: -1 });
 
-      const formattedOrders = orders.map(order => {
-          const date = new Date(order.createdAt)
-          const formattedDate = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-          return {
-              ...order.toObject(),
-              formattedCreatedAt: formattedDate,
-          }
-      })
-      res.render('salesReport', { orderDetails: formattedOrders })
+      const formattedOrders = orders.map(order => ({
+          ...order.toObject(),
+          formattedCreatedAt: moment(order.createdAt).format('YYYY-MM-DD'),
+      }));
+
+      res.render('salesReport', { orderDetails: formattedOrders });
   } catch (error) {
-      console.log('error loading sales report page', error);
+      console.error('Error loading sales report page:', error);
+      res.status(500).send('Error loading sales report');
   }
-}
+};
+
+const generateReport = async (startDate, endDate) => {
+  const report = await Order.aggregate([
+      {
+          $match: {
+              createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() },
+              'orderedItem.orderStatus': 'delivered'
+          }
+      },
+      {
+          $unwind: '$orderedItem'
+      },
+      {
+          $group: {
+              _id: {
+                  date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  productId: '$orderedItem.productId'
+              },
+              totalOrders: { $sum: 1 },
+              totalQuantity: { $sum: '$orderedItem.quantity' },
+              totalAmount: { $sum: '$orderedItem.totalProductAmount' },
+              totalCouponAmount: { $sum: { $ifNull: ['$coupon', 0] } }
+          }
+      },
+      {
+          $lookup: {
+              from: 'products',
+              localField: '_id.productId',
+              foreignField: '_id',
+              as: 'productDetails'
+          }
+      },
+      {
+          $unwind: '$productDetails'
+      },
+      {
+          $project: {
+              date: '$_id.date',
+              productName: '$productDetails.name',
+              productPrice: '$productDetails.price',
+              totalOrders: 1,
+              totalQuantity: 1,
+              totalAmount: 1,
+              totalCouponAmount: 1
+          }
+      },
+      {
+          $sort: { date: 1, productName: 1 }
+      }
+  ]);
+
+  const totals = report.reduce((acc, curr) => ({
+      totalOrders: acc.totalOrders + curr.totalOrders,
+      totalQuantity: acc.totalQuantity + curr.totalQuantity,
+      totalAmount: acc.totalAmount + curr.totalAmount,
+      totalCouponAmount: acc.totalCouponAmount + curr.totalCouponAmount
+  }), { totalOrders: 0, totalQuantity: 0, totalAmount: 0, totalCouponAmount: 0 });
+
+  return { report, totals };
+};
+
 
 //---------------------------------------------------- DAILY SALES REPORT ----------------------------------------------------------//
 
@@ -939,41 +997,13 @@ const dailySalesReport = async (req, res) => {
   try {
       const startDate = moment().startOf('day');
       const endDate = moment().endOf('day');
-
-      const dailyReport = await Order.aggregate([
-          {
-              $unwind: "$orderedItem"
-          },
-          {
-              $match: {
-                  createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() },
-                  "orderedItem.orderStatus": "delivered"
-              }
-          },
-          {
-              $group: {
-                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                  totalOrders: { $sum: 1 },
-                  totalAmount: { $sum: "$orderAmount" },
-                  totalCouponAmount: { $sum: "$coupon" },
-                  products: { $push: "$orderedItem" }
-              }
-          }
-      ]);
-
-      // Calculation and rendering remain the same
-      const totalOrders = dailyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
-      const totalAmount = dailyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
-      const totalCouponAmount = dailyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
-
-      res.render('reports', { report: dailyReport, totalOrders, totalAmount, totalCouponAmount });
-
+      const { report, totals } = await generateReport(startDate, endDate);
+      res.render('reports', { report, totals, reportType: 'Daily' });
   } catch (error) {
-      console.log('error loading daily sales report', error);
-      throw error;
+      console.error('Error generating daily sales report:', error);
+      res.status(500).send('Error generating daily sales report');
   }
 };
-
 
 //---------------------------------------------------- WEEKLY SALES REPORT ----------------------------------------------------------//
 
@@ -981,119 +1011,40 @@ const generateWeeklyReport = async (req, res) => {
   try {
       const startDate = moment().startOf('week');
       const endDate = moment().endOf('week');
-
-      const weeklyReport = await Order.aggregate([
-          {
-              $unwind: "$orderedItem"
-          },
-          {
-              $match: {
-                  createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() },
-                  "orderedItem.orderStatus": "delivered"
-              }
-          },
-          {
-              $group: {
-                  _id: { $week: "$createdAt" },
-                  totalOrders: { $sum: 1 },
-                  totalAmount: { $sum: "$orderAmount" },
-                  totalCouponAmount: { $sum: "$coupon" },
-                  products: { $push: "$orderedItem" }
-              }
-          }
-      ]);
-
-      // Calculation and rendering remain the same
-      const totalOrders = weeklyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
-      const totalAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
-      const totalCouponAmount = weeklyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
-
-      res.render('reports', { report: weeklyReport, totalOrders, totalAmount, totalCouponAmount });
+      const { report, totals } = await generateReport(startDate, endDate);
+      res.render('reports', { report, totals, reportType: 'Weekly' });
   } catch (error) {
-      console.error('Error generating weekly report:', error);
-      throw error;
+      console.error('Error generating weekly sales report:', error);
+      res.status(500).send('Error generating weekly sales report');
   }
 };
-
 
 //---------------------------------------------------- MONTHLY SALES REPORT ----------------------------------------------------------//
 
 const generateMonthlyReport = async (req, res) => {
   try {
-      const monthlyReport = await Order.aggregate([
-          {
-              $unwind: "$orderedItem"
-          },
-          {
-              $match: {
-                  "orderedItem.orderStatus": "delivered"
-              }
-          },
-          {
-              $group: {
-                  _id: { $month: "$createdAt" },
-                  totalOrders: { $sum: 1 },
-                  totalAmount: { $sum: "$orderAmount" },
-                  totalCouponAmount: { $sum: "$coupon" },
-                  products: { $push: "$orderedItem" }
-              }
-          }
-      ]);
-
-      const formattedReport = monthlyReport.map(report => ({
-          _id: moment().month(report._id - 1).format('MMMM'),
-          totalOrders: report.totalOrders,
-          totalAmount: report.totalAmount,
-          products: report.products
-      }));
-
-      const totalOrders = formattedReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
-      const totalAmount = formattedReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
-      const totalCouponAmount = monthlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
-
-      res.render('reports', { report: formattedReport, totalOrders, totalAmount, totalCouponAmount });
+      const startDate = moment().startOf('month');
+      const endDate = moment().endOf('month');
+      const { report, totals } = await generateReport(startDate, endDate);
+      res.render('reports', { report, totals, reportType: 'Monthly' });
   } catch (error) {
-      console.error('Error generating monthly report:', error);
-      throw error;
+      console.error('Error generating monthly sales report:', error);
+      res.status(500).send('Error generating monthly sales report');
   }
 };
-
-
 //---------------------------------------------------- YEARLY SALES REPORT ----------------------------------------------------------//
 
 const generateYearlyReport = async (req, res) => {
   try {
-      const yearlyReport = await Order.aggregate([
-          {
-              $unwind: "$orderedItem"
-          },
-          {
-              $match: {
-                  "orderedItem.orderStatus": "delivered"
-              }
-          },
-          {
-              $group: {
-                  _id: { $year: "$createdAt" },
-                  totalOrders: { $sum: 1 },
-                  totalAmount: { $sum: "$orderAmount" },
-                  totalCouponAmount: { $sum: "$coupon" },
-                  products: { $push: "$orderedItem" }
-              }
-          }
-      ]);
-
-      const totalOrders = yearlyReport.reduce((acc, curr) => acc + curr.totalOrders, 0);
-      const totalAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalAmount, 0);
-      const totalCouponAmount = yearlyReport.reduce((acc, curr) => acc + curr.totalCouponAmount, 0);
-
-      res.render('reports', { report: yearlyReport, totalOrders, totalAmount, totalCouponAmount });
+      const startDate = moment().startOf('year');
+      const endDate = moment().endOf('year');
+      const { report, totals } = await generateReport(startDate, endDate);
+      res.render('reports', { report, totals, reportType: 'Yearly' });
   } catch (error) {
-      console.error('Error generating yearly report:', error);
-      throw error;
+      console.error('Error generating yearly sales report:', error);
+      res.status(500).send('Error generating yearly sales report');
   }
 };
-
 //---------------------------------------------------- CUSTOM DATE SALES REPORT ----------------------------------------------------------//
 
 const generateCustomDateReport = async (req, res) => {
@@ -1105,34 +1056,13 @@ const generateCustomDateReport = async (req, res) => {
           return res.status(400).send('Invalid date range');
       }
 
-      const customDateReport = await Order.find({
-          createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() }
-      });
-
-      let totalAmount = 0;
-      let totalOrders = customDateReport.length;
-
-      if (totalOrders > 0) {
-          customDateReport.forEach(order => {
-              if (order.orderAmount && !isNaN(order.orderAmount)) {
-                  totalAmount += parseFloat(order.orderAmount);
-              } else {
-                  console.warn('Invalid or missing orderAmount in order:', order);
-              }
-          });
-      } else {
-          console.warn('No orders found within the specified date range.');
-      }
-
-      // console.log('Total Amount:', totalAmount);
-      // console.log('Total Orders:', totalOrders);
-
+      const { report, totals } = await generateReport(startDate, endDate);
       res.render('customReport', {
-          report: customDateReport,
+          report,
+          totals,
           startDate: startDate.format('YYYY-MM-DD'),
           endDate: endDate.format('YYYY-MM-DD'),
-          totalAmount: totalAmount.toFixed(2),
-          totalOrders: totalOrders
+          reportType: 'Custom'
       });
   } catch (error) {
       console.error('Error generating custom date report:', error);
