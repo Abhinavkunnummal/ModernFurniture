@@ -990,7 +990,6 @@ const generateReport = async (startDate, endDate) => {
   return { report, totals };
 };
 
-
 //---------------------------------------------------- DAILY SALES REPORT ----------------------------------------------------------//
 
 const dailySalesReport = async (req, res) => {
@@ -1009,8 +1008,8 @@ const dailySalesReport = async (req, res) => {
 
 const generateWeeklyReport = async (req, res) => {
   try {
-      const startDate = moment().startOf('week');
-      const endDate = moment().endOf('week');
+      const startDate = moment().startOf('isoWeek');
+      const endDate = moment().endOf('isoWeek');
       const { report, totals } = await generateReport(startDate, endDate);
       res.render('reports', { report, totals, reportType: 'Weekly' });
   } catch (error) {
@@ -1032,6 +1031,7 @@ const generateMonthlyReport = async (req, res) => {
       res.status(500).send('Error generating monthly sales report');
   }
 };
+
 //---------------------------------------------------- YEARLY SALES REPORT ----------------------------------------------------------//
 
 const generateYearlyReport = async (req, res) => {
@@ -1045,6 +1045,7 @@ const generateYearlyReport = async (req, res) => {
       res.status(500).send('Error generating yearly sales report');
   }
 };
+
 //---------------------------------------------------- CUSTOM DATE SALES REPORT ----------------------------------------------------------//
 
 const generateCustomDateReport = async (req, res) => {
