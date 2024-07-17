@@ -1224,28 +1224,43 @@ const addProductOfferPage = async (req, res) => {
   }
 };
 
+const hasSpecialCharacters = (string) => {
+  const specialCharactersRegex = /[^a-zA-Z0-9\s]/;
+  return specialCharactersRegex.test(string);
+};
+
+
 const addProductOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
+    // Check for special characters in offerName
+    if (hasSpecialCharacters(offerName)) {
+      req.flash('error', 'Offer name cannot contain special characters.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
+    // Check for empty fields
     if (!offerName || !discount || !startDate || !endDate || !productId) {
       req.flash('error', 'All fields are required.');
       return res.redirect('/admin/addProductOffer');
     }
 
+    // Check discount value
     if (discount <= 0) {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
       return res.redirect('/admin/addProductOffer');
     }
 
-    if (discount > 100) {
-      req.flash('error', 'Discount cannot be greater than 100.');
+    if (discount >= 100) {
+      req.flash('error', 'Discount cannot be equal to or greater than 100.');
       return res.redirect('/admin/addProductOffer');
     }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
+    // Check start and end dates
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
       return res.redirect('/admin/addProductOffer');
@@ -1256,6 +1271,14 @@ const addProductOfferPost = async (req, res) => {
       return res.redirect('/admin/addProductOffer');
     }
 
+    // Check for duplicate product offers
+    const existingOffer = await ProductOffer.findOne({ productId, is_active: true });
+    if (existingOffer) {
+      req.flash('error', 'A product offer already exists for this product.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
+    // Create and save the new product offer
     const newOffer = new ProductOffer({
       offerName,
       discount,
