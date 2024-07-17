@@ -60,7 +60,7 @@ document.getElementById('addCouponForm').addEventListener('submit', function(eve
   }
 
   // Validate expiry date
-  if (expiryDate <= today) {
+  if (expiryDate < today) {
     errors.push("Expiry date cannot be today or a past date.");
   }
 
