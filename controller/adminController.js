@@ -619,8 +619,6 @@ const addCoupon = async (req, res) => {
   }
 };
 
-//------------------------------------------------------ SUBMIT ADD COUPON -------------------------------------------------------------//
-
 const submitAddCoupon = async (req, res) => {
   try {
     const { couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
@@ -631,8 +629,19 @@ const submitAddCoupon = async (req, res) => {
       errors.push("Coupon code must not be empty and must not start with a number.");
     }
 
+    // Check for special characters in coupon code
+    if (/[^a-zA-Z0-9]/.test(couponCode)) {
+      errors.push("Coupon code must not contain special characters.");
+    }
+
+    // Check if coupon code is unique
+    const existingCoupon = await Coupon.findOne({ couponCode });
+    if (existingCoupon) {
+      errors.push("Coupon code already exists. Please choose a different code.");
+    }
+
     if (new Date(expiryDate) <= new Date()) {
-      errors.push("Expiry date cannot be  a past date.");
+      errors.push("Expiry date cannot be today or a past date.");
     }
 
     if (parseFloat(minimumAmount) <= 0) {
@@ -643,8 +652,8 @@ const submitAddCoupon = async (req, res) => {
       errors.push("Discount amount must be greater than 0.");
     }
 
-    if (parseFloat(discountAmount) > parseFloat(minimumAmount)) {
-      errors.push("Discount amount cannot be more than the minimum amount.");
+    if (parseFloat(discountAmount) >= parseFloat(minimumAmount)) {
+      errors.push("Discount amount must be less than the minimum amount.");
     }
 
     if (errors.length > 0) {
@@ -665,6 +674,7 @@ const submitAddCoupon = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
 const renderEditCoupon = async (req, res) => {

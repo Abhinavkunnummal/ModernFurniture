@@ -58,9 +58,13 @@ document.getElementById('addCouponForm').addEventListener('submit', function(eve
   if (couponCode === '' || /^\d/.test(couponCode)) {
     errors.push("Coupon code must not be empty and must not start with a number.");
   }
+  // Check for special characters in coupon code
+  if (/[^a-zA-Z0-9]/.test(couponCode)) {
+    errors.push("Coupon code must not contain special characters.");
+  }
 
   // Validate expiry date
-  if (expiryDate < today) {
+  if (expiryDate <= today) {
     errors.push("Expiry date cannot be today or a past date.");
   }
 
@@ -73,8 +77,8 @@ document.getElementById('addCouponForm').addEventListener('submit', function(eve
     errors.push("Discount amount must be greater than 0.");
   }
 
-  if (discountAmount > minimumAmount) {
-    errors.push("Discount amount cannot be more than the minimum amount.");
+  if (discountAmount >= minimumAmount) {
+    errors.push("Discount amount must be less than the minimum amount.");
   }
 
   if (errors.length > 0) {
