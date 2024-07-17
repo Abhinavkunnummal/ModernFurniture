@@ -1664,6 +1664,7 @@ module.exports = {
   addCoupon,
   submitAddCoupon,
   renderEditCoupon,
+  submitEditCoupon,
   deleteCoupon,
   deleteOffer,
   loadEditOffer,
