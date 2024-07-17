@@ -29,31 +29,47 @@
 </script>
 
 <div class="container" style="margin-left: 300px; margin-top: 50px;">
-    <h1>Add Product Offer</h1>
-    <form id="offerForm" action="/admin/addProductOffer" method="POST" onsubmit="return validateForm()">
-        <div class="mb-3">
-            <label for="offerName" class="form-label">Offer Name</label>
-            <input type="text" class="form-control" id="offerName" name="offerName" required>
+    <h1>Product Add Offer !!!</h1>
+    <form id="offerForm" action="/admin/productOffer" method="POST" onsubmit="return validateForm()">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" class="form-control" id="offerName" name="offerName" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount</label>
+                    <input type="number" class="form-control" id="discount" name="discount" style="width: 75%;" required>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="discount" class="form-label">Discount (%)</label>
-            <input type="number" class="form-control" id="discount" name="discount" required min="1" max="100">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" style="width: 75%;" required>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="startDate" name="startDate" required>
-        </div>
-        <div class="mb-3">
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="endDate" name="endDate" required>
-        </div>
-        <div class="mb-3">
-            <label for="productId" class="form-label">Product</label>
-            <select class="form-select" id="productId" name="productId" required>
-                <% products.forEach((product) => { %>
-                    <option value="<%= product._id %>"><%= product.name %></option>
-                <% }); %>
-            </select>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="productId" class="form-label">Product</label>
+                    <select class="form-select" id="productId" name="productId" required>
+                        <% products.forEach((item) => { %>
+                            <option value="<%= item._id %>"><%= item.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Add Offer</button>
     </form>
@@ -67,11 +83,12 @@
     const discount = document.getElementById('discount').value;
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
+    const productId = document.getElementById('productId').value;
 
-    // Regular expression to check for special characters
-    const invalidOfferNameRegex = /[^a-zA-Z0-9\s]/;
+    // Regular expression to check for numbers, spaces, or special characters
+    const invalidOfferNameRegex = /[^a-zA-Z]/;
 
-    if (!offerName || !discount || !startDate || !endDate) {
+    if (!offerName || !discount || !startDate || !endDate || !productId) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -84,16 +101,25 @@
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Offer name cannot contain special characters.'
+        text: 'Offer name cannot contain numbers, spaces, or special characters.'
       });
       return false;
     }
 
-    if (discount <= 0 || discount > 100) {
+    if (discount <= 0) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Discount must be between 1 and 100.'
+        text: 'Discount cannot be less than or equal to 0.'
+      });
+      return false;
+    }
+
+    if (discount > 100) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Discount cannot be greater than 100.'
       });
       return false;
     }

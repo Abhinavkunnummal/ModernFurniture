@@ -1228,6 +1228,13 @@ const addProductOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, productId } = req.body;
 
+    // Check for existing product offer for the same product
+    const existingOffer = await ProductOffer.findOne({ productId });
+    if (existingOffer) {
+      req.flash('error', 'A product offer already exists for this product.');
+      return res.redirect('/admin/addProductOffer');
+    }
+
     // Check for special characters in offerName
     if (!/^[a-zA-Z0-9\s]+$/.test(offerName)) {
       req.flash('error', 'Offer name cannot contain special characters.');
@@ -1257,13 +1264,6 @@ const addProductOfferPost = async (req, res) => {
 
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
-      return res.redirect('/admin/addProductOffer');
-    }
-
-    // Check for existing product offer
-    const existingOffer = await ProductOffer.findOne({ productId });
-    if (existingOffer) {
-      req.flash('error', 'A product offer already exists for this product.');
       return res.redirect('/admin/addProductOffer');
     }
 
