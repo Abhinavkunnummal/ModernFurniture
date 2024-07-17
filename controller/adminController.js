@@ -640,8 +640,12 @@ const submitAddCoupon = async (req, res) => {
       errors.push("Coupon code already exists. Please choose a different code.");
     }
 
-    if (new Date(expiryDate) <= new Date()) {
-      errors.push("Expiry date cannot be today or a past date.");
+    const expiryDateObj = new Date(expiryDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);  // Set time to midnight for accurate date comparison
+
+    if (expiryDateObj < today) {
+      errors.push("Expiry date cannot be a past date.");
     }
 
     if (parseFloat(minimumAmount) <= 0) {
@@ -674,6 +678,7 @@ const submitAddCoupon = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 

@@ -64,8 +64,8 @@ document.getElementById('addCouponForm').addEventListener('submit', function(eve
   }
 
   // Validate expiry date
-  if (expiryDate <= today) {
-    errors.push("Expiry date cannot be today or a past date.");
+  if (expiryDate < today) {
+    errors.push("Expiry date cannot be a past date.");
   }
 
   // Validate minimum and discount amounts
