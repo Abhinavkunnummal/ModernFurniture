@@ -343,31 +343,28 @@ const addProduct = async (req, res) => {
 const addingNewProduct = async (req, res) => {
   try {
     const { name, description, price, stock, dateCreated, category } = req.body;
+    // console.log(stock);
     const categoryId = await Category.findOne({ _id: category, is_Listed: false });
     const categoryData = await Category.find({ is_Listed: false });
     if (!categoryId) {
-      return res.render("addProduct", { message: "Category not found or is not listed.", categoryData });
+      return res.render("addProduct", { message: "Category not found or is not listed.", categoryData});
     }
-    if (stock < 0) {
-      return res.render("addProduct", { message: "Stock cannot be negative.", categoryData });
+    if(stock < 0){
+      return res.render("addProduct", { message: "Stock cannot be negative.", categoryData});
     }
     const normalizedProductName = name.trim().toLowerCase();
     const existingProduct = await Product.findOne({ name: normalizedProductName });
     if (existingProduct) {
-      return res.render("addProduct", { message: "Product name already exists", categoryData });
+      return res.render("addProduct", { message: "Product name already exists",categoryData});
     }
-
-    const croppedImages = [];
-    if (req.files) {
-      for (const file of req.files.croppedImages) {
-        const croppedBuffer = await sharp(file.buffer).resize({ width: 350, height: 450, fit: sharp.fit.cover }).toBuffer();
-        const filename = `cropped_${file.originalname}`;
-        croppedImages.push(filename);
-        await sharp(croppedBuffer).toFile(`public/productimage/${filename}`);
-      }
+    const croppedimages = [];
+    for (const file of req.files) {
+      const croppedBuffer = await sharp(file.path).resize({ width: 350, height: 450, fit: sharp.fit.cover }).toBuffer();
+      const filename = `cropped_${file.originalname}`;
+      croppedimages.push(filename);
+      await sharp(croppedBuffer).toFile(`public/productimage/${filename}`);
     }
-
-    const product = new Product({ name, description, price, category: categoryId._id, stock, image: croppedImages, dateCreated });
+    const product = new Product({ name, description, price, category: categoryId._id, stock, image: croppedimages, dateCreated });
     await product.save();
     res.redirect("/admin/productlist");
   } catch (error) {
