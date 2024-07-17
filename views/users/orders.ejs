@@ -131,7 +131,7 @@
                           <th>Price</th>
                           
                           <th><strong>Total Amount</strong></th>
-                          <th>Action</th> 
+                     
                         </tr>
                         <% order.orderedItem.forEach(item => { %>
                           <tr>
@@ -149,9 +149,7 @@
                             </td>
                             <td><span style="color: #333;"><%= item.totalProductAmount %></span></td>
                             <td><span style="color: #333;"><%= order.orderAmount %></span></td>
-                            <td>
-                              <a href="/product/<%= item.productId._id %>" class="btn btn-info btn-sm">View Product</a>
-                            </td>
+                            
                           </tr>
                         <% }) %>
                         <tr>
