@@ -695,6 +695,7 @@ const renderEditCoupon = async (req, res) => {
   }
 };
 
+
 const submitEditCoupon = async (req, res) => {
   try {
     const { id, couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
