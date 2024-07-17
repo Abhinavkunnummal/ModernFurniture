@@ -682,18 +682,70 @@ const submitAddCoupon = async (req, res) => {
 
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
+
 const renderEditCoupon = async (req, res) => {
   try {
-    const id = req.query.id;
-    const couponData = await Coupon.findOne({ _id: id }).lean();
-    if (couponData && couponData.expiryDate) {
-      couponData.formattedExpiryDate = moment(couponData.expiryDate).format('YYYY-MM-DD');
+    const { id, couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
+    
+    let errors = [];
+
+    if (!couponCode || /^\d/.test(couponCode)) {
+      errors.push("Coupon code must not be empty and must not start with a number.");
     }
-    res.render('editCoupon', { couponData });
+
+    // Check for special characters in coupon code
+    if (/[^a-zA-Z0-9]/.test(couponCode)) {
+      errors.push("Coupon code must not contain special characters.");
+    }
+
+    // Check if coupon code is unique (excluding the current coupon being edited)
+    const existingCoupon = await Coupon.findOne({ couponCode, _id: { $ne: id } });
+    if (existingCoupon) {
+      errors.push("Coupon code already exists. Please choose a different code.");
+    }
+
+    const expiryDateObj = new Date(expiryDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);  // Set time to midnight for accurate date comparison
+
+    if (expiryDateObj < today) {
+      errors.push("Expiry date cannot be a past date.");
+    }
+
+    if (parseFloat(minimumAmount) <= 0) {
+      errors.push("Minimum amount must be greater than 0.");
+    }
+
+    if (parseFloat(discountAmount) <= 0) {
+      errors.push("Discount amount must be greater than 0.");
+    }
+
+    if (parseFloat(discountAmount) >= parseFloat(minimumAmount)) {
+      errors.push("Discount amount must be less than the minimum amount.");
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    await Coupon.updateOne(
+      { _id: id },
+      {
+        couponCode,
+        discountAmount,
+        minimumAmount,
+        description,
+        expiryDate,
+      }
+    );
+
+    res.redirect('/admin/coupon');
   } catch (error) {
     console.error(error.message);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
 
 //------------------------------------------------------ DELETE COUPON -------------------------------------------------------------//
 
