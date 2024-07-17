@@ -1451,6 +1451,13 @@ const addCategoryOfferPost = async (req, res) => {
       return res.redirect('/admin/addCategoryOffer');
     }
 
+    // Check if there is already an offer for the same category
+    const existingOffer = await CategoryOffer.findOne({ categoryId });
+    if (existingOffer) {
+      req.flash('error', 'A category offer already exists for this category.');
+      return res.redirect('/admin/addCategoryOffer');
+    }
+
     const newOffer = new CategoryOffer({
       offerName,
       discount,
@@ -1511,9 +1518,10 @@ const updateCategoryOffer = async (req, res) => {
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-       const today = new Date();
+    const today = new Date();
     today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
 
+    // Validate start date
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
@@ -1526,12 +1534,20 @@ const updateCategoryOffer = async (req, res) => {
     }
 
     // Check if the offer name is unique
-    const existingOffer = await CategoryOffer.findOne({ offerName, _id: { $ne: offerId } });
-    if (existingOffer) {
+    const existingOfferName = await CategoryOffer.findOne({ offerName, _id: { $ne: offerId } });
+    if (existingOfferName) {
       req.flash('error', 'An offer with this name already exists.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
+    // Check if there is already an offer for the same category
+    const existingOfferCategory = await CategoryOffer.findOne({ categoryId, _id: { $ne: offerId } });
+    if (existingOfferCategory) {
+      req.flash('error', 'A category offer already exists for this category.');
+      return res.redirect(`/admin/editCategoryOffer/${offerId}`);
+    }
+
+    // Update the category offer
     await CategoryOffer.findByIdAndUpdate(offerId, {
       offerName,
       discount,
