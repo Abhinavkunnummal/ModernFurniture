@@ -682,8 +682,20 @@ const submitAddCoupon = async (req, res) => {
 
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
-
 const renderEditCoupon = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const couponData = await Coupon.findOne({ _id: id }).lean();
+    if (couponData && couponData.expiryDate) {
+      couponData.formattedExpiryDate = moment(couponData.expiryDate).format('YYYY-MM-DD');
+    }
+    res.render('editCoupon', { couponData });
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const submitEditCoupon = async (req, res) => {
   try {
     const { id, couponCode, discountAmount, minimumAmount, description, expiryDate } = req.body;
     
@@ -745,7 +757,6 @@ const renderEditCoupon = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 
 //------------------------------------------------------ DELETE COUPON -------------------------------------------------------------//
 
