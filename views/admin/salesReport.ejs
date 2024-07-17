@@ -54,6 +54,7 @@
             <thead>
               <tr>
                 <th style="width: 50px;">ID</th>
+                <th>User Name</th>
                 <th>Order Number</th>
                 <th>Order Status</th>
                 <th>Date</th>
@@ -67,14 +68,9 @@
                 <% const item = order.orderedItem && order.orderedItem.length > 0 ? order.orderedItem[0] : {}; %>
                 <tr>
                   <td><%= i + 1 %></td>
+                  <td><%= order.userName %></td>
                   <td style="color: green;"><%= order._id %></td>
-                  <td style="color: 
-                    <%= item.orderStatus === 'cancelled' || item.orderStatus === 'returned' ? 'red' : 
-                         item.orderStatus === 'pending' ? 'blue' : 
-                         item.orderStatus === 'delivered' ? 'green' : 
-                         'black' %>;">
-                    <%= item.orderStatus || 'N/A' %>
-                  </td>
+                  <td style="color: green;">Delivered</td>
                   <td><%= order.formattedCreatedAt %></td>
                   <td><%= order.deliveryAddress ? order.deliveryAddress.city : 'N/A' %></td>
                   <td>₹<%= order.orderAmount %></td>
@@ -88,11 +84,15 @@
     <div class="pagination-area mt-15 mb-50">
       <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-start">
-          <li class="page-item active"><a class="page-link" href="#">01</a></li>
-          <li class="page-item"><a class="page-link" href="#">02</a></li>
-          <li class="page-item">
-            <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
-          </li>
+          <% if (currentPage > 1) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a></li>
+          <% } %>
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>"><a class="page-link" href="?page=<%= i %>"><%= i %></a></li>
+          <% } %>
+          <% if (currentPage < totalPages) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a></li>
+          <% } %>
         </ul>
       </nav>
     </div>

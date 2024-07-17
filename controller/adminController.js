@@ -912,23 +912,41 @@ const deleteOffer = async (req, res) => {
 
 const loadSalesReport = async (req, res) => {
   try {
-      const orders = await Order.find({})
+      // Pagination setup
+      const page = parseInt(req.query.page) || 1;
+      const limit = 10;
+      const skip = (page - 1) * limit;
+
+      // Filter and populate orders
+      const orders = await Order.find({ 'orderedItem.orderStatus': 'delivered' })
           .populate('userId')
           .populate('deliveryAddress')
           .populate({ path: 'orderedItem.productId', model: 'Product' })
-          .sort({ createdAt: -1 });
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit);
 
+      // Get total count for pagination
+      const totalOrders = await Order.countDocuments({ 'orderedItem.orderStatus': 'delivered' });
+
+      // Format orders
       const formattedOrders = orders.map(order => ({
           ...order.toObject(),
           formattedCreatedAt: moment(order.createdAt).format('YYYY-MM-DD'),
+          userName: order.userId.name
       }));
 
-      res.render('salesReport', { orderDetails: formattedOrders });
+      res.render('salesReport', {
+          orderDetails: formattedOrders,
+          currentPage: page,
+          totalPages: Math.ceil(totalOrders / limit)
+      });
   } catch (error) {
       console.error('Error loading sales report page:', error);
       res.status(500).send('Error loading sales report');
   }
 };
+
 
 const generateReport = async (startDate, endDate) => {
   const report = await Order.aggregate([
