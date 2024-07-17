@@ -57,6 +57,7 @@
               <label for="productimages">Images (up to 4)</label>
               <input type="file" class="form-control border" id="productimages" name="images" accept="image/jpeg, image/png" multiple>
               <div id="images-error" class="error-message"></div>
+              <div id="image-preview-container" class="preview-container"></div>
             </div>
           </div>
           <div class="col-md-6">
@@ -87,7 +88,7 @@
       </form>
     </section>
 
-    <div class="modal" id="cropperModal" tabindex="-1" role="dialog">
+    <div class="modal" id="cropperModal" tabindex="-1" role="dialog" style="display:none;">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
