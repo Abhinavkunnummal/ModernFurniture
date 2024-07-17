@@ -1351,7 +1351,13 @@ const updateProductOffer = async (req, res) => {
       req.flash('error', 'Start date must be before end date.');
       return res.redirect(`/admin/editProductOffer/${offerId}`);
     }
-    
+
+    // Check if there is already an offer for the same product
+    const existingOffer = await ProductOffer.findOne({ productId, _id: { $ne: offerId } });
+    if (existingOffer) {
+      req.flash('error', 'A product offer already exists for this product.');
+      return res.redirect(`/admin/editProductOffer/${offerId}`);
+    }
 
     // Update the offer
     await ProductOffer.findByIdAndUpdate(offerId, {
