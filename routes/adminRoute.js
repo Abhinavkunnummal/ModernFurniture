@@ -64,6 +64,7 @@ adminRoute.get('/coupon',isLogin,adminController.renderCoupon)
 adminRoute.get('/addCoupon',isLogin,adminController.addCoupon)
 adminRoute.post('/addCoupon',isLogin,adminController.submitAddCoupon)
 adminRoute.get('/editcoupon',isLogin,adminController.renderEditCoupon)
+adminRoute.post('/editcoupon',isLogin,adminController.submitEditCoupon)
 adminRoute.post('/deletecoupon',isLogin,adminController.deleteCoupon)
 
 

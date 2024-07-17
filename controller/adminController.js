@@ -682,6 +682,7 @@ const submitAddCoupon = async (req, res) => {
 
 //------------------------------------------------------ EDIT COUPON -------------------------------------------------------------//
 
+
 const renderEditCoupon = async (req, res) => {
   try {
     const id = req.query.id;
@@ -694,6 +695,7 @@ const renderEditCoupon = async (req, res) => {
     console.error(error.message);
   }
 };
+
 
 const submitEditCoupon = async (req, res) => {
   try {
