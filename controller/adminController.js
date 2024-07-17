@@ -1230,10 +1230,11 @@ const addProductOfferPost = async (req, res) => {
 
     // Check for existing product offer for the same product
     const existingOffer = await ProductOffer.findOne({ productId });
-    if (existingOffer) {
-      req.flash('error', 'A product offer already exists for this product.');
-      return res.redirect('/admin/addProductOffer');
-    }
+if (existingOffer) {
+  req.flash('error', 'A product offer already exists for this product.');
+  return res.redirect('/admin/addProductOffer');
+}
+
 
     // Check for special characters in offerName
     if (!/^[a-zA-Z0-9\s]+$/.test(offerName)) {
@@ -1248,10 +1249,11 @@ const addProductOfferPost = async (req, res) => {
     }
 
     // Check discount value
-    if (discount <= 0 || discount > 100) {
+    if (discount <= 0 || discount >= 100) {
       req.flash('error', 'Discount must be between 1 and 100.');
       return res.redirect('/admin/addProductOffer');
     }
+    
 
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
