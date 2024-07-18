@@ -1169,7 +1169,7 @@ const loadInvoice = async (req, res) => {
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
     const totalProductAmount = actualUnitPrice * orderedItem.quantity;
-    const offerAmount = orderedItem.offer || 0; // Using the offer field from the database
+    const offerAmount = totalProductAmount - orderedItem.totalProductAmount;
 
     const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
     const discountedPrice = totalProductAmount - discountShare;
@@ -1179,7 +1179,7 @@ const loadInvoice = async (req, res) => {
       .text(orderedItem.quantity.toString(), 200, yPosition)
       .text(`Rs ${actualUnitPrice.toFixed(2)}`, 300, yPosition)
       .text(`Rs ${totalProductAmount.toFixed(2)}`, 400, yPosition)
-      .text(`Rs ${offerAmount.toFixed(2)}`, 500, yPosition) // Displaying the offer amount
+      .text(`Rs ${offerAmount.toFixed(2)}`, 500, yPosition)
       .moveDown();
 
     const summaryTop = doc.y + 20;
@@ -1228,7 +1228,6 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
-
 
 
 
