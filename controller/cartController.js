@@ -368,12 +368,13 @@ const verifyPayment = async (req, res) => {
       const cartItems = await CartItem.find({ userId }).populate("product.productId");
       const orderAmount = calculateOrderAmount(cartItems);
       let finalOrderAmount = orderAmount;
+      let couponDiscount = 0;
 
       if (req.session.coupon) {
         const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
         if (coupon) {
-          const discountAmount = coupon.discountAmount;
-          finalOrderAmount = orderAmount - discountAmount;
+          couponDiscount = coupon.discountAmount;
+          finalOrderAmount = orderAmount - couponDiscount;
         }
       }
 
@@ -385,6 +386,7 @@ const verifyPayment = async (req, res) => {
       const newOrder = new Order({
         userId,
         coupon: req.session.coupon || null,
+        couponDiscount,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
