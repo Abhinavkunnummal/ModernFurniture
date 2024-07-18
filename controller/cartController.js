@@ -1156,13 +1156,14 @@ const loadInvoice = async (req, res) => {
       .moveDown();
 
     const yPosition = doc.y;
-    const unitPrice = orderedItem.totalProductAmount / orderedItem.quantity;
+    const actualUnitPrice = orderedItem.productId.price;
+    const totalProductAmount = actualUnitPrice * orderedItem.quantity;
 
     doc
       .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
       .text(orderedItem.quantity.toString(), 250, yPosition)
-      .text(`Rs ${unitPrice.toFixed(2)}`, 350, yPosition)
-      .text(`Rs ${orderedItem.totalProductAmount.toFixed(2)}`, 450, yPosition);
+      .text(`Rs ${actualUnitPrice.toFixed(2)}`, 350, yPosition)
+      .text(`Rs ${totalProductAmount.toFixed(2)}`, 450, yPosition);
 
     const summaryTop = yPosition + 40;
     doc
@@ -1171,9 +1172,9 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    const subtotal = orderedItem.totalProductAmount;
-    const discount = subtotal - order.orderAmount; // This may need adjustment based on your business logic
-    const finalAmount = order.orderAmount;
+    const subtotal = totalProductAmount;
+    const discount = subtotal - orderedItem.totalProductAmount;
+    const finalAmount = orderedItem.totalProductAmount;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
@@ -1210,6 +1211,9 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
+
+
+
 //---------------------------------------------------------- APPLY COUPON -----------------------------------------------------------//
 
 const applyCoupon = async (req, res) => {
