@@ -1163,27 +1163,14 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    // Calculate the total amount, the amount after applying discounts, and offers
-    let totalAmount = 0;
-    let totalAmountAfterOffers = 0;
-
-    order.orderedItem.forEach(item => {
-      const actualUnitPrice = item.productId.price;
-      const offerAmount = item.productId.offer || 0; // Assuming the offer amount is stored in the product model
-      const discountedUnitPrice = actualUnitPrice - offerAmount;
-      const totalProductAmount = discountedUnitPrice * item.quantity;
-      totalAmount += actualUnitPrice * item.quantity;
-      totalAmountAfterOffers += totalProductAmount;
-    });
+    const totalAmount = order.orderedItem.reduce((acc, item) => acc + item.productId.price * item.quantity, 0);
 
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
-    const offerAmount = orderedItem.productId.offer || 0; // Assuming the offer amount is stored in the product model
-    const discountedUnitPrice = actualUnitPrice - offerAmount;
-    const totalProductAmount = discountedUnitPrice * orderedItem.quantity;
+    const totalProductAmount = actualUnitPrice * orderedItem.quantity;
 
-    const discountShare = (totalProductAmount / totalAmountAfterOffers) * couponDiscount;
-    const finalProductPrice = totalProductAmount - discountShare;
+    const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
+    const discountedPrice = totalProductAmount - discountShare;
 
     doc
       .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
@@ -1199,20 +1186,17 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    const subtotal = totalAmountAfterOffers;
-    const offersTotal = totalAmount - totalAmountAfterOffers;
+    const subtotal = totalProductAmount;
     const discount = discountShare;
-    const finalAmount = totalAmountAfterOffers - discountShare;
+    const finalAmount = totalProductAmount - discountShare;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
-      .text('Offers', 350, summaryTop + 35)
-      .text(`Rs ${offersTotal.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Coupon Discount', 350, summaryTop + 55)
-      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 55)
-      .text('Grand Total', 350, summaryTop + 75)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
+      .text('Coupon Discount', 350, summaryTop + 35)
+      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
+      .text('Grand Total', 350, summaryTop + 55)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
     doc
@@ -1241,7 +1225,6 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
-
 
 
 
