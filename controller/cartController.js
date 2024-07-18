@@ -1189,18 +1189,15 @@ const loadInvoice = async (req, res) => {
       .moveDown();
 
     const subtotal = totalProductAmount;
-    const discount = subtotal - orderedItem.totalProductAmount;
-    const finalAmount = orderedItem.totalProductAmount - couponDiscount;
+    const finalAmount = subtotal - discountShare;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
-      .text('Discount', 350, summaryTop + 35)
-      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Coupon Discount', 350, summaryTop + 55)
-      .text(`Rs ${couponDiscount.toFixed(2)}`, 450, summaryTop + 55)
-      .text('Grand Total', 350, summaryTop + 75)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
+      .text('Coupon Discount', 350, summaryTop + 35)
+      .text(`Rs ${discountShare.toFixed(2)}`, 450, summaryTop + 35)
+      .text('Grand Total', 350, summaryTop + 55)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
 
     doc
