@@ -53,6 +53,10 @@ const orderSchema = new mongoose.Schema({
     coupon: {
         type: String
     },
+    couponDiscount: { // Adding the couponDiscount field
+        type: Number,
+        default: 0
+    },
     paymentStatus: {
         type: Boolean,
         default: false

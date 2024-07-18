@@ -231,12 +231,13 @@ const renderPlaceOrder = async (req, res) => {
 
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
+    let couponDiscount = 0;
 
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
       if (coupon) {
-        const discountAmount = coupon.discountAmount;
-        finalOrderAmount = orderAmount - discountAmount;
+        couponDiscount = coupon.discountAmount;
+        finalOrderAmount = orderAmount - couponDiscount;
       }
     }
 
@@ -300,6 +301,7 @@ const renderPlaceOrder = async (req, res) => {
       const newOrder = new Order({
         userId,
         coupon: req.session.coupon || null,
+        couponDiscount,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
@@ -319,6 +321,7 @@ const renderPlaceOrder = async (req, res) => {
       const newOrder = new Order({
         userId,
         coupon: req.session.coupon || null,
+        couponDiscount,
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => ({
           productId: item.product[0].productId,
@@ -1110,6 +1113,9 @@ const loadInvoice = async (req, res) => {
       return res.status(400).send('Invalid item ID');
     }
 
+    // Retrieve the coupon discount
+    const couponDiscount = order.couponDiscount || 0;
+
     const generateInvoiceNumber = () => {
       return Math.floor(100000 + Math.random() * 900000).toString();
     };
@@ -1174,15 +1180,17 @@ const loadInvoice = async (req, res) => {
 
     const subtotal = totalProductAmount;
     const discount = subtotal - orderedItem.totalProductAmount;
-    const finalAmount = orderedItem.totalProductAmount;
+    const finalAmount = orderedItem.totalProductAmount - couponDiscount;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Discount', 350, summaryTop + 35)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Grand Total', 350, summaryTop + 55)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Coupon Discount', 350, summaryTop + 55)
+      .text(`Rs ${couponDiscount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Grand Total', 350, summaryTop + 75)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
@@ -1211,6 +1219,7 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
+
 
 
 
