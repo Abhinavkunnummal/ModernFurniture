@@ -347,24 +347,18 @@ const addingNewProduct = async (req, res) => {
 
     const categoryId = await Category.findOne({ _id: category, is_Listed: false });
     if (!categoryId) {
-      return res.render("addProduct", { message: "Category not found or is not listed.", categoryData });
+      return res.status(400).json({ message: "Category not found or is not listed." });
     }
     if (stock < 0) {
-      return res.render("addProduct", { message: "Stock cannot be negative.", categoryData });
+      return res.status(400).json({ message: "Stock cannot be negative." });
     }
     const normalizedProductName = name.trim().toLowerCase();
     const existingProduct = await Product.findOne({ name: normalizedProductName });
     if (existingProduct) {
-      return res.render("addProduct", { message: "Product name already exists", categoryData });
+      return res.status(400).json({ message: "Product name already exists" });
     }
 
-    const croppedImages = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const buffer = await file.buffer();
-        croppedImages.push(buffer);
-      }
-    }
+    const images = req.files.map(file => file.buffer);
 
     const product = new Product({
       name,
@@ -372,15 +366,15 @@ const addingNewProduct = async (req, res) => {
       price,
       category: categoryId._id,
       stock,
-      image: croppedImages,
+      image: images,
       dateCreated: new Date()
     });
 
     await product.save();
-    res.redirect("/admin/Productlist");
+    res.status(201).json({ message: "Product added successfully" });
   } catch (error) {
     console.error("Error adding new product:", error);
-    res.status(500).render('error');
+    res.status(500).json({ message: "An error occurred while adding the product" });
   }
 };
 
