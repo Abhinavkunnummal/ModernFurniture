@@ -1191,15 +1191,17 @@ const loadInvoice = async (req, res) => {
 
     const subtotal = totalProductAmount;
     const discount = discountShare;
-    const finalAmount = totalProductAmount - discountShare;
+    const finalAmount = subtotal - discount - offerAmount;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Coupon Discount', 350, summaryTop + 35)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Grand Total', 350, summaryTop + 55)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Offer Amount', 350, summaryTop + 55)
+      .text(`Rs ${offerAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Grand Total', 350, summaryTop + 75)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
@@ -1228,7 +1230,6 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
-
 
 
 //---------------------------------------------------------- APPLY COUPON -----------------------------------------------------------//
