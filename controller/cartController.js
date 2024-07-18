@@ -1163,14 +1163,25 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    const totalAmount = order.orderedItem.reduce((acc, item) => acc + item.productId.price * item.quantity, 0);
+    let totalAmount = 0;
+
+    // Calculate the total amount after applying product/category discounts
+    order.orderedItem.forEach(item => {
+      const actualUnitPrice = item.productId.price;
+      const discountAmount = item.productId.discount || 0; // Assuming the discount is stored in the product model
+      const discountedUnitPrice = actualUnitPrice - discountAmount;
+      const totalProductAmount = discountedUnitPrice * item.quantity;
+      totalAmount += totalProductAmount;
+    });
 
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
-    const totalProductAmount = actualUnitPrice * orderedItem.quantity;
+    const discountAmount = orderedItem.productId.discount || 0; // Assuming the discount is stored in the product model
+    const discountedUnitPrice = actualUnitPrice - discountAmount;
+    const totalProductAmount = discountedUnitPrice * orderedItem.quantity;
 
     const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
-    const discountedPrice = totalProductAmount - discountShare;
+    const finalProductPrice = totalProductAmount - discountShare;
 
     doc
       .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
@@ -1193,10 +1204,12 @@ const loadInvoice = async (req, res) => {
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
-      .text('Coupon Discount', 350, summaryTop + 35)
-      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Grand Total', 350, summaryTop + 55)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Product/Category Discount', 350, summaryTop + 35)
+      .text(`Rs ${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text('Coupon Discount', 350, summaryTop + 55)
+      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Grand Total', 350, summaryTop + 75)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
@@ -1225,6 +1238,7 @@ const loadInvoice = async (req, res) => {
     res.status(500).send('Error generating invoice');
   }
 };
+
 
 
 
