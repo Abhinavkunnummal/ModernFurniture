@@ -342,39 +342,37 @@ const addProduct = async (req, res) => {
 
 const addingNewProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, category } = req.body;
-    const categoryData = await Category.find({ is_Listed: false });
-
+    const { name, description, price, stock, dateCreated, category } = req.body;
     const categoryId = await Category.findOne({ _id: category, is_Listed: false });
+    const categoryData = await Category.find({ is_Listed: false });
     if (!categoryId) {
-      return res.status(400).json({ message: "Category not found or is not listed." });
+      return res.render("addProduct", { message: "Category not found or is not listed.", categoryData });
     }
     if (stock < 0) {
-      return res.status(400).json({ message: "Stock cannot be negative." });
+      return res.render("addProduct", { message: "Stock cannot be negative.", categoryData });
     }
     const normalizedProductName = name.trim().toLowerCase();
     const existingProduct = await Product.findOne({ name: normalizedProductName });
     if (existingProduct) {
-      return res.status(400).json({ message: "Product name already exists" });
+      return res.render("addProduct", { message: "Product name already exists", categoryData });
     }
 
-    const images = req.files.map(file => file.buffer);
+    const croppedImages = [];
+    if (req.files && req.files.croppedImages) {
+      for (const file of req.files.croppedImages) {
+        const croppedBuffer = await sharp(file.buffer).resize({ width: 350, height: 450, fit: sharp.fit.cover }).toBuffer();
+        const filename = `cropped_${Date.now()}_${file.originalname}`;
+        croppedImages.push(filename);
+        await sharp(croppedBuffer).toFile(`public/productimage/${filename}`);
+      }
+    }
 
-    const product = new Product({
-      name,
-      description,
-      price,
-      category: categoryId._id,
-      stock,
-      image: images,
-      dateCreated: new Date()
-    });
-
+    const product = new Product({ name, description, price, category: categoryId._id, stock, image: croppedImages, dateCreated });
     await product.save();
-    res.status(201).json({ message: "Product added successfully" });
+    res.redirect("/admin/productlist");
   } catch (error) {
     console.error("Error adding new product:", error);
-    res.status(500).json({ message: "An error occurred while adding the product" });
+    res.status(500).render('error');
   }
 };
 
