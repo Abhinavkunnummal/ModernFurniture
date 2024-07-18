@@ -1153,9 +1153,10 @@ const loadInvoice = async (req, res) => {
     const tableTop = doc.y;
     doc
       .text('Product Name', 50, tableTop)
-      .text('Quantity', 250, tableTop)
-      .text('Unit Price', 350, tableTop)
-      .text('Total Price', 450, tableTop);
+      .text('Quantity', 200, tableTop)
+      .text('Unit Price', 300, tableTop)
+      .text('Total Price', 400, tableTop)
+      .text('Offer', 500, tableTop);
 
     doc
       .moveTo(50, tableTop + 15)
@@ -1167,16 +1168,19 @@ const loadInvoice = async (req, res) => {
 
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
-    const totalProductAmount = actualUnitPrice * orderedItem.quantity;
+    const offerAmount = orderedItem.productId.offer || 0; // Assuming the offer amount is stored in the product model
+    const discountedUnitPrice = actualUnitPrice - offerAmount;
+    const totalProductAmount = discountedUnitPrice * orderedItem.quantity;
 
     const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
     const discountedPrice = totalProductAmount - discountShare;
 
     doc
-      .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
-      .text(orderedItem.quantity.toString(), 250, yPosition)
-      .text(`Rs ${actualUnitPrice.toFixed(2)}`, 350, yPosition)
-      .text(`Rs ${totalProductAmount.toFixed(2)}`, 450, yPosition)
+      .text(orderedItem.productId.name, 50, yPosition, { width: 150 })
+      .text(orderedItem.quantity.toString(), 200, yPosition)
+      .text(`Rs ${actualUnitPrice.toFixed(2)}`, 300, yPosition)
+      .text(`Rs ${totalProductAmount.toFixed(2)}`, 400, yPosition)
+      .text(`Rs ${(actualUnitPrice * orderedItem.quantity - totalProductAmount).toFixed(2)}`, 500, yPosition) // Offer amount
       .moveDown();
 
     const summaryTop = doc.y + 20;
