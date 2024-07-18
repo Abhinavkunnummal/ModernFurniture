@@ -1155,7 +1155,8 @@ const loadInvoice = async (req, res) => {
       .text('Product Name', 50, tableTop)
       .text('Quantity', 200, tableTop)
       .text('Unit Price', 300, tableTop)
-      .text('Total Price', 400, tableTop);
+      .text('Total Price', 400, tableTop)
+      .text('Offer', 500, tableTop);
 
     doc
       .moveTo(50, tableTop + 15)
@@ -1168,6 +1169,7 @@ const loadInvoice = async (req, res) => {
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
     const totalProductAmount = actualUnitPrice * orderedItem.quantity;
+    const offerAmount = totalProductAmount - orderedItem.totalProductAmount;
 
     const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
     const discountedPrice = totalProductAmount - discountShare;
@@ -1177,6 +1179,7 @@ const loadInvoice = async (req, res) => {
       .text(orderedItem.quantity.toString(), 200, yPosition)
       .text(`Rs ${actualUnitPrice.toFixed(2)}`, 300, yPosition)
       .text(`Rs ${totalProductAmount.toFixed(2)}`, 400, yPosition)
+      .text(`Rs ${offerAmount.toFixed(2)}`, 500, yPosition)
       .moveDown();
 
     const summaryTop = doc.y + 20;
@@ -1188,15 +1191,17 @@ const loadInvoice = async (req, res) => {
 
     const subtotal = totalProductAmount;
     const discount = discountShare;
-    const finalAmount = subtotal - discount;
+    const finalAmount = subtotal - discount - offerAmount;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Coupon Discount', 350, summaryTop + 35)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
-      .text('Grand Total', 350, summaryTop + 55)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Offer Amount', 350, summaryTop + 55)
+      .text(`Rs ${offerAmount.toFixed(2)}`, 450, summaryTop + 55)
+      .text('Grand Total', 350, summaryTop + 75)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
