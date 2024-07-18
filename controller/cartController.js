@@ -1163,15 +1163,17 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    let totalAmount = 0;
+    // Calculate the total amount and the amount after applying discounts
+    let totalAmountBeforeDiscounts = 0;
+    let totalAmountAfterProductDiscounts = 0;
 
-    // Calculate the total amount after applying product/category discounts
     order.orderedItem.forEach(item => {
       const actualUnitPrice = item.productId.price;
       const discountAmount = item.productId.discount || 0; // Assuming the discount is stored in the product model
       const discountedUnitPrice = actualUnitPrice - discountAmount;
       const totalProductAmount = discountedUnitPrice * item.quantity;
-      totalAmount += totalProductAmount;
+      totalAmountBeforeDiscounts += actualUnitPrice * item.quantity;
+      totalAmountAfterProductDiscounts += totalProductAmount;
     });
 
     const yPosition = doc.y;
@@ -1180,7 +1182,7 @@ const loadInvoice = async (req, res) => {
     const discountedUnitPrice = actualUnitPrice - discountAmount;
     const totalProductAmount = discountedUnitPrice * orderedItem.quantity;
 
-    const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
+    const discountShare = (totalProductAmount / totalAmountAfterProductDiscounts) * couponDiscount;
     const finalProductPrice = totalProductAmount - discountShare;
 
     doc
@@ -1203,13 +1205,13 @@ const loadInvoice = async (req, res) => {
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
+      .text(`Rs ${totalAmountBeforeDiscounts.toFixed(2)}`, 450, summaryTop + 15)
       .text('Product/Category Discount', 350, summaryTop + 35)
-      .text(`Rs ${discountAmount.toFixed(2)}`, 450, summaryTop + 35)
+      .text(`Rs ${(totalAmountBeforeDiscounts - totalAmountAfterProductDiscounts).toFixed(2)}`, 450, summaryTop + 35)
       .text('Coupon Discount', 350, summaryTop + 55)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 55)
       .text('Grand Total', 350, summaryTop + 75)
-      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
+      .text(`Rs ${totalAmountAfterProductDiscounts - discount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
