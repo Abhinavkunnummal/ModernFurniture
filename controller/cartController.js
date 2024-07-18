@@ -1163,25 +1163,23 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
+    const totalAmount = order.orderedItem.reduce((acc, item) => acc + item.productId.price * item.quantity, 0);
+
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
     const totalProductAmount = actualUnitPrice * orderedItem.quantity;
 
-    // Calculate the total amount for all products in the order
-    const totalAmount = order.orderedItem.reduce((acc, item) => acc + item.productId.price * item.quantity, 0);
-
-    // Calculate each product's share of the coupon discount
     const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
-
     const discountedPrice = totalProductAmount - discountShare;
 
     doc
       .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
       .text(orderedItem.quantity.toString(), 250, yPosition)
       .text(`Rs ${actualUnitPrice.toFixed(2)}`, 350, yPosition)
-      .text(`Rs ${discountedPrice.toFixed(2)}`, 450, yPosition);
+      .text(`Rs ${totalProductAmount.toFixed(2)}`, 450, yPosition)
+      .moveDown();
 
-    const summaryTop = yPosition + 40;
+    const summaryTop = doc.y + 20;
     doc
       .moveTo(50, summaryTop)
       .lineTo(550, summaryTop)
@@ -1189,13 +1187,14 @@ const loadInvoice = async (req, res) => {
       .moveDown();
 
     const subtotal = totalProductAmount;
-    const finalAmount = subtotal - discountShare;
+    const discount = discountShare;
+    const finalAmount = totalProductAmount - discountShare;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
       .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Coupon Discount', 350, summaryTop + 35)
-      .text(`Rs ${discountShare.toFixed(2)}`, 450, summaryTop + 35)
+      .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 35)
       .text('Grand Total', 350, summaryTop + 55)
       .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 55)
       .moveDown(2);
