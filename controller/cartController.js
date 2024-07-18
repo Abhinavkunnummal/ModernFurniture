@@ -1163,26 +1163,26 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    // Calculate the total amount and the amount after applying discounts
-    let totalAmountBeforeDiscounts = 0;
-    let totalAmountAfterProductDiscounts = 0;
+    // Calculate the total amount, the amount after applying discounts, and offers
+    let totalAmount = 0;
+    let totalAmountAfterOffers = 0;
 
     order.orderedItem.forEach(item => {
       const actualUnitPrice = item.productId.price;
-      const discountAmount = item.productId.discount || 0; // Assuming the discount is stored in the product model
-      const discountedUnitPrice = actualUnitPrice - discountAmount;
+      const offerAmount = item.productId.offer || 0; // Assuming the offer amount is stored in the product model
+      const discountedUnitPrice = actualUnitPrice - offerAmount;
       const totalProductAmount = discountedUnitPrice * item.quantity;
-      totalAmountBeforeDiscounts += actualUnitPrice * item.quantity;
-      totalAmountAfterProductDiscounts += totalProductAmount;
+      totalAmount += actualUnitPrice * item.quantity;
+      totalAmountAfterOffers += totalProductAmount;
     });
 
     const yPosition = doc.y;
     const actualUnitPrice = orderedItem.productId.price;
-    const discountAmount = orderedItem.productId.discount || 0; // Assuming the discount is stored in the product model
-    const discountedUnitPrice = actualUnitPrice - discountAmount;
+    const offerAmount = orderedItem.productId.offer || 0; // Assuming the offer amount is stored in the product model
+    const discountedUnitPrice = actualUnitPrice - offerAmount;
     const totalProductAmount = discountedUnitPrice * orderedItem.quantity;
 
-    const discountShare = (totalProductAmount / totalAmountAfterProductDiscounts) * couponDiscount;
+    const discountShare = (totalProductAmount / totalAmountAfterOffers) * couponDiscount;
     const finalProductPrice = totalProductAmount - discountShare;
 
     doc
@@ -1200,18 +1200,19 @@ const loadInvoice = async (req, res) => {
       .moveDown();
 
     const subtotal = totalProductAmount;
+    const offersTotal = totalAmount - totalAmountAfterOffers;
     const discount = discountShare;
     const finalAmount = totalProductAmount - discountShare;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`Rs ${totalAmountBeforeDiscounts.toFixed(2)}`, 450, summaryTop + 15)
-      .text('Product/Category Discount', 350, summaryTop + 35)
-      .text(`Rs ${(totalAmountBeforeDiscounts - totalAmountAfterProductDiscounts).toFixed(2)}`, 450, summaryTop + 35)
+      .text(`Rs ${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
+      .text('Offers', 350, summaryTop + 35)
+      .text(`Rs ${offersTotal.toFixed(2)}`, 450, summaryTop + 35)
       .text('Coupon Discount', 350, summaryTop + 55)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 55)
       .text('Grand Total', 350, summaryTop + 75)
-      .text(`Rs ${totalAmountAfterProductDiscounts - discount.toFixed(2)}`, 450, summaryTop + 75)
+      .text(`Rs ${(totalAmountAfterOffers - discount).toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
