@@ -1,161 +1,238 @@
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/header.ejs') %>
 <%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/sidenav.ejs') %>
-<script defer src="https://cdn.crop.guide/loader/l.js?c=ZLZMMG"></script>
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
 <main class="main-wrap">
-    <header class="main-header navbar">
-        <!-- Header content -->
-    </header>
+  <header class="main-header navbar">
+      <!-- Header content -->
+  </header>
 
-    <section class="content-main">
-        <form action="/admin/products" method="post" class="forms-sample" enctype="multipart/form-data">
-            <% if (typeof message != 'undefined') { %>
-                <p class="text-danger"><%= message %></p>
-              <% } %>
-            <h1 class="mb-4">Welcome to Add Product</h1>
-            <div class="row">
-                <div class="col-md-6">
-                    <a href="/admin/Productlist" class="btn btn-warning">Product Lists</a>
-                    <div class="form-group">
-                        <label for="name">Product Name</label>
-                        <input type="text" class="form-control border" name="name" id="name">
-                        <div id="name-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Product Description</label>
-                        <textarea class="form-control border" name="description" id="description" rows="5"></textarea>
-                        <div id="description-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="productimages">Images (up to 4)</label>
-                        <input type="file" class="form-control border" id="productimages" name="images" accept="image/jpeg, image/png" multiple>
+  <section class="content-main">
+      <form action="/admin/products" method="post" class="forms-sample" enctype="multipart/form-data">
+          <% if (typeof message != 'undefined') { %>
+              <p class="text-danger"><%= message %></p>
+            <% } %>
+          <h1 class="mb-4">Welcome to Add Product</h1>
+          <div class="row">
+              <div class="col-md-6">
+                  <a href="/admin/Productlist" class="btn btn-warning">Product Lists</a>
+                  <div class="form-group">
+                      <label for="name">Product Name</label>
+                      <input type="text" class="form-control border" name="name" id="name">
+                      <div id="name-error" class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                      <label for="description">Product Description</label>
+                      <textarea class="form-control border" name="description" id="description" rows="5"></textarea>
+                      <div id="description-error" class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                      <label for="productimages">Images (up to 4)</label>
+                      <input type="file" class="form-control border" id="productimages" name="images" accept="image/jpeg, image/png" multiple>
 
-                        <!-- Image preview container -->
-                        <div id="image-preview-container" class="mt-3"></div>
-                        <div id="images-error" class="error-message"></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="price">Price</label>
-                        <input type="number" class="form-control border" name="price" id="price" min="1">
-                        <div id="price-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select class="form-control border" name="category" id="category">
-                           <% categoryData.forEach(item => {  %>
-                              <% if(!item.Is_Listed){ %>
-                                <option value="<%= item._id %>"><%= item.name %> </option>
-                              <% } %>
-                           <% }) %>
-                        </select>
-                        <div id="category-error" class="error-message"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Stock</label>
-                        <input type="number" class="form-control border" name="stock" id="quantity" min="1">
-                        <div id="quantity-error" class="error-message"></div>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary ">Create Product</button>
-        </form>
-    </section>
+                      <!-- Image preview container -->
+                      <div id="image-preview-container" class="mt-3"></div>
+                      <div id="images-error" class="error-message"></div>
+                  </div>
+                  <!-- Cropper Modal -->
+                  <div class="modal fade" id="cropperModal" tabindex="-1" role="dialog" aria-labelledby="cropperModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header">
+                                  <h5 class="modal-title" id="cropperModalLabel">Crop Image</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                  </button>
+                              </div>
+                              <div class="modal-body">
+                                  <div class="img-container">
+                                      <img id="image-to-crop" src="" alt="Image to crop">
+                                  </div>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="button" class="btn btn-primary" id="crop-button">Crop</button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-6">
+                  <div class="form-group">
+                      <label for="price">Price</label>
+                      <input type="number" class="form-control border" name="price" id="price" min="1">
+                      <div id="price-error" class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                      <label for="category">Category</label>
+                      <select class="form-control border" name="category" id="category">
+                         <% categoryData.forEach(item => {  %>
+                            <% if(!item.Is_Listed){ %>
+                              <option value="<%= item._id %>"><%= item.name %> </option>
+                            <% } %>
+                         <% }) %>
+                      </select>
+                      <div id="category-error" class="error-message"></div>
+                  </div>
+                  <div class="form-group">
+                      <label for="quantity">Stock</label>
+                      <input type="number" class="form-control border" name="stock" id="quantity" min="1">
+                      <div id="quantity-error" class="error-message"></div>
+                  </div>
+              </div>
+          </div>
+          <button type="submit" class="btn btn-primary ">Create Product</button>
+      </form>
+  </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const maxImageCount = 4;
-          const previewContainer = document.getElementById("image-preview-container");
-          const form = document.querySelector('.forms-sample');
-      
-          document.getElementById("productimages").addEventListener("change", function (e) {
-            const selectedFiles = e.target.files;
-            if (selectedFiles.length > maxImageCount) {
-              showError('images', `Maximum ${maxImageCount} images allowed.`);
-              e.target.value = "";
-            } else {
-              updateImagePreviews(selectedFiles);
-            }
-          });
-      
-          function updateImagePreviews(files) {
-            previewContainer.innerHTML = ""; 
-            for (let i = 0; i < files.length; i++) {
-              const reader = new FileReader();
-              const previewImage = document.createElement("img");
-              previewImage.className = "preview-image";
-      
-              reader.onload = (function (img) {
-                return function (e) {
-                  img.src = e.target.result;
-                };
-              })(previewImage);
-      
-              reader.readAsDataURL(files[i]);
-              previewContainer.appendChild(previewImage);
-            }
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const maxImageCount = 4;
+        const previewContainer = document.getElementById("image-preview-container");
+        const form = document.querySelector('.forms-sample');
+    
+        const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+        const imageToCrop = document.getElementById('image-to-crop');
+        let cropper;
+
+        document.getElementById("productimages").addEventListener("change", function (e) {
+          const selectedFiles = e.target.files;
+          if (selectedFiles.length > maxImageCount) {
+            showError('images', `Maximum ${maxImageCount} images allowed.`);
+            e.target.value = "";
+          } else {
+            updateImagePreviews(selectedFiles);
           }
-      
-          form.addEventListener('submit', (event) => {
-            event.preventDefault();
-      
-            const name = document.getElementById('name');
-            const description = document.getElementById('description');
-            const images = document.getElementById('productimages');
-            const price = document.getElementById('price');
-            const category = document.getElementById('category');
-            // const quantity = document.getElementById('quantity');
-      
-           
-            let isValid = true;
-      
-            showError('name', '');
-            if (name.value.trim() === '') {
-              showError('name', 'Please enter a product name.');
-              isValid = false;
-            }
-      
-            showError('description', ''); 
-            if (description.value.trim() === '') {
-              showError('description', 'Please enter a product description.');
-              isValid = false;
-            }
-      
-            showError('images', ''); 
-            if (images.files.length === 0) {
-              showError('images', 'Please select at least one image.');
-              isValid = false;
-            }
-      
-            showError('price', ''); 
-            if (price.value.trim() === '' || parseFloat(price.value) <= 0) {
-              showError('price', 'Please enter a valid price.');
-              isValid = false;
-            }
-      
-            showError('category', ''); 
-            if (category.value.trim() === '') {
-              showError('category', 'Please select a category.');
-              isValid = false;
-            }
-      
-            if (isValid) {
-              form.submit(); 
-            }
-          });
-      
-          function showError(fieldId, message) {
-            const errorDiv = document.getElementById(`${fieldId}-error`);
-            if (errorDiv) { 
-              errorDiv.textContent = message;
-              errorDiv.style.display = message ? 'block' : 'none'; 
-              errorDiv.style.color = 'red';
+        });
+
+        function updateImagePreviews(files) {
+          previewContainer.innerHTML = "";
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            const previewImage = document.createElement("img");
+            previewImage.className = "preview-image";
+    
+            reader.onload = (function (img, file) {
+              return function (e) {
+                img.src = e.target.result;
+                img.addEventListener('click', () => {
+                  imageToCrop.src = e.target.result;
+                  cropperModal.show();
+                  cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 350 / 450,
+                    viewMode: 1,
+                  });
+
+                  document.getElementById('crop-button').onclick = () => {
+                    const canvas = cropper.getCroppedCanvas({
+                      width: 350,
+                      height: 450,
+                    });
+                    canvas.toBlob((blob) => {
+                      img.src = canvas.toDataURL();
+                      img.dataset.cropped = 'true';
+                      img.dataset.blob = URL.createObjectURL(blob);
+                      cropperModal.hide();
+                      cropper.destroy();
+                    }, 'image/jpeg');
+                  };
+                });
+              };
+            })(previewImage, file);
+    
+            reader.readAsDataURL(file);
+            previewContainer.appendChild(previewImage);
+          }
+        }
+    
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const name = document.getElementById('name');
+          const description = document.getElementById('description');
+          const images = document.getElementById('productimages');
+          const price = document.getElementById('price');
+          const category = document.getElementById('category');
+          const quantity = document.getElementById('quantity');
+    
+          let isValid = true;
+    
+          showError('name', '');
+          if (name.value.trim() === '') {
+            showError('name', 'Please enter a product name.');
+            isValid = false;
+          }
+    
+          showError('description', ''); 
+          if (description.value.trim() === '') {
+            showError('description', 'Please enter a product description.');
+            isValid = false;
+          }
+    
+          showError('images', ''); 
+          if (images.files.length === 0) {
+            showError('images', 'Please select at least one image.');
+            isValid = false;
+          }
+    
+          showError('price', ''); 
+          if (price.value.trim() === '' || parseFloat(price.value) <= 0) {
+            showError('price', 'Please enter a valid price.');
+            isValid = false;
+          }
+    
+          showError('category', ''); 
+          if (category.value.trim() === '') {
+            showError('category', 'Please select a category.');
+            isValid = false;
+          }
+
+          showError('quantity', '');
+          if (quantity.value.trim() === '' || parseInt(quantity.value) <= 0) {
+            showError('quantity', 'Please enter a valid stock quantity.');
+            isValid = false;
+          }
+    
+          if (isValid) {
+            const formData = new FormData();
+            formData.append('name', name.value.trim());
+            formData.append('description', description.value.trim());
+            formData.append('price', price.value.trim());
+            formData.append('category', category.value.trim());
+            formData.append('stock', quantity.value.trim());
+
+            const images = document.querySelectorAll('.preview-image');
+            images.forEach((img, index) => {
+              if (img.dataset.cropped) {
+                formData.append('images', img.dataset.blob, `cropped_${index}.jpg`);
+              }
+            });
+
+            const response = await fetch('/admin/products', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (response.ok) {
+              window.location.href = "/admin/Productlist";
+            } else {
+              const errorData = await response.json();
+              showError('form', errorData.message);
             }
           }
         });
-      </script>
-      
+    
+        function showError(fieldId, message) {
+          const errorDiv = document.getElementById(`${fieldId}-error`);
+          if (errorDiv) { 
+            errorDiv.textContent = message;
+            errorDiv.style.display = message ? 'block' : 'none'; 
+            errorDiv.style.color = 'red';
+          }
+        }
+      });
+    </script>
+    
 </main>
-
-<%- include('/home/ubuntu/ModernFurniture/views/admin_Layouts/footer.ejs') %>
-
