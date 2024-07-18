@@ -1199,20 +1199,20 @@ const loadInvoice = async (req, res) => {
       .stroke()
       .moveDown();
 
-    const subtotal = totalProductAmount;
-    const offersTotal = totalAmount - totalAmountAfterOffers;
-    const discount = discountShare;
-    const finalAmount = totalProductAmount - discountShare;
+    const subtotal = totalAmountAfterOffers; // Total after applying offers
+    const offersTotal = totalAmount - totalAmountAfterOffers; // Total offers applied
+    const discount = couponDiscount;
+    const finalAmount = subtotal - discount; // Grand total after applying coupon discount
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
-      .text(`Rs ${totalAmount.toFixed(2)}`, 450, summaryTop + 15)
+      .text(`Rs ${subtotal.toFixed(2)}`, 450, summaryTop + 15)
       .text('Offers', 350, summaryTop + 35)
       .text(`Rs ${offersTotal.toFixed(2)}`, 450, summaryTop + 35)
       .text('Coupon Discount', 350, summaryTop + 55)
       .text(`Rs ${discount.toFixed(2)}`, 450, summaryTop + 55)
       .text('Grand Total', 350, summaryTop + 75)
-      .text(`Rs ${(totalAmountAfterOffers - discount).toFixed(2)}`, 450, summaryTop + 75)
+      .text(`Rs ${finalAmount.toFixed(2)}`, 450, summaryTop + 75)
       .moveDown(2);
 
     doc
