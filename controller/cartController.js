@@ -1167,11 +1167,19 @@ const loadInvoice = async (req, res) => {
     const actualUnitPrice = orderedItem.productId.price;
     const totalProductAmount = actualUnitPrice * orderedItem.quantity;
 
+    // Calculate the total amount for all products in the order
+    const totalAmount = order.orderedItem.reduce((acc, item) => acc + item.productId.price * item.quantity, 0);
+
+    // Calculate each product's share of the coupon discount
+    const discountShare = (totalProductAmount / totalAmount) * couponDiscount;
+
+    const discountedPrice = totalProductAmount - discountShare;
+
     doc
       .text(orderedItem.productId.name, 50, yPosition, { width: 180 })
       .text(orderedItem.quantity.toString(), 250, yPosition)
       .text(`Rs ${actualUnitPrice.toFixed(2)}`, 350, yPosition)
-      .text(`Rs ${totalProductAmount.toFixed(2)}`, 450, yPosition);
+      .text(`Rs ${discountedPrice.toFixed(2)}`, 450, yPosition);
 
     const summaryTop = yPosition + 40;
     doc
