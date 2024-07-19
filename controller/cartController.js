@@ -1197,7 +1197,7 @@ const loadInvoice = async (req, res) => {
 
     const subtotal = totalProductAmount;
     const discount = discountShare;
-    const finalAmount = subtotal - discount - offerAmount;
+    const finalAmount = Math.round(subtotal - discount - offerAmount) ;
 
     doc
       .text('Subtotal', 350, summaryTop + 15)
