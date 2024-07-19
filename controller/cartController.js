@@ -309,7 +309,7 @@ const renderPlaceOrder = async (req, res) => {
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => {
           const totalProductAmount = item.product[0].totalPrice;
-          const discountedPrice = proportionalDiscount(totalProductAmount, orderAmount, couponDiscount);
+          const discountedPrice = Math.round(proportionalDiscount(totalProductAmount, orderAmount, couponDiscount));
           return {
             productId: item.product[0].productId,
             quantity: item.product[0].quantity,
