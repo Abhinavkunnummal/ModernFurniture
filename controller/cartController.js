@@ -394,6 +394,10 @@ const verifyPayment = async (req, res) => {
         }
       }
 
+      const proportionalDiscount = (itemTotal, orderTotal, discount) => {
+        return itemTotal - ((itemTotal / orderTotal) * discount);
+      };
+
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
@@ -404,11 +408,16 @@ const verifyPayment = async (req, res) => {
         coupon: req.session.coupon || null,
         couponDiscount,
         cartId: cartItems.map((item) => item._id),
-        orderedItem: cartItems.map((item) => ({
-          productId: item.product[0].productId,
-          quantity: item.product[0].quantity,
-          totalProductAmount: item.product[0].totalPrice,
-        })),
+        orderedItem: cartItems.map((item) => {
+          const totalProductAmount = item.product[0].totalPrice;
+          const discountedPrice = Math.round(proportionalDiscount(totalProductAmount, orderAmount, couponDiscount));
+          return {
+            productId: item.product[0].productId,
+            quantity: item.product[0].quantity,
+            totalProductAmount: totalProductAmount,
+            discountedPrice: discountedPrice,
+          };
+        }),
         orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
         shippingDate,
