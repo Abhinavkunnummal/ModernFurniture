@@ -342,7 +342,7 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
     }
 
-    item.orderStatus = 'Cancelled';
+    item.orderStatus = 'Cancellation Request Sent';
     item.cancelReason = cancelReason;
 
     const product = await Product.findById(item.productId);
