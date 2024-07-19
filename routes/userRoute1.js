@@ -13,6 +13,7 @@ userRoute.set("views", "./views/users");
 
 const userController = require("../controller/userController1");
 const cartController=require('../controller/cartController')
+const paymentController=require('../controller/paymentController')
 const { isLogin, isLogout } = require("../auth/userAuth");
 
 userRoute.use(
@@ -91,8 +92,8 @@ userRoute.get('/addToCart',isLogin,cartController.addToCart)
 
 userRoute.get('/checkout',isLogin,cartController.checkoutPage)
 // userRoute.post('/placeOrder',cartController.placeOrder)
-userRoute.post('/checkoutAddress',isLogin,cartController.renderPlaceOrder)
-userRoute.post('/verify-payment',isLogin,cartController.verifyPayment)
+userRoute.post('/checkoutAddress',isLogin,paymentController.renderPlaceOrder)
+userRoute.post('/verify-payment',isLogin,paymentController.verifyPayment)
 userRoute.get('/coupon',isLogin,userController.renderCouponPage)
 userRoute.post('/returnOrder',isLogin,cartController.returnOrder)
 
@@ -137,9 +138,9 @@ userRoute.post('/placeorderwallet',isLogin,cartController.placeOrderWallet)
 
 // userRoute.get('/downloadInvoice',cartController.downloadInvoice)
 userRoute.get('/invoice',isLogin,cartController.loadInvoice)
-userRoute.post('/handle-failed-razorpay',isLogin,cartController.handleFailedRazorpayPayment)
+userRoute.post('/handle-failed-razorpay',isLogin,paymentController.handleFailedRazorpayPayment)
 
-userRoute.post('/retry-payment',isLogin,cartController.razorPayRetryPayment)
-userRoute.post('/verifyretry-payment',isLogin,cartController.verifyRetryPayment)
+userRoute.post('/retry-payment',isLogin,paymentController.razorPayRetryPayment)
+userRoute.post('/verifyretry-payment',isLogin,paymentController.verifyRetryPayment)
 
 module.exports = userRoute;
