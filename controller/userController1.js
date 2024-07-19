@@ -162,7 +162,6 @@ const insertUser = async (req, res) => {
       }
 
       const spassword = await securePassword(req.body.password);
-      // Refferal Code create chyyunnu
       function generateReferralCode(length) {
           const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
           let code = '';
@@ -230,7 +229,7 @@ const insertUser = async (req, res) => {
 
       const otp = generateOTP();
       req.session.otp = otp;
-      req.session.timer = 60; // Set timer to 20 seconds
+      req.session.timer = 60; 
       req.session.timerStart = Date.now();
       console.log(`Generated OTP: ${otp}`);
       await saveOTP(newUser.email, otp);

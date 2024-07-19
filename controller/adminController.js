@@ -1411,17 +1411,12 @@ const addCategoryOfferPage = async (req, res) => {
 const addCategoryOfferPost = async (req, res) => {
   try {
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
-
-    // Regular expression to check for numbers, spaces, or special characters
     const invalidOfferNameRegex = /[^a-zA-Z]/;
-
-    // Check if any required field is missing
     if (!offerName || !discount || !startDate || !endDate || !categoryId) {
       req.flash('error', 'All fields are required.');
       return res.redirect('/admin/addCategoryOffer');
     }
 
-    // Validate offer name
     if (invalidOfferNameRegex.test(offerName)) {
       req.flash('error', 'Offer name cannot contain numbers, spaces, or special characters.');
       return res.redirect('/admin/addCategoryOffer');
@@ -1431,15 +1426,13 @@ const addCategoryOfferPost = async (req, res) => {
       req.flash('error', 'Discount cannot be greater than or equal to 100.');
       return res.redirect('/admin/addCategoryOffer');
     }
-
-    // Validate discount value
     if (discount <= 0) {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
       return res.redirect('/admin/addCategoryOffer');
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+    today.setHours(0, 0, 0, 0); 
 
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
@@ -1451,7 +1444,6 @@ const addCategoryOfferPost = async (req, res) => {
       return res.redirect('/admin/addCategoryOffer');
     }
 
-    // Check if there is already an offer for the same category
     const existingOffer = await CategoryOffer.findOne({ categoryId });
     if (existingOffer) {
       req.flash('error', 'A category offer already exists for this category.');
@@ -1496,58 +1488,47 @@ const updateCategoryOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
     const { offerName, discount, startDate, endDate, categoryId } = req.body;
-
-    // Regular expression to check for numbers, spaces, or special characters
     const invalidOfferNameRegex = /[^a-zA-Z]/;
-
-    // Check if any required field is missing
     if (!offerName || !discount || !startDate || !endDate || !categoryId) {
       req.flash('error', 'All fields are required.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Validate offer name
     if (invalidOfferNameRegex.test(offerName)) {
       req.flash('error', 'Offer name cannot contain numbers, spaces, or special characters.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Validate discount value
     if (discount <= 0) {
       req.flash('error', 'Discount cannot be less than or equal to 0.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for today
+    today.setHours(0, 0, 0, 0); 
 
-    // Validate start date
     if (new Date(startDate) < today) {
       req.flash('error', 'Start date must be today or after today.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Validate date range
     if (new Date(startDate) >= new Date(endDate)) {
       req.flash('error', 'Start date must be before end date.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Check if the offer name is unique
     const existingOfferName = await CategoryOffer.findOne({ offerName, _id: { $ne: offerId } });
     if (existingOfferName) {
       req.flash('error', 'An offer with this name already exists.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Check if there is already an offer for the same category
     const existingOfferCategory = await CategoryOffer.findOne({ categoryId, _id: { $ne: offerId } });
     if (existingOfferCategory) {
       req.flash('error', 'A category offer already exists for this category.');
       return res.redirect(`/admin/editCategoryOffer/${offerId}`);
     }
 
-    // Update the category offer
     await CategoryOffer.findByIdAndUpdate(offerId, {
       offerName,
       discount,
@@ -1715,19 +1696,11 @@ module.exports = {
   generateMonthlyReport,
   generateYearlyReport,
   generateCustomDateReport,
-  
-
   getBestSellingProducts,
   getBestSellingCategories,
-  // daily,
-  // weekly,
-  // monthly,
-  // yearly
-
   productOfferPage,
   addProductOfferPage,
   addProductOfferPost,
-  // DummyOfferList,
   editProductOffer,
   updateProductOffer,
   deleteProductOffer,

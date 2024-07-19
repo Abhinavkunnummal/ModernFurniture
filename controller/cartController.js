@@ -255,17 +255,14 @@ const returnOrder = async (req, res) => {
           orderedItem.orderStatus = 'returned';
           order.returnReason = returnReason;
 
-          // Calculate refund amount based on discounted price
           const refundAmount = orderedItem.discountedPrice || orderedItem.totalProductAmount;
 
-          // Increase product stock
           const product = await Product.findById(orderedItem.productId);
           if (product) {
             product.stock += orderedItem.quantity; 
             await product.save();
           }
 
-          // Refund wallet balance
           const wallet = await Wallet.findOne({ userId: userId });
           if (wallet) {
             const refundTransaction = {
@@ -345,7 +342,7 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ error: 'Order status is not eligible for cancellation' });
     }
 
-    item.orderStatus = 'Cancellation Request Sent';
+    item.orderStatus = 'Cancelled';
     item.cancelReason = cancelReason;
 
     const product = await Product.findById(item.productId);
