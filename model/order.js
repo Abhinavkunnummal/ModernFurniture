@@ -29,6 +29,9 @@ const orderSchema = new mongoose.Schema({
             type: String,
             required: true,
             default: "pending"
+        },
+        discountedPrice:{
+            type:Number,
         }
     }],
     orderAmount: {

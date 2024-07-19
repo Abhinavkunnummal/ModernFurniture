@@ -232,12 +232,14 @@ const renderPlaceOrder = async (req, res) => {
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
     let couponDiscount = 0;
-
+    let discountPercentage =0
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
       if (coupon) {
         couponDiscount = coupon.discountAmount;
         finalOrderAmount = orderAmount - couponDiscount;
+        discountPercentage = Math.round((couponDiscount / finalOrderAmount) * 100);
+
       }
     }
 
@@ -307,6 +309,7 @@ const renderPlaceOrder = async (req, res) => {
           productId: item.product[0].productId,
           quantity: item.product[0].quantity,
           totalProductAmount: item.product[0].totalPrice,
+          discountedPrice:discountPercentage*item.product[0].quantity,
         })),
         orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
