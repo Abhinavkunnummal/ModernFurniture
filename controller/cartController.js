@@ -232,17 +232,18 @@ const renderPlaceOrder = async (req, res) => {
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
     let couponDiscount = 0;
-    let discountPercentage =0
+    let discountPercentage = 0;
+
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
       if (coupon) {
         couponDiscount = coupon.discountAmount;
         finalOrderAmount = orderAmount - couponDiscount;
-        discountPercentage = Math.round((couponDiscount / finalOrderAmount) * 100);
-
+        if (finalOrderAmount > 0) {
+          discountPercentage = Math.round((couponDiscount / orderAmount) * 100);
+        }
       }
     }
-    console.log(discountPercentage+'  is the disc %');
 
     const handlePostOrder = async (newOrder) => {
       await newOrder.save();
@@ -300,18 +301,22 @@ const renderPlaceOrder = async (req, res) => {
       });
 
       await wallet.save();
-      console.log(item.product[0].totalPrice +'  is the price');
+
       const newOrder = new Order({
         userId,
         coupon: req.session.coupon || null,
         couponDiscount,
         cartId: cartItems.map((item) => item._id),
-        orderedItem: cartItems.map((item) => ({
-          productId: item.product[0].productId,
-          quantity: item.product[0].quantity,
-          totalProductAmount: item.product[0].totalPrice,
-          discountedPrice:discountPercentage*item.product[0].totalPrice,
-        })),
+        orderedItem: cartItems.map((item) => {
+          const totalProductAmount = item.product[0].totalPrice;
+          const discountedPrice = totalProductAmount - ((discountPercentage / 100) * totalProductAmount);
+          return {
+            productId: item.product[0].productId,
+            quantity: item.product[0].quantity,
+            totalProductAmount: totalProductAmount,
+            discountedPrice: discountedPrice,
+          };
+        }),
         orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
         orderStatus: "pending",
@@ -327,11 +332,16 @@ const renderPlaceOrder = async (req, res) => {
         coupon: req.session.coupon || null,
         couponDiscount,
         cartId: cartItems.map((item) => item._id),
-        orderedItem: cartItems.map((item) => ({
-          productId: item.product[0].productId,
-          quantity: item.product[0].quantity,
-          totalProductAmount: item.product[0].totalPrice,
-        })),
+        orderedItem: cartItems.map((item) => {
+          const totalProductAmount = item.product[0].totalPrice;
+          const discountedPrice = totalProductAmount - ((discountPercentage / 100) * totalProductAmount);
+          return {
+            productId: item.product[0].productId,
+            quantity: item.product[0].quantity,
+            totalProductAmount: totalProductAmount,
+            discountedPrice: discountedPrice,
+          };
+        }),
         orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
         orderStatus: "pending",
@@ -347,6 +357,7 @@ const renderPlaceOrder = async (req, res) => {
     return res.status(500).send('Server Error');
   }
 };
+
 
 function calculateOrderAmount(cartItems) {
   let totalAmount = 0;
