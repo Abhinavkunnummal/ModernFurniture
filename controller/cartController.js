@@ -242,6 +242,7 @@ const renderPlaceOrder = async (req, res) => {
 
       }
     }
+    console.log(discountPercentage+'  is the disc %');
 
     const handlePostOrder = async (newOrder) => {
       await newOrder.save();
@@ -299,7 +300,7 @@ const renderPlaceOrder = async (req, res) => {
       });
 
       await wallet.save();
-
+      console.log(item.product[0].totalPrice +'  is the price');
       const newOrder = new Order({
         userId,
         coupon: req.session.coupon || null,
@@ -309,7 +310,7 @@ const renderPlaceOrder = async (req, res) => {
           productId: item.product[0].productId,
           quantity: item.product[0].quantity,
           totalProductAmount: item.product[0].totalPrice,
-          discountedPrice:discountPercentage*item.product[0].quantity,
+          discountedPrice:discountPercentage*item.product[0].totalPrice,
         })),
         orderAmount: finalOrderAmount,
         deliveryAddress: selectedAddress,
