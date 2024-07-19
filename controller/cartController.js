@@ -232,16 +232,12 @@ const renderPlaceOrder = async (req, res) => {
     const orderAmount = calculateOrderAmount(cartItems);
     let finalOrderAmount = orderAmount;
     let couponDiscount = 0;
-    let discountPercentage = 0;
 
     if (req.session.coupon) {
       const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
       if (coupon) {
         couponDiscount = coupon.discountAmount;
         finalOrderAmount = orderAmount - couponDiscount;
-        if (finalOrderAmount > 0) {
-          discountPercentage = Math.round((couponDiscount / orderAmount) * 100);
-        }
       }
     }
 
@@ -265,6 +261,10 @@ const renderPlaceOrder = async (req, res) => {
           console.error('Error deleting coupon:', error.message);
         }
       }
+    };
+
+    const proportionalDiscount = (itemTotal, orderTotal, discount) => {
+      return itemTotal - ((itemTotal / orderTotal) * discount);
     };
 
     if (paymentMethod === 'razorPay') {
@@ -309,7 +309,7 @@ const renderPlaceOrder = async (req, res) => {
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => {
           const totalProductAmount = item.product[0].totalPrice;
-          const discountedPrice = totalProductAmount - ((discountPercentage / 100) * totalProductAmount);
+          const discountedPrice = proportionalDiscount(totalProductAmount, orderAmount, couponDiscount);
           return {
             productId: item.product[0].productId,
             quantity: item.product[0].quantity,
@@ -334,7 +334,7 @@ const renderPlaceOrder = async (req, res) => {
         cartId: cartItems.map((item) => item._id),
         orderedItem: cartItems.map((item) => {
           const totalProductAmount = item.product[0].totalPrice;
-          const discountedPrice = totalProductAmount - ((discountPercentage / 100) * totalProductAmount);
+          const discountedPrice = proportionalDiscount(totalProductAmount, orderAmount, couponDiscount);
           return {
             productId: item.product[0].productId,
             quantity: item.product[0].quantity,
@@ -357,6 +357,7 @@ const renderPlaceOrder = async (req, res) => {
     return res.status(500).send('Server Error');
   }
 };
+
 
 
 function calculateOrderAmount(cartItems) {
