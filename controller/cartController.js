@@ -580,8 +580,8 @@ const returnOrder = async (req, res) => {
           orderedItem.orderStatus = 'returned';
           order.returnReason = returnReason;
 
-          // Calculate refund amount based on order total amount
-          const refundAmount = order.orderAmount;
+          // Calculate refund amount based on discounted price
+          const refundAmount = orderedItem.discountedPrice || orderedItem.totalProductAmount;
 
           // Increase product stock
           const product = await Product.findById(orderedItem.productId);
@@ -622,7 +622,8 @@ const returnOrder = async (req, res) => {
     console.error('Error processing return request:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
-}
+};
+
 
 //-------------------------------------------------------ORDER FULL DETAILS --------------------------------------------------------//
 
