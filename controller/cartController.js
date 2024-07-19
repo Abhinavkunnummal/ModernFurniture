@@ -369,7 +369,6 @@ function calculateOrderAmount(cartItems) {
 }
 
 //------------------------------------------------------- VERIFY PAYMENT --------------------------------------------------------//
-
 const verifyPayment = async (req, res) => {
   try {
     const { razorpayPaymentId, razorpayOrderId, razorpaySignature, selectedAddress, paymentMethod } = req.body;
@@ -386,11 +385,12 @@ const verifyPayment = async (req, res) => {
       let finalOrderAmount = orderAmount;
       let couponDiscount = 0;
 
+      // Apply coupon discount if available
       if (req.session.coupon) {
         const coupon = await Coupon.findOne({ couponCode: req.session.coupon });
         if (coupon) {
           couponDiscount = coupon.discountAmount;
-          finalOrderAmount = orderAmount - couponDiscount;
+          finalOrderAmount = Math.max(orderAmount - couponDiscount, 0); // Ensure the final amount is not negative
         }
       }
 
@@ -454,6 +454,7 @@ function calculateOrderAmount(cartItems) {
   });
   return totalAmount;
 }
+
 
 
 //------------------------------------------------------- FAILED PAYMENT --------------------------------------------------------//
