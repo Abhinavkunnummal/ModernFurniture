@@ -357,7 +357,6 @@ const cancelOrder = async (req, res) => {
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
-    // Calculate refund amount based on discounted price if available, otherwise total product amount
     const refundAmount = item.discountedPrice || item.totalProductAmount;
 
     wallet.balance = (wallet.balance || 0) + refundAmount;
